@@ -219,6 +219,15 @@ CREATE TABLE IF NOT EXISTS learning_change_log (
     created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS analysis_snapshots (
+    id TEXT PRIMARY KEY,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    scope_json TEXT NOT NULL,
+    metrics_json TEXT NOT NULL,
+    change_log_cutoff INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS learning_students (
     row_id INTEGER PRIMARY KEY AUTOINCREMENT,
     dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
@@ -356,6 +365,8 @@ CREATE INDEX IF NOT EXISTS idx_learning_batches_dataset
     ON learning_import_batches(dataset_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_learning_changes_dataset
     ON learning_change_log(dataset_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_analysis_snapshots_dataset
+    ON analysis_snapshots(dataset_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_learning_students_dataset
     ON learning_students(dataset_id, deleted_at);
 CREATE INDEX IF NOT EXISTS idx_learning_requirements_dataset
@@ -487,7 +498,7 @@ class Repository:
                 )
             connection.execute(
                 "INSERT OR REPLACE INTO schema_meta(key, value) VALUES (?, ?)",
-                ("schema_version", "4"),
+                ("schema_version", "5"),
             )
 
     def create_material_set(
