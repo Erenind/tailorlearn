@@ -15,6 +15,7 @@ from tailorlearn.models import (
     MaterialType,
     OutlineDraftResponse,
     ProviderProfile,
+    StudentDiagnosisDraft,
 )
 
 _UNIT_TYPES = {
@@ -409,3 +410,48 @@ class OpenAICompatibleClient:
         if not parsed.items:
             raise AIRequestError("AI 未能返回任何学习内容")
         return parsed, raw, finish_reason
+
+    def draft_student_diagnosis(
+        self,
+        evidence_pack: dict[str, Any],
+    ) -> tuple[dict[str, Any], str]:
+        """Generate a teacher-reviewable draft from a minimised evidence pack."""
+        prompt = f"""
+你是教师的学情分析助手。只能依据下方脱敏证据包生成诊断草稿，不计算新统计，
+不补充未提供的事实。有效记录不足、待评分或未作答时，只能说明信息不足并提出
+补充观察，绝不能写“未掌握”“掌握不足”或“能力下降”。
+
+所有 observations 必须引用证据包中已有的 record_code 和 indicator_code；
+所有 suggestions 必须只使用 candidate_material_codes 中的材料编号。只输出合法 JSON：
+{{
+  "summary": "面向教师的谨慎摘要",
+  "observations": [
+    {{"theme_code":"T01", "statement":"观察描述", "evidence_record_codes":["DR001"], "indicator_codes":["T01I1"]}}
+  ],
+  "information_gaps": [{{"theme_code":"T01", "statement":"缺口说明"}}],
+  "suggestions": [{{"material_code":"Q002", "reason":"补充观察理由"}}],
+  "teacher_actions": ["教师下一步操作"]
+}}
+
+脱敏证据包：
+{json.dumps(evidence_pack, ensure_ascii=False, indent=2)}
+""".strip()
+        raw, _ = self._complete(
+            [
+                {
+                    "role": "system",
+                    "content": (
+                        "你是严谨的中文教师学情分析助手。"
+                        "只输出合法 JSON，不得超出证据范围。"
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ]
+        )
+        try:
+            draft = StudentDiagnosisDraft.model_validate(_extract_json(raw))
+        except (ValueError, json.JSONDecodeError, ValidationError):
+            repaired = self._repair_json(raw)
+            draft = StudentDiagnosisDraft.model_validate(_extract_json(repaired))
+            raw = f"{raw}\n\n--- repaired ---\n{repaired}"
+        return draft.model_dump(), raw

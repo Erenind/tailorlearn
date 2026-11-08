@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from tailorlearn.ai import OpenAICompatibleClient, _extract_json
 from tailorlearn.models import AIUnit, SourceRef
+from tailorlearn.models import ProviderProfile
 
 
 def test_extract_json_accepts_fenced_response():
@@ -46,3 +47,43 @@ def test_validation_rejects_material_incompatible_unit_type():
         page_texts={1: "原文"},
     )[0]
     assert any("不在允许枚举" in warning for warning in checked.review_warnings)
+
+
+def test_student_diagnosis_client_parses_a_structured_draft(monkeypatch):
+    def fake_complete(self, messages):
+        return (
+            """{
+            "summary":"有效记录不足，建议补充观察。",
+            "observations":[],
+            "information_gaps":[{"theme_code":"T01","statement":"仅一条有效记录。"}],
+            "suggestions":[{"material_code":"Q002","reason":"补充同一指标。"}],
+            "teacher_actions":["补充观察后再更新。"]
+            }""",
+            "stop",
+        )
+
+    monkeypatch.setattr(OpenAICompatibleClient, "_complete", fake_complete)
+    client = OpenAICompatibleClient(
+        ProviderProfile(
+            id="provider_test",
+            vendor_name="Test",
+            base_url="https://example.test/v1",
+            model="test-model",
+            api_key="test-key",
+        )
+    )
+
+    draft, raw = client.draft_student_diagnosis(
+        {
+            "student_code": "D01",
+            "node_code": "N01",
+            "themes": [],
+            "indicators": [],
+            "evidence": {},
+            "candidate_material_codes": ["Q002"],
+        }
+    )
+
+    assert draft["summary"] == "有效记录不足，建议补充观察。"
+    assert draft["suggestions"][0]["material_code"] == "Q002"
+    assert raw.startswith("{")
