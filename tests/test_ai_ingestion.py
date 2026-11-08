@@ -9,8 +9,11 @@ from tailorlearn.models import ProviderProfile
 from tailorlearn.paths import AppPaths
 
 
-def test_structure_document_persists_units_and_raw_response(tmp_path, monkeypatch):
-    source = Path(__file__).resolve().parents[1] / "res" / "B02_相关资料切片.pdf"
+def test_structure_document_persists_units_and_raw_response(
+    tmp_path,
+    sample_pdf: Path,
+    monkeypatch,
+):
     paths = AppPaths(tmp_path)
     paths.ensure()
     repository = Repository(paths.database_file)
@@ -19,7 +22,7 @@ def test_structure_document_persists_units_and_raw_response(tmp_path, monkeypatc
     _, documents = service.create_material_from_paths(
         name="七年级数学课本切片",
         material_type="textbook",
-        pdf_paths=[source],
+        pdf_paths=[sample_pdf],
     )
     service.process_document(documents[0]["id"])
 

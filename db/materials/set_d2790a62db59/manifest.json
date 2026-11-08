@@ -4,7 +4,7 @@
     "name": "七年级数学课本切片（B02）",
     "material_type": "textbook",
     "subject": "数学",
-    "stage": null,
+    "stage": "小学",
     "grade": "七年级",
     "semester": null,
     "edition": null,
@@ -12,7 +12,7 @@
     "version": 1,
     "created_at": "2026-11-08T03:39:30+00:00",
     "deleted_at": null,
-    "metadata_sources_json": "{\"subject\": \"inferred:content\", \"grade\": \"inferred:content\"}"
+    "metadata_sources_json": "{\"subject\": \"inferred:content\", \"grade\": \"inferred:content\", \"stage\": \"inferred:content\"}"
   },
   "documents": [
     {
@@ -27,6 +27,104 @@
       "extraction_method": "text-first-ocr-fallback",
       "metadata_json": "{}",
       "created_at": "2026-11-08T03:39:30+00:00",
+      "deleted_at": null
+    },
+    {
+      "id": "doc_b1e5c192_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "B03_相关资料切片.pdf",
+      "sha256": "b1e5c1928ba857b1561231e866010b3a9cdcebf4c3efe373a0c75be14093b7e2",
+      "stored_path": "materials/set_d2790a62db59/doc_b1e5c192_62db59/source/original.pdf",
+      "page_count": 38,
+      "order_index": 1,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T05:39:15+00:00",
+      "deleted_at": null
+    },
+    {
+      "id": "doc_3c131d77_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "B01_相关资料切片.pdf",
+      "sha256": "3c131d770c62858cf609e3e455bfbcfc40f941564209914edda55fb39c7df0a9",
+      "stored_path": "materials/set_d2790a62db59/doc_3c131d77_62db59/source/original.pdf",
+      "page_count": 24,
+      "order_index": 2,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T05:39:15+00:00",
+      "deleted_at": null
+    },
+    {
+      "id": "doc_410bfc4f_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "B08_相关资料切片.pdf",
+      "sha256": "410bfc4f88a94480cd473fc0bf08716e4c1b5aa98da0916d4c2e3a78333d3c72",
+      "stored_path": "materials/set_d2790a62db59/doc_410bfc4f_62db59/source/original.pdf",
+      "page_count": 38,
+      "order_index": 3,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T05:39:15+00:00",
+      "deleted_at": null
+    },
+    {
+      "id": "doc_be3630a7_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "B07_相关资料切片.pdf",
+      "sha256": "be3630a7a28647cd78f0432c16b21c985f3fd6004e86f22dd320b71a0dfa3d5b",
+      "stored_path": "materials/set_d2790a62db59/doc_be3630a7_62db59/source/original.pdf",
+      "page_count": 39,
+      "order_index": 4,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T05:39:15+00:00",
+      "deleted_at": null
+    },
+    {
+      "id": "doc_cb6d4e0a_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "B04_相关资料切片.pdf",
+      "sha256": "cb6d4e0aa9bbed40579f3faf06f0080b09bd954c774b4b5e645438cd6a493410",
+      "stored_path": "materials/set_d2790a62db59/doc_cb6d4e0a_62db59/source/original.pdf",
+      "page_count": 40,
+      "order_index": 5,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T05:39:15+00:00",
+      "deleted_at": null
+    },
+    {
+      "id": "doc_ccee907e_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "B06_相关资料切片.pdf",
+      "sha256": "ccee907e3a43e701d851942d59511c6a7f78c2ee315cc831592b28517168a990",
+      "stored_path": "materials/set_d2790a62db59/doc_ccee907e_62db59/source/original.pdf",
+      "page_count": 72,
+      "order_index": 6,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T05:39:15+00:00",
+      "deleted_at": null
+    },
+    {
+      "id": "doc_3f5e0575_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "B05_相关资料切片.pdf",
+      "sha256": "3f5e0575e5983a35662e705e90230ee5c0c9876b47c98c9da8b9b444027e2e8e",
+      "stored_path": "materials/set_d2790a62db59/doc_3f5e0575_62db59/source/original.pdf",
+      "page_count": 42,
+      "order_index": 7,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T05:39:15+00:00",
       "deleted_at": null
     }
   ]

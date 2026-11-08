@@ -1,0 +1,1 @@
+{"units":[{"unit_type":"concept","title":"统计调查与数据收集","content":"统计的研究对象是数据．面对一个统计问题，首要的任务是收集数据，统计调查是收集数据的常用方法．","source_refs":[{"page":2,"quote":"统计的研究对象是数据．面对一个统计问题，首要的任务是收集数据，统计调查是收集数据的常用方法．"}],"related_unit_ids":[],"review_warnings":[]}]}

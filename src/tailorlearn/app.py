@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -48,6 +47,13 @@ STATUS_LABELS = {
     UnitStatus.NEEDS_REVIEW.value: "待复核",
     UnitStatus.VERIFIED.value: "已确认",
 }
+PROVIDER_SELECTOR_KEY = "ai_provider_selector"
+PROVIDER_FIELD_KEYS = {
+    "vendor_name": "provider_vendor_name",
+    "base_url": "provider_base_url",
+    "model": "provider_model",
+    "api_key": "provider_api_key",
+}
 
 
 def _rerun() -> None:
@@ -58,16 +64,79 @@ def _show_error(exc: Exception) -> None:
     st.error(str(exc))
 
 
+def _load_provider_into_form(profile: ProviderProfile | None) -> None:
+    st.session_state[PROVIDER_FIELD_KEYS["vendor_name"]] = (
+        profile.vendor_name if profile else ""
+    )
+    st.session_state[PROVIDER_FIELD_KEYS["base_url"]] = (
+        profile.base_url if profile else "https://api.openai.com/v1"
+    )
+    st.session_state[PROVIDER_FIELD_KEYS["model"]] = profile.model if profile else ""
+    st.session_state[PROVIDER_FIELD_KEYS["api_key"]] = ""
+
+
+def _on_provider_selected() -> None:
+    selected_id = st.session_state[PROVIDER_SELECTOR_KEY]
+    selected = (
+        next(
+            (
+                profile
+                for profile in PROVIDERS.load().profiles
+                if profile.id == selected_id
+            ),
+            None,
+        )
+        if selected_id != "__new__"
+        else None
+    )
+    _load_provider_into_form(selected)
+
+
 def render_ai_settings() -> None:
     st.title("AI 参数设置")
     st.caption("支持多个 OpenAI-compatible 厂商配置；密钥仅保存在本机。")
+    notice = st.session_state.pop("_provider_settings_notice", None)
+    if notice:
+        st.success(notice)
     config = PROVIDERS.load()
     profiles = config.profiles
 
     options = ["__new__", *[profile.id for profile in profiles]]
+    pending_profile_id = st.session_state.pop("_pending_provider_select", None)
+    if pending_profile_id in options:
+        st.session_state[PROVIDER_SELECTOR_KEY] = pending_profile_id
+    elif (
+        PROVIDER_SELECTOR_KEY not in st.session_state
+        or st.session_state[PROVIDER_SELECTOR_KEY] not in options
+    ):
+        st.session_state[PROVIDER_SELECTOR_KEY] = (
+            config.active_profile_id
+            if config.active_profile_id in options
+            else (profiles[0].id if profiles else "__new__")
+        )
+    if pending_profile_id in options:
+        pending_profile = next(
+            (profile for profile in profiles if profile.id == pending_profile_id),
+            None,
+        )
+        _load_provider_into_form(pending_profile)
+    if st.session_state.pop("_pending_clear_provider_key", False):
+        st.session_state[PROVIDER_FIELD_KEYS["api_key"]] = ""
+    if not all(key in st.session_state for key in PROVIDER_FIELD_KEYS.values()):
+        selected_for_defaults = next(
+            (
+                profile
+                for profile in profiles
+                if profile.id == st.session_state[PROVIDER_SELECTOR_KEY]
+            ),
+            None,
+        )
+        _load_provider_into_form(selected_for_defaults)
     selected_id = st.selectbox(
         "厂商配置",
         options,
+        key=PROVIDER_SELECTOR_KEY,
+        on_change=_on_provider_selected,
         format_func=lambda value: (
             "＋ 新增厂商"
             if value == "__new__"
@@ -90,29 +159,47 @@ def render_ai_settings() -> None:
     with st.form("provider_form"):
         vendor_name = st.text_input(
             "厂商名称",
-            value=selected.vendor_name if selected else "",
+            key=PROVIDER_FIELD_KEYS["vendor_name"],
             placeholder="例如 OpenAI、DeepSeek、Moonshot",
         )
         base_url = st.text_input(
             "Base URL",
-            value=selected.base_url if selected else "https://api.openai.com/v1",
+            key=PROVIDER_FIELD_KEYS["base_url"],
             help="填写 OpenAI-compatible API 根地址，不在代码中自动追加 /v1。",
         )
         model = st.text_input(
             "默认模型",
-            value=selected.model if selected else "",
+            key=PROVIDER_FIELD_KEYS["model"],
             placeholder="填写服务端支持的模型名称",
         )
+        if selected and selected.api_key:
+            st.text_input(
+                "已保存的密钥",
+                value=selected.masked_api_key,
+                disabled=True,
+            )
         api_key = st.text_input(
-            "API Key",
-            value="",
+            "更新 API Key（留空保留）",
+            key=PROVIDER_FIELD_KEYS["api_key"],
             type="password",
+            placeholder=(
+                selected.masked_api_key
+                if selected and selected.api_key
+                else "请输入 API Key"
+            ),
             help=(
-                "编辑已有配置时留空会保留原密钥。"
+                "已保存的密钥不会回填到浏览器。留空提交会保留当前密钥。"
                 if selected
                 else "首次创建时必须填写，之后可单独清除。"
             ),
         )
+        if selected and selected.api_key:
+            st.caption(
+                "已安全保存；完整密钥不会回填到浏览器。"
+                "上方密码输入框仅用于替换密钥，留空提交会保留当前值。"
+            )
+        else:
+            st.caption("当前尚未保存 API Key。")
         make_active = st.checkbox(
             "保存后设为当前配置",
             value=selected is None or selected.id == config.active_profile_id,
@@ -129,7 +216,8 @@ def render_ai_settings() -> None:
             )
             if make_active:
                 PROVIDERS.set_active(profile.id)
-            st.success("厂商配置已保存")
+            st.session_state["_pending_provider_select"] = profile.id
+            st.session_state["_provider_settings_notice"] = "厂商配置已保存"
             _rerun()
         except Exception as exc:
             _show_error(exc)
@@ -138,11 +226,18 @@ def render_ai_settings() -> None:
         key_status = "已保存" if selected.api_key else "未设置"
         st.info(
             f"当前配置：{selected.vendor_name} · {selected.model} · "
-            f"Key {key_status} · `{selected.base_url}`"
+            f"Key {key_status}"
+            + (
+                f"（{selected.masked_api_key}）"
+                if selected.api_key
+                else ""
+            )
+            + f" · `{selected.base_url}`"
         )
         action_col_1, action_col_2, action_col_3 = st.columns(3)
         if action_col_1.button("设为当前配置", width="stretch"):
             PROVIDERS.set_active(selected.id)
+            st.session_state["_provider_settings_notice"] = "当前配置已切换"
             _rerun()
         if action_col_2.button("测试连接", width="stretch"):
             try:
@@ -155,7 +250,10 @@ def render_ai_settings() -> None:
                 _show_error(exc)
         if action_col_3.button("清除密钥", width="stretch"):
             PROVIDERS.clear_key(selected.id)
-            st.warning("本机保存的 API Key 已清除")
+            st.session_state["_pending_clear_provider_key"] = True
+            st.session_state["_provider_settings_notice"] = (
+                "本机保存的 API Key 已清除"
+            )
             _rerun()
 
     with st.expander("本机存储说明"):
@@ -222,18 +320,12 @@ def _import_uploaded(
         f"已保存 {material['name']} 第 {material['version']} 版，"
         f"共 {len(documents)} 个 PDF"
     )
-    _rerun()
-
-
-def _import_reference(path: Path, material_type: str, name: str) -> None:
-    material, _ = INGEST.create_material_from_paths(
-        name=name,
-        material_type=material_type,
-        pdf_paths=[path],
+    st.session_state["_pending_material_library_id"] = material["id"]
+    st.session_state["_pending_material_library_document_id"] = documents[-1]["id"]
+    st.session_state["_material_library_notice"] = (
+        f"已导入 {material['name']}（第 {material['version']} 版），"
+        f"共 {len(documents)} 个 PDF。"
     )
-    documents = REPO.list_documents(material["id"])
-    _process_documents_with_progress(documents)
-    st.success(f"参考资料 {path.name} 已导入并完成切分")
     _rerun()
 
 
@@ -306,35 +398,6 @@ def render_import_tab(material_type: str) -> None:
             except Exception as exc:
                 _show_error(exc)
 
-    with st.expander("使用 res/ 中的参考资料"):
-        references = sorted(PATHS.res_dir.glob("*.pdf"))
-        if not references:
-            st.caption("res/ 中没有 PDF")
-        for reference in references:
-            inferred_type = (
-                MaterialType.STANDARD
-                if "课程标准" in reference.name
-                else MaterialType.TEXTBOOK
-            )
-            if inferred_type != material_type:
-                continue
-            default_name = reference.stem
-            if material_type == MaterialType.STANDARD:
-                default_name = "义务教育数学课程标准（2022年版）"
-            col_1, col_2 = st.columns([4, 1])
-            col_1.write(f"`{reference.name}`")
-            if col_2.button(
-                "导入",
-                key=f"reference_{reference.name}_{material_type}",
-                width="stretch",
-            ):
-                try:
-                    with st.status("正在处理参考资料", expanded=True):
-                        _import_reference(reference, material_type, default_name)
-                except Exception as exc:
-                    _show_error(exc)
-
-
 def _material_label(materials: list[dict[str, Any]], material_id: str) -> str:
     material = next(item for item in materials if item["id"] == material_id)
     return (
@@ -354,9 +417,22 @@ def render_material_library() -> None:
     if not materials:
         st.info("尚未导入材料。请先在“导入课本”或“导入课程标准”中创建材料。")
         return
+    material_ids = [item["id"] for item in materials]
+    pending_material_id = st.session_state.pop("_pending_material_library_id", None)
+    if pending_material_id in material_ids:
+        st.session_state["material_library_selector"] = pending_material_id
+    elif (
+        "material_library_selector" not in st.session_state
+        or st.session_state["material_library_selector"] not in material_ids
+    ):
+        st.session_state["material_library_selector"] = material_ids[0]
+    notice = st.session_state.pop("_material_library_notice", None)
+    if notice:
+        st.success(notice)
     material_id = st.selectbox(
         "材料",
-        [item["id"] for item in materials],
+        material_ids,
+        key="material_library_selector",
         format_func=lambda value: _material_label(materials, value),
     )
     material = REPO.get_material_set(material_id)
@@ -405,9 +481,22 @@ def render_material_library() -> None:
     if not documents:
         st.warning("该材料没有文档")
         return
+    document_ids = [item["id"] for item in documents]
+    pending_document_id = st.session_state.pop(
+        "_pending_material_library_document_id",
+        None,
+    )
+    if pending_document_id in document_ids:
+        st.session_state["material_library_document_selector"] = pending_document_id
+    elif (
+        "material_library_document_selector" not in st.session_state
+        or st.session_state["material_library_document_selector"] not in document_ids
+    ):
+        st.session_state["material_library_document_selector"] = document_ids[0]
     document_id = st.selectbox(
         "文档切片",
-        [item["id"] for item in documents],
+        document_ids,
+        key="material_library_document_selector",
         format_func=lambda value: _document_label(documents, value),
     )
     document = next(item for item in documents if item["id"] == document_id)
@@ -598,7 +687,6 @@ def render_material_library() -> None:
         refs = json.loads(unit["source_refs_json"])
         table_rows.append(
             {
-                "选择": False,
                 "ID": unit["id"],
                 "类型": unit["unit_type"],
                 "标题": unit["title"],
@@ -608,25 +696,64 @@ def render_material_library() -> None:
                 "版本": unit["current_version"],
             }
         )
-    edited = st.data_editor(
-        pd.DataFrame(table_rows),
+    visible_ids = [unit["id"] for unit in visible]
+    scope_signature = (
+        f"{document_id}|{','.join(status_filter)}|{','.join(section_filter)}"
+    )
+    if st.session_state.get("unit_select_all_scope") != scope_signature:
+        st.session_state["unit_select_all_scope"] = scope_signature
+        st.session_state["unit_select_all_ids"] = []
+    selection_key = f"unit_selection_{document_id}"
+    if st.session_state.pop("_clear_unit_table_selection", None) == selection_key:
+        st.session_state.pop(selection_key, None)
+    select_columns = st.columns([1.2, 1.2, 3])
+    if select_columns[0].button(
+        "全选当前筛选结果",
+        key=f"select_all_{document_id}",
+        width="stretch",
+    ):
+        st.session_state["unit_select_all_ids"] = list(visible_ids)
+        st.rerun()
+    if select_columns[1].button(
+        "取消全选",
+        key=f"clear_all_{document_id}",
+        width="stretch",
+    ):
+        st.session_state["unit_select_all_ids"] = []
+        st.session_state["_clear_unit_table_selection"] = selection_key
+        st.rerun()
+    select_columns[2].caption(
+        "点击表格行首复选框进行多选；全选覆盖当前筛选结果。"
+    )
+    table = pd.DataFrame(table_rows)
+    selection_event = st.dataframe(
+        table,
         hide_index=True,
         width="stretch",
-        disabled=[column for column in (pd.DataFrame(table_rows).columns if table_rows else []) if column != "选择"],
-        column_config={
-            "选择": st.column_config.CheckboxColumn(
-                "选择",
-                help="勾选后可批量修改状态、重试或软删除",
-            )
-        },
-        key=f"unit_editor_{document_id}",
+        on_select="rerun",
+        selection_mode="multi-row",
+        key=selection_key,
+        column_order=("ID", "类型", "标题", "章节", "状态", "页码", "版本"),
+        alt="结构化单元审核列表",
     )
-    selected_ids = (
-        edited.loc[edited["选择"] == True, "ID"].tolist()
-        if not edited.empty
-        else []
-    )
-    st.caption(f"已选择 {len(selected_ids)} 个单元")
+    selected_rows = list(selection_event.selection.rows)
+    manual_ids = [
+        visible[index]["id"]
+        for index in selected_rows
+        if 0 <= index < len(visible)
+    ]
+    selected_all_ids = [
+        unit_id
+        for unit_id in st.session_state.get("unit_select_all_ids", [])
+        if unit_id in visible_ids
+    ]
+    selected_ids = list(dict.fromkeys([*manual_ids, *selected_all_ids]))
+    if selected_all_ids:
+        st.caption(
+            f"已全选当前筛选结果，共 {len(selected_ids)} 个单元。"
+        )
+    else:
+        st.caption(f"已选择 {len(selected_ids)} 个单元。")
     if selected_ids:
         button_columns = st.columns(5)
         if button_columns[0].button("标记已确认", width="stretch"):
@@ -759,6 +886,7 @@ def main() -> None:
     page = st.sidebar.radio(
         "导航",
         ["AI 参数设置", "学科分析"],
+        key="main_navigation",
     )
     st.sidebar.caption("本轮不含智能对话入口")
     if page == "AI 参数设置":

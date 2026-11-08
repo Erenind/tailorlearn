@@ -39,10 +39,6 @@ class AppPaths:
     def provider_file(self) -> Path:
         return self.local_dir / "ai_profiles.json"
 
-    @property
-    def res_dir(self) -> Path:
-        return self.root / "res"
-
     def ensure(self) -> None:
         for path in (
             self.db_dir,

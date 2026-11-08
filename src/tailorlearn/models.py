@@ -78,9 +78,19 @@ class ProviderProfile(BaseModel):
     model: str
     api_key: str = ""
 
+    @property
+    def masked_api_key(self) -> str:
+        if not self.api_key:
+            return ""
+        key = self.api_key.strip()
+        if len(key) <= 8:
+            return "•" * max(len(key), 4)
+        prefix = key[:3] if key.startswith("sk-") else ""
+        return f"{prefix}••••••••{key[-4:]}"
+
     def public_dict(self) -> dict[str, Any]:
         data = self.model_dump()
-        data["api_key"] = "********" if self.api_key else ""
+        data["api_key"] = self.masked_api_key
         return data
 
 
@@ -108,4 +118,3 @@ class AIResult(BaseModel):
     raw_response: str
     finish_reason: str | None = None
     segmented: bool = False
-

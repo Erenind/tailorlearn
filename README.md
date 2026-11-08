@@ -26,7 +26,7 @@ uv run tailorlearn import-pdf \
   --name "七年级数学课本切片" \
   --material-type textbook \
   --subject 数学 \
-  res/B02_相关资料切片.pdf
+  /path/to/textbook-slice.pdf
 ```
 
 成功后可在界面中审核，或使用当前厂商配置执行：
@@ -39,8 +39,8 @@ uv run tailorlearn structure --document-id <document_id>
 
 ## 数据
 
-结构说明见 [db/README.md](db/README.md)。`res/` 是输入参考资料；导入后的原始 PDF、
-逐页文本、章节、单元、版本和任务索引位于 `db/`。
+结构说明见 [db/README.md](db/README.md)。导入后的原始 PDF、逐页文本、章节、
+单元、版本和任务索引均位于 `db/`。
 
 ## 测试
 
