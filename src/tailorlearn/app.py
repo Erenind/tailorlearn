@@ -10,6 +10,8 @@ from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.db import Repository
 from tailorlearn.extraction import page_as_png
 from tailorlearn.ingest import IngestionService
+from tailorlearn.learning_data import LearningDataService
+from tailorlearn.learning_data_ui import render_learning_data_page
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
 from tailorlearn.paths import AppPaths
 from tailorlearn.providers import ProviderStore
@@ -23,7 +25,13 @@ st.set_page_config(
 
 
 @st.cache_resource
-def app_services() -> tuple[AppPaths, Repository, IngestionService, ProviderStore]:
+def app_services() -> tuple[
+    AppPaths,
+    Repository,
+    IngestionService,
+    ProviderStore,
+    LearningDataService,
+]:
     paths = AppPaths.default()
     paths.ensure()
     repository = Repository(paths.database_file)
@@ -33,10 +41,11 @@ def app_services() -> tuple[AppPaths, Repository, IngestionService, ProviderStor
         repository,
         IngestionService(paths, repository),
         ProviderStore(paths.provider_file),
+        LearningDataService(repository, paths.db_dir),
     )
 
 
-PATHS, REPO, INGEST, PROVIDERS = app_services()
+PATHS, REPO, INGEST, PROVIDERS, LEARNING_DATA = app_services()
 
 MATERIAL_LABELS = {
     MaterialType.TEXTBOOK.value: "课本",
@@ -885,14 +894,16 @@ def main() -> None:
     st.sidebar.title("TailorLearn")
     page = st.sidebar.radio(
         "导航",
-        ["AI 参数设置", "学科分析"],
+        ["AI 参数设置", "学科分析", "学情数据"],
         key="main_navigation",
     )
     st.sidebar.caption("本轮不含智能对话入口")
     if page == "AI 参数设置":
         render_ai_settings()
-    else:
+    elif page == "学科分析":
         render_subject_analysis()
+    else:
+        render_learning_data_page(LEARNING_DATA)
 
 
 main()

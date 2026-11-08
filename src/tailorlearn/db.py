@@ -146,11 +146,217 @@ CREATE TABLE IF NOT EXISTS job_items (
     UNIQUE(job_id, item_key)
 );
 
+CREATE TABLE IF NOT EXISTS learning_datasets (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS learning_import_batches (
+    id TEXT PRIMARY KEY,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    data_type TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    sha256 TEXT NOT NULL,
+    raw_path TEXT NOT NULL,
+    status TEXT NOT NULL,
+    total_rows INTEGER NOT NULL DEFAULT 0,
+    inserted_rows INTEGER NOT NULL DEFAULT 0,
+    updated_rows INTEGER NOT NULL DEFAULT 0,
+    skipped_rows INTEGER NOT NULL DEFAULT 0,
+    conflict_rows INTEGER NOT NULL DEFAULT 0,
+    issue_count INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    finished_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS learning_field_aliases (
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    data_type TEXT NOT NULL,
+    source_name TEXT NOT NULL,
+    target_field TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY(dataset_id, data_type, source_name)
+);
+
+CREATE TABLE IF NOT EXISTS learning_import_issues (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    batch_id TEXT NOT NULL REFERENCES learning_import_batches(id),
+    data_type TEXT NOT NULL,
+    row_number INTEGER,
+    severity TEXT NOT NULL,
+    code TEXT NOT NULL,
+    field_name TEXT,
+    message TEXT NOT NULL,
+    raw_value TEXT
+);
+
+CREATE TABLE IF NOT EXISTS learning_change_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    data_type TEXT NOT NULL,
+    row_id INTEGER NOT NULL,
+    action TEXT NOT NULL,
+    before_json TEXT,
+    after_json TEXT,
+    change_source TEXT NOT NULL,
+    import_batch_id TEXT,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS learning_students (
+    row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    student_code TEXT NOT NULL,
+    class_code TEXT,
+    grade INTEGER,
+    source_json TEXT NOT NULL DEFAULT '{}',
+    extra_json TEXT NOT NULL DEFAULT '{}',
+    import_batch_id TEXT REFERENCES learning_import_batches(id),
+    manual_revision INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    UNIQUE(dataset_id, student_code)
+);
+
+CREATE TABLE IF NOT EXISTS learning_requirements (
+    row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    theme_code TEXT,
+    theme_name TEXT,
+    theme_goal TEXT,
+    indicator_code TEXT NOT NULL,
+    indicator_name TEXT,
+    standard_ref TEXT,
+    standard_page TEXT,
+    textbook_page TEXT,
+    source_json TEXT NOT NULL DEFAULT '{}',
+    extra_json TEXT NOT NULL DEFAULT '{}',
+    import_batch_id TEXT REFERENCES learning_import_batches(id),
+    manual_revision INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    UNIQUE(dataset_id, indicator_code)
+);
+
+CREATE TABLE IF NOT EXISTS learning_materials (
+    row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    material_code TEXT NOT NULL,
+    theme_code TEXT,
+    material_type TEXT,
+    question_type TEXT,
+    content TEXT,
+    options TEXT,
+    reference_answer TEXT,
+    reference_solution TEXT,
+    full_score INTEGER,
+    rubric TEXT,
+    indicator_codes TEXT,
+    source TEXT,
+    source_json TEXT NOT NULL DEFAULT '{}',
+    extra_json TEXT NOT NULL DEFAULT '{}',
+    import_batch_id TEXT REFERENCES learning_import_batches(id),
+    manual_revision INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    UNIQUE(dataset_id, material_code)
+);
+
+CREATE TABLE IF NOT EXISTS learning_nodes (
+    row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    node_code TEXT NOT NULL,
+    test_date TEXT,
+    taught_topics TEXT,
+    description TEXT,
+    available_materials TEXT,
+    source_json TEXT NOT NULL DEFAULT '{}',
+    extra_json TEXT NOT NULL DEFAULT '{}',
+    import_batch_id TEXT REFERENCES learning_import_batches(id),
+    manual_revision INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    UNIQUE(dataset_id, node_code)
+);
+
+CREATE TABLE IF NOT EXISTS learning_answers (
+    row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    record_code TEXT NOT NULL,
+    student_code TEXT,
+    material_code TEXT,
+    theme_code TEXT,
+    node_code TEXT,
+    answer_event_code TEXT NOT NULL,
+    revision INTEGER NOT NULL,
+    submitted_at TEXT,
+    grading_status TEXT,
+    score INTEGER,
+    full_score INTEGER,
+    final_answer TEXT,
+    solution TEXT,
+    rubric_scores TEXT,
+    source_json TEXT NOT NULL DEFAULT '{}',
+    extra_json TEXT NOT NULL DEFAULT '{}',
+    import_batch_id TEXT REFERENCES learning_import_batches(id),
+    manual_revision INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    UNIQUE(dataset_id, record_code),
+    UNIQUE(dataset_id, answer_event_code, revision)
+);
+
+CREATE TABLE IF NOT EXISTS learning_field_definitions (
+    row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    table_name TEXT NOT NULL,
+    field_name TEXT NOT NULL,
+    field_type TEXT,
+    meaning TEXT,
+    allowed_format TEXT,
+    example TEXT,
+    blank_behavior TEXT,
+    source_json TEXT NOT NULL DEFAULT '{}',
+    extra_json TEXT NOT NULL DEFAULT '{}',
+    import_batch_id TEXT REFERENCES learning_import_batches(id),
+    manual_revision INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    UNIQUE(dataset_id, table_name, field_name)
+);
+
 CREATE INDEX IF NOT EXISTS idx_documents_set ON documents(material_set_id);
 CREATE INDEX IF NOT EXISTS idx_sections_document ON sections(document_id, order_index);
 CREATE INDEX IF NOT EXISTS idx_units_document ON units(document_id, section_id);
 CREATE INDEX IF NOT EXISTS idx_units_status ON units(status, deleted_at);
 CREATE INDEX IF NOT EXISTS idx_jobs_document ON jobs(document_id, started_at);
+CREATE INDEX IF NOT EXISTS idx_learning_batches_dataset
+    ON learning_import_batches(dataset_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_learning_changes_dataset
+    ON learning_change_log(dataset_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_learning_students_dataset
+    ON learning_students(dataset_id, deleted_at);
+CREATE INDEX IF NOT EXISTS idx_learning_requirements_dataset
+    ON learning_requirements(dataset_id, deleted_at);
+CREATE INDEX IF NOT EXISTS idx_learning_materials_dataset
+    ON learning_materials(dataset_id, deleted_at);
+CREATE INDEX IF NOT EXISTS idx_learning_nodes_dataset
+    ON learning_nodes(dataset_id, deleted_at);
+CREATE INDEX IF NOT EXISTS idx_learning_answers_dataset
+    ON learning_answers(dataset_id, deleted_at, answer_event_code, revision);
+CREATE INDEX IF NOT EXISTS idx_learning_field_definitions_dataset
+    ON learning_field_definitions(dataset_id, deleted_at);
 """
 
 
@@ -189,7 +395,7 @@ class Repository:
                 )
             connection.execute(
                 "INSERT OR REPLACE INTO schema_meta(key, value) VALUES (?, ?)",
-                ("schema_version", "2"),
+                ("schema_version", "3"),
             )
 
     def create_material_set(
