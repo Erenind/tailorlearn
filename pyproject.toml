@@ -1,0 +1,25 @@
+[project]
+name = "tailorlearn"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "erenind", email = "chaojianbili@outlook.com" }
+]
+requires-python = "==3.12.14"
+dependencies = [
+    "openai>=3.46.0",
+    "opencv-python-headless>=5.0.0.93",
+    "pydantic>=2.14.3",
+    "pymupdf>=2.1",
+    "pytest>=9.2.0",
+    "rapidocr-onnxruntime>=1.4.4",
+    "streamlit>=1.67.0",
+]
+
+[project.scripts]
+tailorlearn = "tailorlearn.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.11,<0.13.0"]
+build-backend = "uv_build"

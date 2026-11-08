@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.local/
+.streamlit/secrets.toml
+db/**/*.sqlite3-wal
+db/**/*.sqlite3-shm
+db/.upload_tmp/
+db/backups/

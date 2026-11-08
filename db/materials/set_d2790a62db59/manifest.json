@@ -1,0 +1,33 @@
+{
+  "material": {
+    "id": "set_d2790a62db59",
+    "name": "七年级数学课本切片（B02）",
+    "material_type": "textbook",
+    "subject": "数学",
+    "stage": null,
+    "grade": "七年级",
+    "semester": null,
+    "edition": null,
+    "notes": null,
+    "version": 1,
+    "created_at": "2026-11-08T03:39:30+00:00",
+    "deleted_at": null,
+    "metadata_sources_json": "{\"subject\": \"inferred:content\", \"grade\": \"inferred:content\"}"
+  },
+  "documents": [
+    {
+      "id": "doc_ccde81c9_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "B02_相关资料切片.pdf",
+      "sha256": "ccde81c935d7adeaf3c0da331b8881ea86ca0b173e01d20c4ab427d202efc6b6",
+      "stored_path": "materials/set_d2790a62db59/doc_ccde81c9_62db59/source/original.pdf",
+      "page_count": 26,
+      "order_index": 1,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T03:39:30+00:00",
+      "deleted_at": null
+    }
+  ]
+}

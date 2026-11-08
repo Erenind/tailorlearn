@@ -1,0 +1,33 @@
+{
+  "material": {
+    "id": "set_790c195dad4d",
+    "name": "义务教育数学课程标准（2022年版）",
+    "material_type": "curriculum_standard",
+    "subject": "数学",
+    "stage": "义务教育",
+    "grade": null,
+    "semester": null,
+    "edition": null,
+    "notes": null,
+    "version": 1,
+    "created_at": "2026-11-08T03:39:31+00:00",
+    "deleted_at": null,
+    "metadata_sources_json": "{\"subject\": \"inferred:content\", \"stage\": \"inferred:content\"}"
+  },
+  "documents": [
+    {
+      "id": "doc_1183b95c_5dad4d",
+      "material_set_id": "set_790c195dad4d",
+      "file_name": "课程标准_2022.pdf",
+      "sha256": "1183b95c58a65eaac4c456f2d2b329bbe42f65a6482993edb537e3eaf8baa144",
+      "stored_path": "materials/set_790c195dad4d/doc_1183b95c_5dad4d/source/original.pdf",
+      "page_count": 189,
+      "order_index": 1,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T03:39:31+00:00",
+      "deleted_at": null
+    }
+  ]
+}
