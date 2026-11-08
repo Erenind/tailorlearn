@@ -13,6 +13,7 @@ from tailorlearn.models import (
     AIResult,
     AIUnit,
     MaterialType,
+    OutlineDraftResponse,
     ProviderProfile,
 )
 
@@ -381,3 +382,30 @@ class OpenAICompatibleClient:
             result.append({"title": title, "page_start": start, "page_end": end})
         result.sort(key=lambda item: item["page_start"])
         return result
+
+    def draft_outline(
+        self,
+        *,
+        prompt: str,
+    ) -> tuple[OutlineDraftResponse, str, str | None]:
+        raw, finish_reason = self._complete(
+            [
+                {
+                    "role": "system",
+                    "content": (
+                        "你是严谨的初中数学课程专家。只依据用户给出的"
+                        "课标条目、教材小节和指标编号工作，输出合法 JSON。"
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ]
+        )
+        try:
+            parsed = OutlineDraftResponse.model_validate(_extract_json(raw))
+        except (ValueError, json.JSONDecodeError, ValidationError):
+            repaired = self._repair_json(raw)
+            parsed = OutlineDraftResponse.model_validate(_extract_json(repaired))
+            raw = f"{raw}\n\n--- repaired ---\n{repaired}"
+        if not parsed.items:
+            raise AIRequestError("AI 未能返回任何学习内容")
+        return parsed, raw, finish_reason

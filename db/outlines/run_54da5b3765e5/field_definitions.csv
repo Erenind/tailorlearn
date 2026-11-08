@@ -1,0 +1,25 @@
+﻿数据表,字段,类型,含义,取值或格式,示例,为空时
+outline_runs,id,字符串,一次梳理运行的唯一编号,run_ + 12 位十六进制,run_1a2b3c4d5e6f,不允许为空
+outline_runs,method,枚举,清单生成方式,rule=规则梳理；ai=AI 梳理,rule,不允许为空
+outline_runs,boundary_note,长文本,本次梳理的范围边界说明,自由文本，需写明已纳入与未纳入内容,已确定主题范围，其余内容未纳入本次梳理,表示范围边界尚未说明
+outline_items,item_key,字符串,学习内容在本清单中的稳定编号,优先沿用课程要求指标编号，人工新增用 KP01 形式,T03I1,不允许为空
+outline_items,theme_code,字符串,所属主题编号,与课程要求“主题编号”一致,T03,表示未归入主题，需复核
+outline_items,content,文本,学习内容名称,简洁名词性表述，避免与要求混写,不等式的性质与一元一次不等式的解法,不允许为空
+outline_items,key_points,字符串数组,支撑该学习内容的关键知识点、性质或方法,JSON 数组；每项须能追溯到教材小节或单元,"[""不等式的性质1"", ""不等式的性质2""]",表示尚未整理要点
+outline_items,indicator_codes,字符串数组,对应的课程要求观测指标编号,JSON 数组；取值须来自所选数据集,"[""T03I1""]",表示与课程要求尚未建立对应
+outline_items,requirements,对象数组,对应课程标准要求，含层级、原文与页码,对象含 text/clause/level/evidence,"{""level"": ""掌握"", ""text"": ""能解数字系数的一元一次不等式""}",表示未匹配到课标条目，需人工确认
+outline_items,sources,对象数组,教材材料出处，含文件、小节、页码与原文,对象含 document_id/section_id/page/quote,"{""page"": 4, ""quote"": ""不等式的性质1……""}",表示缺少教材出处
+outline_items,status,枚举,教师核对状态,draft=草稿；needs_review=待复核；verified=已确认,needs_review,默认草稿
+outline_items,review_warnings,字符串数组,自动核对发现的问题，供教师处理,JSON 数组；问题描述,"[""教材第 4 页出处引文未通过核对""]",表示自动核对未发现问题
+outline_relations,source_item_key,字符串,联系的起点学习内容,须存在于同一 run 的 item_key,T03I1,不允许为空
+outline_relations,target_item_key,字符串,联系的终点学习内容,须存在于同一 run 的 item_key，且不能与起点相同,T03I2,不允许为空
+outline_relations,relation_type,枚举,联系类型,prerequisite=先备；application=应用；parallel=并列；contrast=对比；other=其他,prerequisite,不允许为空
+outline_relations,note,文本,联系的具体说明,应写明前后内容及为什么有联系,教材先安排 11.1，后安排 11.2；解法以性质为基础,不允许为空
+outline_relations,basis,文本,建立联系的依据,课标条目、教材章节或推断说明,依据教材章节先后顺序,表示依据未说明
+outline_relations,origin,枚举,联系生成方式,rule=规则；ai=AI；manual=人工,rule,默认 rule
+references,ref_id,字符串,出处编号,R + 3 位序号,R001,不允许为空
+references,kind,枚举,出处类型,standard=课程标准；textbook=教材；requirement=课程要求,standard,不允许为空
+references,page,整数,PDF 文件页号,从 1 开始,63,表示页码未确认
+references,printed_page,字符串,页脚印刷页码（正文页）,数字字符串,56,表示该页未识别到印刷页码
+references,quote,文本,用于核对的原文引文,逐字摘录，不概括改写,②能解数字系数的一元一次不等式，并能在数轴上表示出解集；,表示尚未提供引文
+references,verified,布尔,引文是否在所指页面逐字匹配,true=通过；false=未通过,true,默认 false，需人工核对

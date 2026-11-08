@@ -20,6 +20,16 @@ db/
 │           │   ├── sections.json
 │           │   └── units.jsonl
 │           └── runs/<run_id>/chunks/
+├── outlines/
+│   └── <run_id>/
+│       ├── outline.json
+│       ├── scope.json
+│       ├── items.jsonl  items.csv
+│       ├── relations.jsonl  relations.csv
+│       ├── references.json  references.jsonl  references.csv
+│       ├── field_definitions.csv
+│       ├── ai_response.txt（仅 AI 梳理）
+│       └── README.md
 ├── exports/
 └── backups/
 ```
@@ -39,6 +49,12 @@ db/
 - 学情数据先按 `learning_datasets` 隔离；同一数据集内的重复导入按业务主键合并。
 - 业务编号修改不改变内部 `row_id` 关系；删除学生、材料或节点时可选择同步
   软删除关联作答，恢复时也可同步恢复。
+- 学习内容梳理按 `outline_runs` 保存范围快照、方式和统计；条目与联系分别写入
+  `outline_items` / `outline_relations`，每次修改生成条目新版本。
+- 梳理结果不覆盖历史：重新生成会产生新的 `run`，软删除只影响当前清单展示。
+- 每条要求与教材出处都保存页码和原文引文；`verified` 表示引文能在该页提取文本
+  中逐字匹配，未通过核对的条目保留并标为待复核。
+- 成果包写入 `outlines/<run_id>/`，数据库只保存索引和 JSON 快照。
 
 常用表：
 
@@ -55,3 +71,6 @@ db/
   六类强类型业务数据。
 - `learning_change_log`：导入和人工增删改审计。
 - `learning_field_aliases`：按数据集和数据类型保存的字段映射别名。
+- `outline_runs`：一次学习内容梳理的范围、方式、统计和 AI 快照。
+- `outline_items` / `outline_item_versions`：学习内容与要求清单及版本历史。
+- `outline_relations`：必要联系及其依据、出处和生成方式。

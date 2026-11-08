@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tailorlearn.db import Repository
 from tailorlearn.ingest import IngestionService
+from tailorlearn.outline import OutlineService
 from tailorlearn.paths import AppPaths
 from tailorlearn.providers import ProviderStore
 
@@ -119,6 +120,87 @@ def _structure(args: argparse.Namespace) -> int:
     return 1 if has_failure else 0
 
 
+def _outline(args: argparse.Namespace) -> int:
+    paths, repository, _ingestion, providers = _services()
+    service = OutlineService(paths, repository)
+    datasets = service.list_datasets()
+    if not datasets:
+        print("没有可用的学情数据集，请先在界面中导入课程要求")
+        return 2
+    dataset = next(
+        (row for row in datasets if row["id"] == args.dataset_id),
+        datasets[0],
+    )
+    themes = service.list_themes(dataset["id"])
+    selected = [
+        theme["theme_code"]
+        for theme in themes
+        if not args.themes or theme["theme_code"] in args.themes
+    ]
+    if not selected:
+        print("所选主题不存在")
+        return 2
+    standard_materials = service.materials("curriculum_standard")
+    textbook_materials = service.materials("textbook")
+    if not standard_materials or not textbook_materials:
+        print("请先导入课程标准与教材")
+        return 2
+    standard = (
+        next(
+            (
+                item
+                for item in standard_materials
+                if item["id"] == args.standard_id
+            ),
+            standard_materials[0],
+        )
+    )
+    textbook = (
+        next(
+            (
+                item
+                for item in textbook_materials
+                if item["id"] == args.material_id
+            ),
+            textbook_materials[0],
+        )
+    )
+    standard_documents = service.documents(standard["id"])
+    if not standard_documents:
+        print("课程标准材料没有文档")
+        return 2
+    textbook_documents = service.documents(textbook["id"])
+    scope = service.build_scope(
+        dataset_id=dataset["id"],
+        theme_codes=selected,
+        standard_material_id=standard["id"],
+        standard_document_id=standard_documents[0]["id"],
+        textbook_material_id=textbook["id"],
+        textbook_document_ids=[item["id"] for item in textbook_documents],
+    )
+    method = "ai" if args.ai else "rule"
+    profile = providers.active() if method == "ai" else None
+    if method == "ai" and (profile is None or not profile.api_key):
+        print("AI 梳理需要先在界面保存并启用厂商配置")
+        return 2
+    result = service.generate(
+        scope=scope,
+        method=method,
+        profile=profile,
+        name=args.name,
+    )
+    run = result["run"]
+    print(f"梳理：{run['id']}  {run['name']}")
+    print(
+        f"条目 {run['item_count']}  联系 {run['relation_count']}  "
+        f"范围：{scope['boundary']['statement']}"
+    )
+    for item in service.items(run["id"]):
+        print(f"  {item.item_key}  {item.content}")
+    print(f"成果目录：{service.outlines_dir / run['id']}")
+    return 0
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tailorlearn")
     subparsers = parser.add_subparsers(dest="command")
@@ -155,6 +237,22 @@ def _build_parser() -> argparse.ArgumentParser:
     structure_parser.add_argument("--document-id")
     structure_parser.add_argument("--force", action="store_true")
     structure_parser.set_defaults(handler=_structure)
+
+    outline_parser = subparsers.add_parser(
+        "outline",
+        help="按课程要求主题梳理学习内容、要求、联系与材料出处",
+    )
+    outline_parser.add_argument("--dataset-id")
+    outline_parser.add_argument(
+        "--themes",
+        nargs="*",
+        help="主题编号，留空表示数据集中全部主题",
+    )
+    outline_parser.add_argument("--standard-id")
+    outline_parser.add_argument("--material-id")
+    outline_parser.add_argument("--name")
+    outline_parser.add_argument("--ai", action="store_true")
+    outline_parser.set_defaults(handler=_outline)
     return parser
 
 

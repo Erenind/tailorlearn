@@ -2,12 +2,23 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import uuid
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Iterator, Sequence
 
-from tailorlearn.models import AIUnit, PageResult, UnitStatus
+from tailorlearn.models import (
+    AIUnit,
+    OutlineEvidence,
+    OutlineItem,
+    OutlineItemStatus,
+    OutlineRelation,
+    OutlineRelationType,
+    OutlineRequirement,
+    PageResult,
+    UnitStatus,
+)
 
 
 def utc_now() -> str:
@@ -357,6 +368,87 @@ CREATE INDEX IF NOT EXISTS idx_learning_answers_dataset
     ON learning_answers(dataset_id, deleted_at, answer_event_code, revision);
 CREATE INDEX IF NOT EXISTS idx_learning_field_definitions_dataset
     ON learning_field_definitions(dataset_id, deleted_at);
+
+CREATE TABLE IF NOT EXISTS outline_runs (
+    id TEXT PRIMARY KEY,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    name TEXT NOT NULL,
+    method TEXT NOT NULL,
+    scope_json TEXT NOT NULL,
+    boundary_note TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'draft',
+    item_count INTEGER NOT NULL DEFAULT 0,
+    relation_count INTEGER NOT NULL DEFAULT 0,
+    ai_vendor TEXT,
+    ai_base_url TEXT,
+    ai_model TEXT,
+    raw_response_path TEXT,
+    notes TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS outline_items (
+    id TEXT PRIMARY KEY,
+    run_id TEXT NOT NULL REFERENCES outline_runs(id) ON DELETE CASCADE,
+    item_key TEXT NOT NULL,
+    ordinal INTEGER NOT NULL,
+    theme_code TEXT,
+    theme_name TEXT,
+    item_type TEXT NOT NULL,
+    content TEXT NOT NULL,
+    key_points_json TEXT NOT NULL DEFAULT '[]',
+    indicator_codes_json TEXT NOT NULL DEFAULT '[]',
+    requirements_json TEXT NOT NULL DEFAULT '[]',
+    sources_json TEXT NOT NULL DEFAULT '[]',
+    notes TEXT,
+    review_warnings_json TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'draft',
+    current_version INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    UNIQUE(run_id, item_key)
+);
+
+CREATE TABLE IF NOT EXISTS outline_item_versions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id TEXT NOT NULL REFERENCES outline_items(id),
+    version INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    key_points_json TEXT NOT NULL,
+    indicator_codes_json TEXT NOT NULL,
+    requirements_json TEXT NOT NULL,
+    sources_json TEXT NOT NULL,
+    notes TEXT,
+    change_source TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE(item_id, version)
+);
+
+CREATE TABLE IF NOT EXISTS outline_relations (
+    id TEXT PRIMARY KEY,
+    run_id TEXT NOT NULL REFERENCES outline_runs(id) ON DELETE CASCADE,
+    source_item_id TEXT NOT NULL REFERENCES outline_items(id) ON DELETE CASCADE,
+    target_item_id TEXT NOT NULL REFERENCES outline_items(id) ON DELETE CASCADE,
+    relation_type TEXT NOT NULL,
+    note TEXT NOT NULL DEFAULT '',
+    basis TEXT NOT NULL DEFAULT '',
+    evidence_json TEXT NOT NULL DEFAULT '[]',
+    origin TEXT NOT NULL DEFAULT 'rule',
+    status TEXT NOT NULL DEFAULT 'draft',
+    created_at TEXT NOT NULL,
+    deleted_at TEXT,
+    UNIQUE(run_id, source_item_id, target_item_id, relation_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_outline_runs_dataset
+    ON outline_runs(dataset_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_outline_items_run
+    ON outline_items(run_id, ordinal);
+CREATE INDEX IF NOT EXISTS idx_outline_relations_run
+    ON outline_relations(run_id, created_at);
 """
 
 
@@ -395,7 +487,7 @@ class Repository:
                 )
             connection.execute(
                 "INSERT OR REPLACE INTO schema_meta(key, value) VALUES (?, ?)",
-                ("schema_version", "3"),
+                ("schema_version", "4"),
             )
 
     def create_material_set(
@@ -1058,3 +1150,548 @@ class Repository:
                 f"UPDATE jobs SET {assignments} WHERE id=?",
                 (*fields.values(), job_id),
             )
+
+    def create_outline_run(
+        self,
+        *,
+        run_id: str,
+        dataset_id: str,
+        name: str,
+        method: str,
+        scope: dict[str, Any],
+        boundary_note: str = "",
+        status: str = "draft",
+        ai_vendor: str | None = None,
+        ai_base_url: str | None = None,
+        ai_model: str | None = None,
+        raw_response_path: str | None = None,
+        notes: str | None = None,
+    ) -> dict[str, Any]:
+        now = utc_now()
+        with self.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO outline_runs
+                (id, dataset_id, name, method, scope_json, boundary_note,
+                 status, item_count, relation_count, ai_vendor, ai_base_url,
+                 ai_model, raw_response_path, notes, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    run_id,
+                    dataset_id,
+                    name,
+                    method,
+                    json.dumps(scope, ensure_ascii=False),
+                    boundary_note,
+                    status,
+                    ai_vendor,
+                    ai_base_url,
+                    ai_model,
+                    raw_response_path,
+                    notes,
+                    now,
+                    now,
+                ),
+            )
+            row = connection.execute(
+                "SELECT * FROM outline_runs WHERE id=?",
+                (run_id,),
+            ).fetchone()
+            return dict(row)
+
+    def update_outline_run(
+        self,
+        run_id: str,
+        *,
+        name: str | None = None,
+        scope: dict[str, Any] | None = None,
+        boundary_note: str | None = None,
+        status: str | None = None,
+        item_count: int | None = None,
+        relation_count: int | None = None,
+        raw_response_path: str | None = None,
+        notes: str | None = None,
+    ) -> None:
+        fields: dict[str, Any] = {}
+        if name is not None:
+            fields["name"] = name
+        if scope is not None:
+            fields["scope_json"] = json.dumps(scope, ensure_ascii=False)
+        if boundary_note is not None:
+            fields["boundary_note"] = boundary_note
+        if status is not None:
+            fields["status"] = status
+        if item_count is not None:
+            fields["item_count"] = item_count
+        if relation_count is not None:
+            fields["relation_count"] = relation_count
+        if raw_response_path is not None:
+            fields["raw_response_path"] = raw_response_path
+        if notes is not None:
+            fields["notes"] = notes
+        if not fields:
+            return
+        fields["updated_at"] = utc_now()
+        assignments = ", ".join(f"{key}=?" for key in fields)
+        with self.connect() as connection:
+            connection.execute(
+                f"UPDATE outline_runs SET {assignments} WHERE id=?",
+                (*fields.values(), run_id),
+            )
+
+    def get_outline_run(self, run_id: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM outline_runs WHERE id=?",
+                (run_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+    def list_outline_runs(
+        self,
+        dataset_id: str | None = None,
+        *,
+        include_deleted: bool = False,
+    ) -> list[dict[str, Any]]:
+        query = """
+            SELECT r.*, d.name AS dataset_name
+            FROM outline_runs r
+            JOIN learning_datasets d ON d.id=r.dataset_id
+            WHERE 1=1
+        """
+        params: list[Any] = []
+        if dataset_id:
+            query += " AND r.dataset_id=?"
+            params.append(dataset_id)
+        if not include_deleted:
+            query += " AND r.deleted_at IS NULL"
+        query += " ORDER BY r.created_at DESC, r.id"
+        with self.connect() as connection:
+            return [
+                dict(row)
+                for row in connection.execute(query, params).fetchall()
+            ]
+
+    def save_outline_items(
+        self,
+        *,
+        run_id: str,
+        items: Sequence[OutlineItem],
+        change_source: str = "rule",
+    ) -> list[str]:
+        now = utc_now()
+        saved_ids: list[str] = []
+        with self.connect() as connection:
+            for ordinal, item in enumerate(items, start=1):
+                item_id = item.id or f"{run_id}_{item.item_key}"
+                saved_ids.append(item_id)
+                key_points = json.dumps(item.key_points, ensure_ascii=False)
+                indicator_codes = json.dumps(
+                    item.indicator_codes,
+                    ensure_ascii=False,
+                )
+                requirements = json.dumps(
+                    [entry.model_dump() for entry in item.requirements],
+                    ensure_ascii=False,
+                )
+                sources = json.dumps(
+                    [entry.model_dump() for entry in item.sources],
+                    ensure_ascii=False,
+                )
+                warnings = json.dumps(
+                    item.review_warnings,
+                    ensure_ascii=False,
+                )
+                connection.execute(
+                    """
+                    INSERT INTO outline_items
+                    (id, run_id, item_key, ordinal, theme_code, theme_name,
+                     item_type, content, key_points_json, indicator_codes_json,
+                     requirements_json, sources_json, notes,
+                     review_warnings_json, status, current_version,
+                     created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
+                    ON CONFLICT(id) DO UPDATE SET
+                        ordinal=excluded.ordinal,
+                        theme_code=excluded.theme_code,
+                        theme_name=excluded.theme_name,
+                        item_type=excluded.item_type,
+                        content=excluded.content,
+                        key_points_json=excluded.key_points_json,
+                        indicator_codes_json=excluded.indicator_codes_json,
+                        requirements_json=excluded.requirements_json,
+                        sources_json=excluded.sources_json,
+                        notes=excluded.notes,
+                        review_warnings_json=excluded.review_warnings_json,
+                        status=excluded.status,
+                        current_version=outline_items.current_version + 1,
+                        updated_at=excluded.updated_at,
+                        deleted_at=NULL
+                    """,
+                    (
+                        item_id,
+                        run_id,
+                        item.item_key,
+                        item.ordinal or ordinal,
+                        item.theme_code or None,
+                        item.theme_name or None,
+                        item.item_type,
+                        item.content,
+                        key_points,
+                        indicator_codes,
+                        requirements,
+                        sources,
+                        item.notes or None,
+                        warnings,
+                        item.status,
+                        now,
+                        now,
+                    ),
+                )
+                version = connection.execute(
+                    """
+                    SELECT COUNT(*) FROM outline_item_versions WHERE item_id=?
+                    """,
+                    (item_id,),
+                ).fetchone()[0] + 1
+                connection.execute(
+                    """
+                    INSERT INTO outline_item_versions
+                    (item_id, version, content, key_points_json,
+                     indicator_codes_json, requirements_json, sources_json,
+                     notes, change_source, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        item_id,
+                        version,
+                        item.content,
+                        key_points,
+                        indicator_codes,
+                        requirements,
+                        sources,
+                        item.notes or None,
+                        change_source,
+                        now,
+                    ),
+                )
+        return saved_ids
+
+    def list_outline_items(
+        self,
+        run_id: str,
+        *,
+        include_deleted: bool = False,
+    ) -> list[dict[str, Any]]:
+        query = """
+            SELECT * FROM outline_items WHERE run_id=?
+        """
+        if not include_deleted:
+            query += " AND deleted_at IS NULL"
+        query += " ORDER BY ordinal, item_key"
+        with self.connect() as connection:
+            return [
+                dict(row)
+                for row in connection.execute(query, (run_id,)).fetchall()
+            ]
+
+    def get_outline_item(self, item_id: str) -> dict[str, Any] | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM outline_items WHERE id=?",
+                (item_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+    def update_outline_item(
+        self,
+        *,
+        item_id: str,
+        content: str,
+        key_points: Sequence[str],
+        indicator_codes: Sequence[str],
+        requirements: Sequence[OutlineRequirement],
+        sources: Sequence[OutlineEvidence],
+        notes: str,
+        theme_code: str = "",
+        theme_name: str = "",
+        item_type: str = "knowledge_point",
+        status: str | None = None,
+    ) -> None:
+        now = utc_now()
+        key_points_json = json.dumps(list(key_points), ensure_ascii=False)
+        indicator_codes_json = json.dumps(
+            list(indicator_codes),
+            ensure_ascii=False,
+        )
+        requirements_json = json.dumps(
+            [entry.model_dump() for entry in requirements],
+            ensure_ascii=False,
+        )
+        sources_json = json.dumps(
+            [entry.model_dump() for entry in sources],
+            ensure_ascii=False,
+        )
+        with self.connect() as connection:
+            current = connection.execute(
+                "SELECT * FROM outline_items WHERE id=? AND deleted_at IS NULL",
+                (item_id,),
+            ).fetchone()
+            if current is None:
+                raise ValueError("找不到该学习内容")
+            version = current["current_version"] + 1
+            resolved_status = status or OutlineItemStatus.DRAFT.value
+            connection.execute(
+                """
+                UPDATE outline_items
+                SET content=?, key_points_json=?, indicator_codes_json=?,
+                    requirements_json=?, sources_json=?, notes=?, theme_code=?,
+                    theme_name=?, item_type=?, status=?, current_version=?,
+                    updated_at=?
+                WHERE id=?
+                """,
+                (
+                    content,
+                    key_points_json,
+                    indicator_codes_json,
+                    requirements_json,
+                    sources_json,
+                    notes or None,
+                    theme_code or None,
+                    theme_name or None,
+                    item_type,
+                    resolved_status,
+                    version,
+                    now,
+                    item_id,
+                ),
+            )
+            connection.execute(
+                """
+                INSERT INTO outline_item_versions
+                (item_id, version, content, key_points_json,
+                 indicator_codes_json, requirements_json, sources_json,
+                 notes, change_source, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'manual', ?)
+                """,
+                (
+                    item_id,
+                    version,
+                    content,
+                    key_points_json,
+                    indicator_codes_json,
+                    requirements_json,
+                    sources_json,
+                    notes or None,
+                    now,
+                ),
+            )
+
+    def set_outline_items_status(
+        self,
+        item_ids: Sequence[str],
+        status: str,
+    ) -> int:
+        if status not in set(OutlineItemStatus):
+            raise ValueError("无效的梳理状态")
+        if not item_ids:
+            return 0
+        placeholders = ",".join("?" for _ in item_ids)
+        with self.connect() as connection:
+            cursor = connection.execute(
+                f"""
+                UPDATE outline_items SET status=?, updated_at=?
+                WHERE deleted_at IS NULL AND id IN ({placeholders})
+                """,
+                (status, utc_now(), *item_ids),
+            )
+            return cursor.rowcount
+
+    def soft_delete_outline_items(self, item_ids: Sequence[str]) -> int:
+        if not item_ids:
+            return 0
+        placeholders = ",".join("?" for _ in item_ids)
+        now = utc_now()
+        with self.connect() as connection:
+            cursor = connection.execute(
+                f"""
+                UPDATE outline_items
+                SET deleted_at=?, updated_at=?
+                WHERE deleted_at IS NULL AND id IN ({placeholders})
+                """,
+                (now, now, *item_ids),
+            )
+            return cursor.rowcount
+
+    def save_outline_relations(
+        self,
+        *,
+        run_id: str,
+        relations: Sequence[OutlineRelation],
+        origin: str = "rule",
+    ) -> list[str]:
+        now = utc_now()
+        saved: list[str] = []
+        with self.connect() as connection:
+            for relation in relations:
+                relation_id = relation.id or f"rel_{uuid.uuid4().hex[:12]}"
+                saved.append(relation_id)
+                connection.execute(
+                    """
+                    INSERT INTO outline_relations
+                    (id, run_id, source_item_id, target_item_id,
+                     relation_type, note, basis, evidence_json, origin,
+                     status, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(id) DO UPDATE SET
+                        relation_type=excluded.relation_type,
+                        note=excluded.note,
+                        basis=excluded.basis,
+                        evidence_json=excluded.evidence_json,
+                        status=excluded.status,
+                        deleted_at=NULL
+                    """,
+                    (
+                        relation_id,
+                        run_id,
+                        relation.source_item_id,
+                        relation.target_item_id,
+                        relation.relation_type,
+                        relation.note,
+                        relation.basis,
+                        json.dumps(
+                            [entry.model_dump() for entry in relation.evidence],
+                            ensure_ascii=False,
+                        ),
+                        origin,
+                        relation.status,
+                        now,
+                    ),
+                )
+        return saved
+
+    def list_outline_relations(
+        self,
+        run_id: str,
+        *,
+        include_deleted: bool = False,
+    ) -> list[dict[str, Any]]:
+        query = """
+            SELECT r.*, s.item_key AS source_item_key,
+                   s.content AS source_content,
+                   t.item_key AS target_item_key,
+                   t.content AS target_content
+            FROM outline_relations r
+            JOIN outline_items s ON s.id=r.source_item_id
+            JOIN outline_items t ON t.id=r.target_item_id
+            WHERE r.run_id=?
+        """
+        if not include_deleted:
+            query += " AND r.deleted_at IS NULL"
+        query += " ORDER BY r.created_at, r.id"
+        with self.connect() as connection:
+            return [
+                dict(row)
+                for row in connection.execute(query, (run_id,)).fetchall()
+            ]
+
+    def add_outline_relation(
+        self,
+        *,
+        run_id: str,
+        source_item_id: str,
+        target_item_id: str,
+        relation_type: str,
+        note: str,
+        basis: str = "",
+        evidence: Sequence[OutlineEvidence] | None = None,
+        origin: str = "manual",
+    ) -> dict[str, Any]:
+        if source_item_id == target_item_id:
+            raise ValueError("不能把学习内容关联到自身")
+        if relation_type not in set(OutlineRelationType):
+            raise ValueError("无效的联系类型")
+        if not note.strip():
+            raise ValueError("请填写联系说明")
+        relation_id = f"rel_{uuid.uuid4().hex[:12]}"
+        now = utc_now()
+        with self.connect() as connection:
+            source = connection.execute(
+                """
+                SELECT id FROM outline_items
+                WHERE id=? AND run_id=? AND deleted_at IS NULL
+                """,
+                (source_item_id, run_id),
+            ).fetchone()
+            target = connection.execute(
+                """
+                SELECT id FROM outline_items
+                WHERE id=? AND run_id=? AND deleted_at IS NULL
+                """,
+                (target_item_id, run_id),
+            ).fetchone()
+            if source is None or target is None:
+                raise ValueError("联系两端必须属于本次梳理")
+            connection.execute(
+                """
+                INSERT INTO outline_relations
+                (id, run_id, source_item_id, target_item_id, relation_type,
+                 note, basis, evidence_json, origin, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?)
+                """,
+                (
+                    relation_id,
+                    run_id,
+                    source_item_id,
+                    target_item_id,
+                    relation_type,
+                    note.strip(),
+                    basis.strip(),
+                    json.dumps(
+                        [entry.model_dump() for entry in evidence or []],
+                        ensure_ascii=False,
+                    ),
+                    origin,
+                    now,
+                ),
+            )
+            row = connection.execute(
+                """
+                SELECT r.*, s.item_key AS source_item_key,
+                       s.content AS source_content,
+                       t.item_key AS target_item_key,
+                       t.content AS target_content
+                FROM outline_relations r
+                JOIN outline_items s ON s.id=r.source_item_id
+                JOIN outline_items t ON t.id=r.target_item_id
+                WHERE r.id=?
+                """,
+                (relation_id,),
+            ).fetchone()
+            return dict(row)
+
+    def delete_outline_relation(self, relation_id: str) -> None:
+        with self.connect() as connection:
+            cursor = connection.execute(
+                """
+                UPDATE outline_relations SET deleted_at=?
+                WHERE id=? AND deleted_at IS NULL
+                """,
+                (utc_now(), relation_id),
+            )
+            if cursor.rowcount == 0:
+                raise ValueError("找不到该联系")
+
+    def list_outline_item_versions(self, item_id: str) -> list[dict[str, Any]]:
+        with self.connect() as connection:
+            return [
+                dict(row)
+                for row in connection.execute(
+                    """
+                    SELECT * FROM outline_item_versions
+                    WHERE item_id=? ORDER BY version DESC
+                    """,
+                    (item_id,),
+                ).fetchall()
+            ]

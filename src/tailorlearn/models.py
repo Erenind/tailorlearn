@@ -118,3 +118,173 @@ class AIResult(BaseModel):
     raw_response: str
     finish_reason: str | None = None
     segmented: bool = False
+
+
+class OutlineSourceKind(StrEnum):
+    STANDARD = "standard"
+    TEXTBOOK = "textbook"
+    REQUIREMENT = "requirement"
+
+
+class OutlineItemStatus(StrEnum):
+    DRAFT = "draft"
+    NEEDS_REVIEW = "needs_review"
+    VERIFIED = "verified"
+
+
+class OutlineRelationType(StrEnum):
+    PREREQUISITE = "prerequisite"
+    APPLICATION = "application"
+    PARALLEL = "parallel"
+    CONTRAST = "contrast"
+    OTHER = "other"
+
+
+class OutlineEvidence(BaseModel):
+    """One verifiable citation: a page, a verbatim quote and its owner."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    kind: str
+    material_set_id: str = ""
+    material_name: str = ""
+    document_id: str = ""
+    file_name: str = ""
+    section_id: str = ""
+    section_path: str = ""
+    page: int | None = None
+    page_end: int | None = None
+    printed_page: str | None = None
+    quote: str = ""
+    unit_id: str | None = None
+    verified: bool = False
+    verification_note: str = ""
+
+
+class OutlineRequirement(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    clause: str = ""
+    verb: str = ""
+    level: str = ""
+    text: str
+    evidence: OutlineEvidence | None = None
+    verified: bool = False
+    note: str = ""
+
+    @field_validator("text")
+    @classmethod
+    def text_not_blank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("must not be blank")
+        return value
+
+
+class OutlineItem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str = ""
+    run_id: str = ""
+    item_key: str
+    ordinal: int = 0
+    theme_code: str = ""
+    theme_name: str = ""
+    item_type: str = "knowledge_point"
+    content: str
+    key_points: list[str] = Field(default_factory=list)
+    indicator_codes: list[str] = Field(default_factory=list)
+    requirements: list[OutlineRequirement] = Field(default_factory=list)
+    sources: list[OutlineEvidence] = Field(default_factory=list)
+    notes: str = ""
+    review_warnings: list[str] = Field(default_factory=list)
+    status: str = OutlineItemStatus.DRAFT.value
+    current_version: int = 1
+
+    @field_validator("content")
+    @classmethod
+    def content_not_blank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("must not be blank")
+        return value
+
+
+class OutlineRelation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str = ""
+    run_id: str = ""
+    source_item_id: str = ""
+    source_item_key: str = ""
+    target_item_id: str = ""
+    target_item_key: str = ""
+    relation_type: str = OutlineRelationType.PREREQUISITE.value
+    note: str = ""
+    basis: str = ""
+    evidence: list[OutlineEvidence] = Field(default_factory=list)
+    origin: str = "rule"
+    status: str = OutlineItemStatus.DRAFT.value
+    created_at: str = ""
+
+
+class OutlineDraftRequirement(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    text: str
+    clause: str = ""
+    level: str = ""
+    standard_page: int | None = None
+    quote: str = ""
+
+
+class OutlineDraftSource(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    kind: str = OutlineSourceKind.TEXTBOOK.value
+    material_set_id: str = ""
+    document_id: str = ""
+    section_id: str = ""
+    unit_id: str | None = None
+    page: int | None = None
+    quote: str = ""
+
+
+class OutlineDraftItem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    item_key: str = ""
+    theme_code: str = ""
+    item_type: str = "knowledge_point"
+    content: str
+    key_points: list[str] = Field(default_factory=list)
+    indicator_codes: list[str] = Field(default_factory=list)
+    requirements: list[OutlineDraftRequirement] = Field(default_factory=list)
+    sources: list[OutlineDraftSource] = Field(default_factory=list)
+    review_notes: list[str] = Field(default_factory=list)
+
+    @field_validator("content")
+    @classmethod
+    def content_not_blank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("must not be blank")
+        return value
+
+
+class OutlineDraftRelation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    source_key: str
+    target_key: str
+    relation_type: str = OutlineRelationType.PREREQUISITE.value
+    note: str = ""
+    basis: str = ""
+
+
+class OutlineDraftResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    scope_note: str = ""
+    items: list[OutlineDraftItem]
+    relations: list[OutlineDraftRelation] = Field(default_factory=list)

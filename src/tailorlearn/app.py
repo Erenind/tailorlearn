@@ -13,6 +13,8 @@ from tailorlearn.ingest import IngestionService
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.learning_data_ui import render_learning_data_page
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
+from tailorlearn.outline import OutlineService
+from tailorlearn.outline_ui import render_outline_page
 from tailorlearn.paths import AppPaths
 from tailorlearn.providers import ProviderStore
 
@@ -31,6 +33,7 @@ def app_services() -> tuple[
     IngestionService,
     ProviderStore,
     LearningDataService,
+    OutlineService,
 ]:
     paths = AppPaths.default()
     paths.ensure()
@@ -42,10 +45,11 @@ def app_services() -> tuple[
         IngestionService(paths, repository),
         ProviderStore(paths.provider_file),
         LearningDataService(repository, paths.db_dir),
+        OutlineService(paths, repository),
     )
 
 
-PATHS, REPO, INGEST, PROVIDERS, LEARNING_DATA = app_services()
+PATHS, REPO, INGEST, PROVIDERS, LEARNING_DATA, OUTLINES = app_services()
 
 MATERIAL_LABELS = {
     MaterialType.TEXTBOOK.value: "课本",
@@ -894,14 +898,16 @@ def main() -> None:
     st.sidebar.title("TailorLearn")
     page = st.sidebar.radio(
         "导航",
-        ["AI 参数设置", "学科分析", "学情数据"],
+        ["AI 参数设置", "学科分析", "学习内容梳理", "学情数据"],
         key="main_navigation",
     )
-    st.sidebar.caption("本轮不含智能对话入口")
+    st.sidebar.caption("学习内容梳理可输出可机读成果包")
     if page == "AI 参数设置":
         render_ai_settings()
     elif page == "学科分析":
         render_subject_analysis()
+    elif page == "学习内容梳理":
+        render_outline_page(OUTLINES, _active_profile())
     else:
         render_learning_data_page(LEARNING_DATA)
 

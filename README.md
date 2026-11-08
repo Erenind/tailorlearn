@@ -1,7 +1,8 @@
 # TailorLearn
 
 面向个性化学习分析的材料结构化工具。当前实现包括 AI 厂商配置、课本/课程标准
-导入、本地 OCR、章节切分、AI 结构化以及批量审核。
+导入、本地 OCR、章节切分、AI 结构化、批量审核、学情数据管理，以及按主题范围
+梳理学习内容与要求的成果包。
 
 ## 启动
 
@@ -18,6 +19,30 @@ uv run tailorlearn
 
 AI 参数页支持保存多套 OpenAI-compatible Chat Completions 配置。API Key 只写入
 本机 `.local/ai_profiles.json`，不读取环境变量，也不写入 `db/`。
+
+## 学习内容梳理（任务 1）
+
+侧边栏“学习内容梳理”页面按学情数据集中的主题范围整理成果，包含：
+
+- 学习内容与要求清单：学习内容、要点、对应指标、课标要求原文与层级；
+- 必要联系：先备、应用、并列、对比，逐条写明依据；
+- 材料出处：课标与教材的文件、章节、页码、原文引文及逐字核对结果；
+- 范围边界：已纳入主题、课标页码、教材章节，以及未纳入的章节说明；
+- 成果包：`outline.json`、`items.jsonl/csv`、`relations.jsonl/csv`、
+  `references.json/csv`、`scope.json`、`field_definitions.csv` 和 `README.md`。
+
+规则梳理不需要 API：按课标条目顺序、教材章节顺序和术语重合自动对应，并回查
+每条引文所在页面。配置 AI 厂商后可使用“AI 梳理”，AI 起草的条目一律进入
+待复核状态，仍会逐条回查课标页和教材页。
+
+也可以离线生成：
+
+```bash
+uv run tailorlearn outline --dataset-id <dataset_id> --themes T01 T02 T03
+```
+
+默认使用全部主题和全部教材切片；`--ai` 使用当前厂商配置。成果目录为
+`db/outlines/<run_id>/`。
 
 ## 学情数据
 
