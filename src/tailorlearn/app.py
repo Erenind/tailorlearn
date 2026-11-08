@@ -6,6 +6,11 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
+from tailorlearn.analytics import AnalyticsService
+from tailorlearn.analytics_ui import (
+    render_class_analysis_page,
+    render_student_analysis_page,
+)
 from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.db import Repository
 from tailorlearn.extraction import page_as_png
@@ -34,6 +39,7 @@ def app_services() -> tuple[
     ProviderStore,
     LearningDataService,
     OutlineService,
+    AnalyticsService,
 ]:
     paths = AppPaths.default()
     paths.ensure()
@@ -46,10 +52,11 @@ def app_services() -> tuple[
         ProviderStore(paths.provider_file),
         LearningDataService(repository, paths.db_dir),
         OutlineService(paths, repository),
+        AnalyticsService(repository),
     )
 
 
-PATHS, REPO, INGEST, PROVIDERS, LEARNING_DATA, OUTLINES = app_services()
+PATHS, REPO, INGEST, PROVIDERS, LEARNING_DATA, OUTLINES, ANALYTICS = app_services()
 
 MATERIAL_LABELS = {
     MaterialType.TEXTBOOK.value: "课本",
@@ -898,7 +905,14 @@ def main() -> None:
     st.sidebar.title("TailorLearn")
     page = st.sidebar.radio(
         "导航",
-        ["AI 参数设置", "学科分析", "学习内容梳理", "学情数据"],
+        [
+            "AI 参数设置",
+            "学科分析",
+            "学习内容梳理",
+            "学情数据",
+            "学生分析",
+            "班级分析",
+        ],
         key="main_navigation",
     )
     st.sidebar.caption("学习内容梳理可输出可机读成果包")
@@ -908,8 +922,12 @@ def main() -> None:
         render_subject_analysis()
     elif page == "学习内容梳理":
         render_outline_page(OUTLINES, _active_profile())
-    else:
+    elif page == "学情数据":
         render_learning_data_page(LEARNING_DATA)
+    elif page == "学生分析":
+        render_student_analysis_page(ANALYTICS, LEARNING_DATA)
+    else:
+        render_class_analysis_page(ANALYTICS, LEARNING_DATA)
 
 
 main()

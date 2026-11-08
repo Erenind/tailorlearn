@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import stat
 
 from tailorlearn.providers import ProviderStore
@@ -31,7 +32,13 @@ def test_provider_store_keeps_multiple_vendors_and_protects_file(tmp_path):
     }
     assert config.active_profile_id == second.id
     assert first.base_url == "https://api.openai.com/v1"
-    assert stat.S_IMODE(path.stat().st_mode) == 0o600
+    # Windows does not expose POSIX permission bits through stat().
+    # The atomic write and secret-masking behaviour are platform-neutral;
+    # retain the stricter mode assertion where the OS supports it.
+    if os.name != "nt":
+        assert stat.S_IMODE(path.stat().st_mode) == 0o600
+    else:
+        assert path.is_file()
     assert first.masked_api_key == "sk-••••••••abcd"
     assert first.public_dict()["api_key"] == first.masked_api_key
     assert first.api_key not in repr(first.public_dict())
