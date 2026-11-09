@@ -87,3 +87,36 @@ def test_student_diagnosis_client_parses_a_structured_draft(monkeypatch):
     assert draft["summary"] == "有效记录不足，建议补充观察。"
     assert draft["suggestions"][0]["material_code"] == "Q002"
     assert raw.startswith("{")
+
+
+def test_teaching_recommendation_client_parses_a_structured_draft(monkeypatch):
+    def fake_complete(self, messages):
+        return (
+            """{
+            "summary":"班级已有充分观察，可按分层安排活动。",
+            "observations":[{"theme_code":"T01","statement":"已观察到班级主题表现。","indicator_codes":["T01I1"]}],
+            "information_gaps":[],
+            "group_activities":[{"theme_code":"T01","group":"needs_attention","activity":"补充练习。","student_codes":["D02"]}],
+            "material_suggestions":[{"theme_code":"T01","indicator_code":"T01I1","material_code":"Q004","student_codes":["D02"],"reason":"补充观察。"}],
+            "teacher_actions":["审核后安排活动。"],
+            "post_lesson_checks":["记录补充观察结果。"]
+            }""",
+            "stop",
+        )
+
+    monkeypatch.setattr(OpenAICompatibleClient, "_complete", fake_complete)
+    client = OpenAICompatibleClient(
+        ProviderProfile(
+            id="provider_test",
+            vendor_name="Test",
+            base_url="https://example.test/v1",
+            model="test-model",
+            api_key="test-key",
+        )
+    )
+
+    draft, raw = client.draft_teaching_recommendation({"class_code": "DC01"})
+
+    assert draft["summary"] == "班级已有充分观察，可按分层安排活动。"
+    assert draft["material_suggestions"][0]["student_codes"] == ["D02"]
+    assert raw.startswith("{")

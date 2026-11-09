@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from tailorlearn.analytics import AnalyticsService
 from tailorlearn.db import Repository
 from tailorlearn.learning_data import LearningDataService
+from tailorlearn.models import ProviderProfile
 
 
 def test_teaching_draft_rejects_blank_summary() -> None:
@@ -181,3 +182,88 @@ def test_case_bundle_exposes_only_eligible_candidate_materials(tmp_path: Path) -
 
     assert candidate["eligible_student_codes"] == ["D06"]
     assert "不得泄露的原始作答" not in str(bundle)
+
+
+class _RecommendationClient:
+    def draft_teaching_recommendation(
+        self,
+        evidence_pack: dict[str, object],
+    ) -> tuple[dict[str, object], str]:
+        return (
+            {
+                "summary": "基于当前充分证据，建议分层组织代数式练习。",
+                "observations": [
+                    {
+                        "theme_code": "T01",
+                        "statement": "当前主题已有充分的已观察表现。",
+                        "indicator_codes": ["T01I1"],
+                    }
+                ],
+                "information_gaps": [],
+                "group_activities": [
+                    {
+                        "theme_code": "T01",
+                        "group": "needs_attention",
+                        "activity": "安排同指标的分步练习。",
+                        "student_codes": ["D02"],
+                    }
+                ],
+                "material_suggestions": [
+                    {
+                        "theme_code": "T01",
+                        "indicator_code": "T01I1",
+                        "material_code": "Q004",
+                        "student_codes": ["D02"],
+                        "reason": "作为补充观察材料。",
+                    }
+                ],
+                "teacher_actions": ["教师审核后安排分层活动。"],
+                "post_lesson_checks": ["记录补充观察结果。"],
+            },
+            "{\"summary\": \"raw\"}",
+        )
+
+
+def _profile() -> ProviderProfile:
+    return ProviderProfile(
+        id="provider_test",
+        vendor_name="Test",
+        base_url="https://example.test/v1",
+        model="test-model",
+        api_key="test-key",
+    )
+
+
+def test_recommendation_is_reviewable_and_stale_after_learning_data_changes(
+    tmp_path: Path,
+) -> None:
+    """Accepted teaching guidance must not remain current after new evidence arrives."""
+    repository, learning, dataset_id = _services(tmp_path)
+    _seed_class_scope(learning, dataset_id)
+    for student in ("D01", "D03", "D04", "D05"):
+        for material in ("Q001", "Q002", "Q003"):
+            _answer(learning, dataset_id, student=student, material=material, score=1)
+    for material in ("Q001", "Q002", "Q003"):
+        _answer(learning, dataset_id, student="D02", material=material, score=0)
+
+    from tailorlearn.teaching_recommendations import TeachingRecommendationService
+
+    service = TeachingRecommendationService(repository, AnalyticsService(repository))
+    created = service.create_recommendation(
+        dataset_id,
+        "DC01",
+        "N01",
+        _profile(),
+        _RecommendationClient(),
+    )
+    accepted = service.review_recommendation(
+        created["id"],
+        status="accepted",
+        reviewed_summary="教师采用分层练习。",
+        review_note="先小范围试行。",
+    )
+    _answer(learning, dataset_id, student="D06", material="Q004", score=1)
+
+    assert accepted["status"] == "accepted"
+    assert service.refresh_stale_recommendations(dataset_id) == 1
+    assert service.get_latest_recommendation(dataset_id, "DC01", "N01")["status"] == "stale"

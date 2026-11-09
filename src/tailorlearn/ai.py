@@ -16,6 +16,7 @@ from tailorlearn.models import (
     OutlineDraftResponse,
     ProviderProfile,
     StudentDiagnosisDraft,
+    TeachingRecommendationDraft,
 )
 
 _UNIT_TYPES = {
@@ -453,5 +454,52 @@ class OpenAICompatibleClient:
         except (ValueError, json.JSONDecodeError, ValidationError):
             repaired = self._repair_json(raw)
             draft = StudentDiagnosisDraft.model_validate(_extract_json(repaired))
+            raw = f"{raw}\n\n--- repaired ---\n{repaired}"
+        return draft.model_dump(), raw
+
+    def draft_teaching_recommendation(
+        self,
+        evidence_pack: dict[str, Any],
+    ) -> tuple[dict[str, Any], str]:
+        """Generate a teacher-reviewable class recommendation from evidence only."""
+        prompt = f"""
+你是教师的班级教学建议助手。只能依据下方脱敏班级证据包起草建议，
+不计算新统计，不补充未提供的事实。待评分、未作答、异常数据或证据不足
+只能说明信息不足并提出补充观察，绝不能写“未掌握”“掌握不足”或“能力下降”。
+
+所有 observations 只能引用已有 theme_code 和 indicator_codes；所有
+information_gaps 只能引用已有 theme_code、indicator_code；所有 group_activities
+只能引用已有 group 和 student_codes；所有 material_suggestions 只能使用
+candidate_materials 中同一 material_code 对应的 eligible_student_codes。只输出合法 JSON：
+{{
+  "summary": "面向教师的谨慎班级摘要",
+  "observations": [{{"theme_code":"T01", "statement":"观察描述", "indicator_codes":["T01I1"]}}],
+  "information_gaps": [{{"theme_code":"T01", "indicator_code":"T01I1", "statement":"缺口说明"}}],
+  "group_activities": [{{"theme_code":"T01", "group":"needs_attention", "activity":"活动", "student_codes":["D01"]}}],
+  "material_suggestions": [{{"theme_code":"T01", "indicator_code":"T01I1", "material_code":"Q002", "student_codes":["D01"], "reason":"补充观察理由"}}],
+  "teacher_actions": ["教师下一步操作"],
+  "post_lesson_checks": ["课后检查方式"]
+}}
+
+脱敏班级证据包：
+{json.dumps(evidence_pack, ensure_ascii=False, indent=2)}
+""".strip()
+        raw, _ = self._complete(
+            [
+                {
+                    "role": "system",
+                    "content": (
+                        "你是严谨的中文教师教学建议助手。"
+                        "只输出合法 JSON，不得超出证据范围。"
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ]
+        )
+        try:
+            draft = TeachingRecommendationDraft.model_validate(_extract_json(raw))
+        except (ValueError, json.JSONDecodeError, ValidationError):
+            repaired = self._repair_json(raw)
+            draft = TeachingRecommendationDraft.model_validate(_extract_json(repaired))
             raw = f"{raw}\n\n--- repaired ---\n{repaired}"
         return draft.model_dump(), raw

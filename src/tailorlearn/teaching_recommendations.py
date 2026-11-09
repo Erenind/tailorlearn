@@ -1,11 +1,21 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Any
+import json
+from typing import Any, Protocol
+import uuid
 
 from tailorlearn.analytics import AnalyticsService
-from tailorlearn.db import Repository
+from tailorlearn.db import Repository, utc_now
 from tailorlearn.learning_data import split_multi_value
+from tailorlearn.models import ProviderProfile, TeachingRecommendationDraft
+
+
+class TeachingRecommendationClient(Protocol):
+    def draft_teaching_recommendation(
+        self,
+        evidence_pack: dict[str, Any],
+    ) -> tuple[dict[str, Any], str]: ...
 
 
 class TeachingRecommendationService:
@@ -114,8 +124,193 @@ class TeachingRecommendationService:
             "evidence_pack": self.build_evidence_pack(
                 dataset_id, class_code, node_code
             ),
-            "recommendation": None,
+            "recommendation": self.get_latest_recommendation(
+                dataset_id, class_code, node_code
+            ),
         }
+
+    def _change_log_cutoff(self, dataset_id: str) -> int:
+        with self.repo.connect() as connection:
+            return int(
+                connection.execute(
+                    "SELECT COALESCE(MAX(id), 0) FROM learning_change_log WHERE dataset_id=?",
+                    (dataset_id,),
+                ).fetchone()[0]
+            )
+
+    @staticmethod
+    def _validate_draft(
+        draft_data: dict[str, Any],
+        evidence_pack: dict[str, Any],
+    ) -> TeachingRecommendationDraft:
+        draft = TeachingRecommendationDraft.model_validate(draft_data)
+        forbidden_claims = ("未掌握", "掌握不足", "能力下降")
+        if any(marker in json.dumps(draft.model_dump(), ensure_ascii=False) for marker in forbidden_claims):
+            raise ValueError("信息不足时不得作出未掌握或能力变化判定")
+        theme_codes = {
+            str(item["theme_code"]) for item in evidence_pack["class_themes"]
+        }
+        indicator_codes = {
+            str(item["indicator_code"])
+            for item in evidence_pack["assessment_blueprint"]
+        }
+        groups = {
+            (str(item["theme_code"]), str(item["group"])): set(item["student_codes"])
+            for item in evidence_pack["groups"]
+        }
+        candidates = {
+            (
+                str(item["theme_code"]),
+                str(item["indicator_code"]),
+                str(item["material_code"]),
+            ): set(item["eligible_student_codes"])
+            for item in evidence_pack["candidate_materials"]
+        }
+        for observation in draft.observations:
+            if observation.theme_code not in theme_codes:
+                raise ValueError("AI 引用了范围外主题")
+            if not set(observation.indicator_codes) <= indicator_codes:
+                raise ValueError("AI 引用了范围外观察指标")
+        for gap in draft.information_gaps:
+            if gap.theme_code not in theme_codes or gap.indicator_code not in indicator_codes:
+                raise ValueError("AI 引用了范围外数据缺口")
+        for activity in draft.group_activities:
+            allowed_students = groups.get((activity.theme_code, activity.group))
+            if allowed_students is None or not set(activity.student_codes) <= allowed_students:
+                raise ValueError("AI 引用了范围外分层学生")
+        for suggestion in draft.material_suggestions:
+            key = (
+                suggestion.theme_code,
+                suggestion.indicator_code,
+                suggestion.material_code,
+            )
+            eligible_students = candidates.get(key)
+            if (
+                eligible_students is None
+                or not suggestion.student_codes
+                or not set(suggestion.student_codes) <= eligible_students
+            ):
+                raise ValueError("AI 推荐了范围外或已作答材料")
+        return draft
+
+    def create_recommendation(
+        self,
+        dataset_id: str,
+        class_code: str,
+        node_code: str,
+        profile: ProviderProfile,
+        client: TeachingRecommendationClient,
+    ) -> dict[str, Any]:
+        evidence_pack = self.build_evidence_pack(dataset_id, class_code, node_code)
+        draft_data, raw_response = client.draft_teaching_recommendation(evidence_pack)
+        draft = self._validate_draft(draft_data, evidence_pack)
+        recommendation_id = f"atr_{uuid.uuid4().hex[:12]}"
+        now = utc_now()
+        with self.repo.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO ai_teaching_recommendations
+                (id, dataset_id, class_code, node_code, change_log_cutoff,
+                 evidence_pack_json, response_json, raw_response, provider_id,
+                 provider_vendor, provider_base_url, provider_model, prompt_version,
+                 status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'needs_review', ?, ?)
+                """,
+                (
+                    recommendation_id,
+                    dataset_id,
+                    class_code,
+                    node_code,
+                    self._change_log_cutoff(dataset_id),
+                    json.dumps(evidence_pack, ensure_ascii=False),
+                    json.dumps(draft.model_dump(), ensure_ascii=False),
+                    raw_response,
+                    profile.id,
+                    profile.vendor_name,
+                    profile.base_url,
+                    profile.model,
+                    "class-teaching-v1",
+                    now,
+                    now,
+                ),
+            )
+        result = self.get_latest_recommendation(dataset_id, class_code, node_code)
+        if result is None:
+            raise RuntimeError("教学建议草稿保存失败")
+        return result
+
+    def get_latest_recommendation(
+        self,
+        dataset_id: str,
+        class_code: str,
+        node_code: str,
+    ) -> dict[str, Any] | None:
+        with self.repo.connect() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM ai_teaching_recommendations
+                WHERE dataset_id=? AND class_code=? AND node_code=?
+                ORDER BY created_at DESC, id DESC LIMIT 1
+                """,
+                (dataset_id, class_code, node_code),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "id": row["id"],
+            "dataset_id": row["dataset_id"],
+            "class_code": row["class_code"],
+            "node_code": row["node_code"],
+            "status": row["status"],
+            "draft": json.loads(row["response_json"]),
+            "evidence_pack": json.loads(row["evidence_pack_json"]),
+            "reviewed_summary": row["reviewed_summary"],
+            "review_note": row["review_note"],
+        }
+
+    def review_recommendation(
+        self,
+        recommendation_id: str,
+        *,
+        status: str,
+        reviewed_summary: str,
+        review_note: str,
+    ) -> dict[str, Any]:
+        if status not in {"accepted", "rejected"}:
+            raise ValueError("审核状态只能是 accepted 或 rejected")
+        now = utc_now()
+        with self.repo.connect() as connection:
+            updated = connection.execute(
+                """
+                UPDATE ai_teaching_recommendations
+                SET status=?, reviewed_summary=?, review_note=?, reviewed_at=?, updated_at=?
+                WHERE id=?
+                """,
+                (
+                    status,
+                    reviewed_summary.strip(),
+                    review_note.strip(),
+                    now,
+                    now,
+                    recommendation_id,
+                ),
+            ).rowcount
+            if not updated:
+                raise ValueError("找不到教学建议草稿")
+        return {"id": recommendation_id, "status": status, "reviewed_summary": reviewed_summary.strip(), "review_note": review_note.strip()}
+
+    def refresh_stale_recommendations(self, dataset_id: str) -> int:
+        cutoff = self._change_log_cutoff(dataset_id)
+        with self.repo.connect() as connection:
+            return connection.execute(
+                """
+                UPDATE ai_teaching_recommendations
+                SET status='stale', updated_at=?
+                WHERE dataset_id=? AND change_log_cutoff<?
+                  AND status IN ('needs_review', 'accepted')
+                """,
+                (utc_now(), dataset_id, cutoff),
+            ).rowcount
 
     @staticmethod
     def _assessment_blueprint(
