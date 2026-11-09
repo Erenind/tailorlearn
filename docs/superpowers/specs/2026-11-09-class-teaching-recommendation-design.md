@@ -50,7 +50,7 @@
   "class_themes": [{"theme_code": "T01", "score_rate": 0.72, "scored_records": 12, "student_count": 6, "evidence_status": "sufficient"}],
   "assessment_blueprint": [{"theme_code": "T01", "indicator_code": "T01I1", "available_material_codes": ["Q001"], "valid_answer_count": 5, "pending_count": 1, "unanswered_count": 0, "coverage_status": "observed"}],
   "groups": [{"theme_code": "T01", "group": "needs_attention", "student_codes": ["D01"], "reason": "..."}],
-  "candidate_materials": [{"theme_code": "T01", "indicator_code": "T01I2", "material_codes": ["Q005"]}]
+  "candidate_materials": [{"theme_code": "T01", "indicator_code": "T01I2", "material_code": "Q005", "eligible_student_codes": ["D01", "D02"]}]
 }
 ```
 
@@ -66,13 +66,13 @@
   "observations": [{"theme_code": "T01", "statement": "...", "indicator_codes": ["T01I1"]}],
   "information_gaps": [{"theme_code": "T01", "indicator_code": "T01I2", "statement": "..."}],
   "group_activities": [{"theme_code": "T01", "group": "needs_attention", "activity": "...", "student_codes": ["D01"]}],
-  "material_suggestions": [{"theme_code": "T01", "indicator_code": "T01I2", "material_code": "Q005", "reason": "..."}],
+  "material_suggestions": [{"theme_code": "T01", "indicator_code": "T01I2", "material_code": "Q005", "student_codes": ["D01", "D02"], "reason": "..."}],
   "teacher_actions": ["..."],
   "post_lesson_checks": ["..."]
 }
 ```
 
-校验器拒绝主题、指标、材料或分组外引用；拒绝包含禁止结论的所有字段内容。
+校验器拒绝主题、指标、材料、分组或材料适用学生名单外引用；拒绝包含禁止结论的所有字段内容。
 
 ### SQLite
 
