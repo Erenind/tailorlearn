@@ -9,7 +9,10 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from tailorlearn.analytics import AnalyticsService
+from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.learning_data import LearningDataService
+from tailorlearn.models import ProviderProfile
+from tailorlearn.student_diagnosis import StudentDiagnosisService
 
 
 EVIDENCE_LABELS = {
@@ -189,9 +192,148 @@ def _render_trend(analytics: AnalyticsService, dataset_id: str, student: str, th
         st.caption(f"相邻充分证据节点的得分率变化：{trend['delta']:+.1%}。")
 
 
+def _render_ai_diagnosis_tab(
+    diagnosis: StudentDiagnosisService,
+    profile: ProviderProfile | None,
+    *,
+    dataset_id: str,
+    student_code: str,
+    class_code: str,
+    node_code: str | None,
+) -> None:
+    st.subheader("AI 诊断与教师复核")
+    st.caption("AI 仅解释已核验的证据包；信息不足时只提出补充观察，不判定未掌握。")
+    if node_code is None:
+        st.info("请选择一个具体测验节点，再生成或查看 AI 诊断。")
+        return
+    diagnosis.refresh_stale_diagnoses(dataset_id)
+    latest = diagnosis.get_latest_diagnosis(dataset_id, student_code, node_code)
+    if profile is None:
+        st.info("请先在“AI 参数设置”保存并启用厂商配置；历史草稿仍可查看。")
+    else:
+        single, batch = st.columns(2)
+        if single.button("为当前学生生成草稿", key="diagnosis_generate_student"):
+            try:
+                with st.spinner("正在生成可复核的学生诊断草稿..."):
+                    job = diagnosis.create_student_job(
+                        dataset_id, student_code, node_code, profile
+                    )
+                    result = diagnosis.process_job(
+                        job["id"], OpenAICompatibleClient(profile)
+                    )
+                if result["status"] == "completed":
+                    st.success("学生诊断草稿已生成，等待教师复核。")
+                else:
+                    st.warning("任务已保存，但存在失败项；可稍后继续处理。")
+            except (AIRequestError, ValueError) as exc:
+                st.error(f"无法生成诊断草稿：{exc}")
+        if batch.button(
+            f"为 {class_code} 批量生成", key="diagnosis_generate_class"
+        ):
+            try:
+                with st.spinner("正在逐名生成班级学生诊断，可在中断后继续处理..."):
+                    job = diagnosis.create_batch_job(
+                        dataset_id, class_code, node_code, profile
+                    )
+                    result = diagnosis.process_job(
+                        job["id"], OpenAICompatibleClient(profile)
+                    )
+                if result["status"] == "completed":
+                    st.success(f"已完成 {result['completed']} 名学生的诊断草稿。")
+                else:
+                    st.warning(
+                        f"已完成 {result['completed']} 名，失败 {result['failed']} 名；"
+                        "任务状态已保留。"
+                    )
+            except (AIRequestError, ValueError) as exc:
+                st.error(f"无法创建批量诊断任务：{exc}")
+        jobs = diagnosis.list_jobs(dataset_id, class_code, node_code)
+        if jobs:
+            latest_job = jobs[0]
+            st.caption(
+                "当前班级任务："
+                f"已完成 {latest_job['completed']}/{latest_job['total']}，"
+                f"失败 {latest_job['failed']}。"
+            )
+            st.progress(
+                latest_job["completed"] / latest_job["total"]
+                if latest_job["total"]
+                else 0
+            )
+            if latest_job["status"] in {"queued", "running", "completed_with_errors"}:
+                if st.button("继续处理当前班级任务", key="diagnosis_resume_class"):
+                    try:
+                        if latest_job["status"] == "completed_with_errors":
+                            diagnosis.retry_failed_items(latest_job["id"])
+                        with st.spinner("正在继续处理已保存的诊断任务..."):
+                            result = diagnosis.process_job(
+                                latest_job["id"], OpenAICompatibleClient(profile)
+                            )
+                        st.success(
+                            f"任务处理完成：成功 {result['completed']} 名，"
+                            f"失败 {result['failed']} 名。"
+                        )
+                    except (AIRequestError, ValueError) as exc:
+                        st.error(f"无法继续任务：{exc}")
+    if latest is None:
+        st.info("尚无当前节点的 AI 诊断草稿。")
+        return
+    status_labels = {
+        "needs_review": "待教师复核",
+        "accepted": "已采纳",
+        "rejected": "已拒绝",
+        "stale": "数据已更新，需重新生成",
+    }
+    st.info("当前草稿状态：" + status_labels.get(latest["status"], latest["status"]))
+    draft = latest["draft"]
+    st.markdown("**AI 谨慎摘要**")
+    st.write(draft["summary"])
+    if draft["observations"]:
+        st.markdown("**已观察到的表现与依据**")
+        st.dataframe(draft["observations"], hide_index=True, width="stretch")
+    if draft["information_gaps"]:
+        st.markdown("**信息不足与补充观察**")
+        st.dataframe(draft["information_gaps"], hide_index=True, width="stretch")
+    if draft["suggestions"]:
+        st.markdown("**仅限已有材料的建议**")
+        st.dataframe(draft["suggestions"], hide_index=True, width="stretch")
+    if draft["teacher_actions"]:
+        st.markdown("**建议教师操作**")
+        st.write("\n".join(f"- {item}" for item in draft["teacher_actions"]))
+    reviewed_summary = st.text_area(
+        "教师修订后的摘要",
+        value=latest["reviewed_summary"] or draft["summary"],
+        key=f"diagnosis_reviewed_summary_{latest['id']}",
+    )
+    review_note = st.text_area(
+        "审核备注",
+        value=latest["review_note"],
+        key=f"diagnosis_review_note_{latest['id']}",
+    )
+    accept, reject = st.columns(2)
+    if accept.button("采纳教师修订", key=f"diagnosis_accept_{latest['id']}"):
+        diagnosis.review_diagnosis(
+            latest["id"],
+            status="accepted",
+            reviewed_summary=reviewed_summary,
+            review_note=review_note,
+        )
+        st.success("已采纳并保留教师修订。")
+    if reject.button("拒绝此草稿", key=f"diagnosis_reject_{latest['id']}"):
+        diagnosis.review_diagnosis(
+            latest["id"],
+            status="rejected",
+            reviewed_summary=reviewed_summary,
+            review_note=review_note,
+        )
+        st.info("草稿已拒绝，原始响应仍保留以便追溯。")
+
+
 def render_student_analysis_page(
     analytics: AnalyticsService,
     learning: LearningDataService,
+    diagnosis: StudentDiagnosisService,
+    profile: ProviderProfile | None,
 ) -> None:
     st.title("学生分析")
     st.caption("展示已有学习表现与证据充分度；信息不足不解释为未掌握。")
@@ -206,6 +348,11 @@ def render_student_analysis_page(
         "学生",
         [row["student_code"] for row in students],
         key="analytics_student_selector",
+    )
+    class_code = next(
+        str(row.get("class_code") or "未分班")
+        for row in students
+        if row["student_code"] == student_code
     )
     node_code = _node_selector(
         learning,
@@ -224,8 +371,8 @@ def render_student_analysis_page(
         "需补充观察",
         sum(item["evidence_status"] != "sufficient" for item in metrics),
     )
-    radar_tab, indicator_tab, trend_tab, evidence_tab = st.tabs(
-        ["主题概览", "观察指标", "节点变化", "依据与补充观察"]
+    radar_tab, indicator_tab, trend_tab, evidence_tab, diagnosis_tab = st.tabs(
+        ["主题概览", "观察指标", "节点变化", "依据与补充观察", "AI 诊断与教师复核"]
     )
     with radar_tab:
         _render_radar(metrics)
@@ -334,6 +481,15 @@ def render_student_analysis_page(
             st.dataframe(suggestions, hide_index=True, width="stretch")
         else:
             st.success("当前指标均达到最小有效记录门槛。")
+    with diagnosis_tab:
+        _render_ai_diagnosis_tab(
+            diagnosis,
+            profile,
+            dataset_id=dataset["id"],
+            student_code=student_code,
+            class_code=class_code,
+            node_code=node_code,
+        )
 
 
 def render_class_analysis_page(

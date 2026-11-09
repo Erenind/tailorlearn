@@ -288,3 +288,103 @@ class OutlineDraftResponse(BaseModel):
     scope_note: str = ""
     items: list[OutlineDraftItem]
     relations: list[OutlineDraftRelation] = Field(default_factory=list)
+
+
+class DiagnosisObservation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    theme_code: str
+    statement: str
+    evidence_record_codes: list[str] = Field(default_factory=list)
+    indicator_codes: list[str] = Field(default_factory=list)
+
+
+class DiagnosisInformationGap(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    theme_code: str
+    statement: str
+
+
+class DiagnosisSuggestion(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    material_code: str
+    reason: str
+
+
+class StudentDiagnosisDraft(BaseModel):
+    """Structured, teacher-reviewable response for one student's evidence pack."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    summary: str
+    observations: list[DiagnosisObservation] = Field(default_factory=list)
+    information_gaps: list[DiagnosisInformationGap] = Field(default_factory=list)
+    suggestions: list[DiagnosisSuggestion] = Field(default_factory=list)
+    teacher_actions: list[str] = Field(default_factory=list)
+
+    @field_validator("summary")
+    @classmethod
+    def summary_not_blank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("summary must not be blank")
+        return value
+
+
+class TeachingObservation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    theme_code: str
+    statement: str
+    indicator_codes: list[str] = Field(default_factory=list)
+
+
+class TeachingInformationGap(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    theme_code: str
+    indicator_code: str
+    statement: str
+
+
+class TeachingGroupActivity(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    theme_code: str
+    group: str
+    activity: str
+    student_codes: list[str] = Field(default_factory=list)
+
+
+class TeachingMaterialSuggestion(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    theme_code: str
+    indicator_code: str
+    material_code: str
+    student_codes: list[str] = Field(default_factory=list)
+    reason: str
+
+
+class TeachingRecommendationDraft(BaseModel):
+    """Structured, teacher-reviewable response for one class evidence pack."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    summary: str
+    observations: list[TeachingObservation] = Field(default_factory=list)
+    information_gaps: list[TeachingInformationGap] = Field(default_factory=list)
+    group_activities: list[TeachingGroupActivity] = Field(default_factory=list)
+    material_suggestions: list[TeachingMaterialSuggestion] = Field(default_factory=list)
+    teacher_actions: list[str] = Field(default_factory=list)
+    post_lesson_checks: list[str] = Field(default_factory=list)
+
+    @field_validator("summary")
+    @classmethod
+    def summary_not_blank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("summary must not be blank")
+        return value

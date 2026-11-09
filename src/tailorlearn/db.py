@@ -228,6 +228,81 @@ CREATE TABLE IF NOT EXISTS analysis_snapshots (
     created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS ai_diagnosis_jobs (
+    id TEXT PRIMARY KEY,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    class_code TEXT NOT NULL,
+    node_code TEXT NOT NULL,
+    change_log_cutoff INTEGER NOT NULL DEFAULT 0,
+    provider_id TEXT NOT NULL,
+    provider_vendor TEXT NOT NULL,
+    provider_base_url TEXT NOT NULL,
+    provider_model TEXT NOT NULL,
+    status TEXT NOT NULL,
+    total INTEGER NOT NULL DEFAULT 0,
+    completed INTEGER NOT NULL DEFAULT 0,
+    failed INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    finished_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ai_diagnosis_job_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id TEXT NOT NULL REFERENCES ai_diagnosis_jobs(id) ON DELETE CASCADE,
+    student_code TEXT NOT NULL,
+    status TEXT NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    error TEXT,
+    diagnosis_id TEXT,
+    updated_at TEXT NOT NULL,
+    UNIQUE(job_id, student_code)
+);
+
+CREATE TABLE IF NOT EXISTS ai_student_diagnoses (
+    id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL REFERENCES ai_diagnosis_jobs(id) ON DELETE CASCADE,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    student_code TEXT NOT NULL,
+    node_code TEXT NOT NULL,
+    change_log_cutoff INTEGER NOT NULL DEFAULT 0,
+    evidence_pack_json TEXT NOT NULL,
+    response_json TEXT NOT NULL,
+    raw_response TEXT NOT NULL,
+    provider_id TEXT NOT NULL,
+    provider_vendor TEXT NOT NULL,
+    provider_base_url TEXT NOT NULL,
+    provider_model TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'needs_review',
+    reviewed_summary TEXT NOT NULL DEFAULT '',
+    review_note TEXT NOT NULL DEFAULT '',
+    reviewed_at TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ai_teaching_recommendations (
+    id TEXT PRIMARY KEY,
+    dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
+    class_code TEXT NOT NULL,
+    node_code TEXT NOT NULL,
+    change_log_cutoff INTEGER NOT NULL DEFAULT 0,
+    evidence_pack_json TEXT NOT NULL,
+    response_json TEXT NOT NULL,
+    raw_response TEXT NOT NULL,
+    provider_id TEXT NOT NULL,
+    provider_vendor TEXT NOT NULL,
+    provider_base_url TEXT NOT NULL,
+    provider_model TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'needs_review',
+    reviewed_summary TEXT NOT NULL DEFAULT '',
+    review_note TEXT NOT NULL DEFAULT '',
+    reviewed_at TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS learning_students (
     row_id INTEGER PRIMARY KEY AUTOINCREMENT,
     dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
@@ -367,6 +442,14 @@ CREATE INDEX IF NOT EXISTS idx_learning_changes_dataset
     ON learning_change_log(dataset_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_analysis_snapshots_dataset
     ON analysis_snapshots(dataset_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_ai_diagnosis_jobs_dataset
+    ON ai_diagnosis_jobs(dataset_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_ai_diagnosis_job_items_job
+    ON ai_diagnosis_job_items(job_id, status);
+CREATE INDEX IF NOT EXISTS idx_ai_student_diagnoses_student
+    ON ai_student_diagnoses(dataset_id, student_code, node_code, created_at);
+CREATE INDEX IF NOT EXISTS idx_ai_teaching_recommendations_scope
+    ON ai_teaching_recommendations(dataset_id, class_code, node_code, created_at);
 CREATE INDEX IF NOT EXISTS idx_learning_students_dataset
     ON learning_students(dataset_id, deleted_at);
 CREATE INDEX IF NOT EXISTS idx_learning_requirements_dataset
@@ -498,7 +581,7 @@ class Repository:
                 )
             connection.execute(
                 "INSERT OR REPLACE INTO schema_meta(key, value) VALUES (?, ?)",
-                ("schema_version", "5"),
+                ("schema_version", "7"),
             )
 
     def create_material_set(

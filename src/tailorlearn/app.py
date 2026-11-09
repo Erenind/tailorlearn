@@ -22,6 +22,9 @@ from tailorlearn.outline import OutlineService
 from tailorlearn.outline_ui import render_outline_page
 from tailorlearn.paths import AppPaths
 from tailorlearn.providers import ProviderStore
+from tailorlearn.student_diagnosis import StudentDiagnosisService
+from tailorlearn.teaching_recommendations import TeachingRecommendationService
+from tailorlearn.teaching_recommendations_ui import render_teaching_recommendations_page
 
 
 st.set_page_config(
@@ -40,11 +43,14 @@ def app_services() -> tuple[
     LearningDataService,
     OutlineService,
     AnalyticsService,
+    StudentDiagnosisService,
+    TeachingRecommendationService,
 ]:
     paths = AppPaths.default()
     paths.ensure()
     repository = Repository(paths.database_file)
     repository.initialize()
+    analytics = AnalyticsService(repository)
     return (
         paths,
         repository,
@@ -52,11 +58,23 @@ def app_services() -> tuple[
         ProviderStore(paths.provider_file),
         LearningDataService(repository, paths.db_dir),
         OutlineService(paths, repository),
-        AnalyticsService(repository),
+        analytics,
+        StudentDiagnosisService(repository, analytics),
+        TeachingRecommendationService(repository, analytics),
     )
 
 
-PATHS, REPO, INGEST, PROVIDERS, LEARNING_DATA, OUTLINES, ANALYTICS = app_services()
+(
+    PATHS,
+    REPO,
+    INGEST,
+    PROVIDERS,
+    LEARNING_DATA,
+    OUTLINES,
+    ANALYTICS,
+    DIAGNOSES,
+    TEACHING_RECOMMENDATIONS,
+) = app_services()
 
 MATERIAL_LABELS = {
     MaterialType.TEXTBOOK.value: "课本",
@@ -912,6 +930,7 @@ def main() -> None:
             "学情数据",
             "学生分析",
             "班级分析",
+            "教学建议",
         ],
         key="main_navigation",
     )
@@ -925,9 +944,20 @@ def main() -> None:
     elif page == "学情数据":
         render_learning_data_page(LEARNING_DATA)
     elif page == "学生分析":
-        render_student_analysis_page(ANALYTICS, LEARNING_DATA)
-    else:
+        render_student_analysis_page(
+            ANALYTICS,
+            LEARNING_DATA,
+            DIAGNOSES,
+            _active_profile(),
+        )
+    elif page == "班级分析":
         render_class_analysis_page(ANALYTICS, LEARNING_DATA)
+    else:
+        render_teaching_recommendations_page(
+            TEACHING_RECOMMENDATIONS,
+            LEARNING_DATA,
+            _active_profile(),
+        )
 
 
 main()
