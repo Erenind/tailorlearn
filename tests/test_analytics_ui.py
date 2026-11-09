@@ -89,6 +89,7 @@ def test_streamlit_renders_student_and_class_analysis_navigation(
 
     assert "学生分析" in at.radio(key="main_navigation").options
     assert "班级分析" in at.radio(key="main_navigation").options
+    assert "教学建议" in at.radio(key="main_navigation").options
     at.radio(key="main_navigation").set_value("学生分析").run()
     assert not at.exception
     assert any(item.value == "学生分析" for item in at.title)

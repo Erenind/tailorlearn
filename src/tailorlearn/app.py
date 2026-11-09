@@ -23,6 +23,8 @@ from tailorlearn.outline_ui import render_outline_page
 from tailorlearn.paths import AppPaths
 from tailorlearn.providers import ProviderStore
 from tailorlearn.student_diagnosis import StudentDiagnosisService
+from tailorlearn.teaching_recommendations import TeachingRecommendationService
+from tailorlearn.teaching_recommendations_ui import render_teaching_recommendations_page
 
 
 st.set_page_config(
@@ -42,6 +44,7 @@ def app_services() -> tuple[
     OutlineService,
     AnalyticsService,
     StudentDiagnosisService,
+    TeachingRecommendationService,
 ]:
     paths = AppPaths.default()
     paths.ensure()
@@ -57,6 +60,7 @@ def app_services() -> tuple[
         OutlineService(paths, repository),
         analytics,
         StudentDiagnosisService(repository, analytics),
+        TeachingRecommendationService(repository, analytics),
     )
 
 
@@ -69,6 +73,7 @@ def app_services() -> tuple[
     OUTLINES,
     ANALYTICS,
     DIAGNOSES,
+    TEACHING_RECOMMENDATIONS,
 ) = app_services()
 
 MATERIAL_LABELS = {
@@ -925,6 +930,7 @@ def main() -> None:
             "学情数据",
             "学生分析",
             "班级分析",
+            "教学建议",
         ],
         key="main_navigation",
     )
@@ -944,8 +950,14 @@ def main() -> None:
             DIAGNOSES,
             _active_profile(),
         )
-    else:
+    elif page == "班级分析":
         render_class_analysis_page(ANALYTICS, LEARNING_DATA)
+    else:
+        render_teaching_recommendations_page(
+            TEACHING_RECOMMENDATIONS,
+            LEARNING_DATA,
+            _active_profile(),
+        )
 
 
 main()
