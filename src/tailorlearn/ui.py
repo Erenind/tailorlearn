@@ -20,11 +20,11 @@ PAGE_META: dict[str, PageMeta] = {
         eyebrow="任务 1 · 内容基准",
         description="按主题梳理学习内容、课标要求、必要联系与教材出处，并生成可核对的成果包。",
     ),
-    "学情数据": PageMeta(
-        label="学情数据",
-        icon="database.svg",
-        eyebrow="数据准备",
-        description="集中管理六类学情 CSV，完成字段映射、重复合并、质量检查与变更追溯。",
+    "材料中心": PageMeta(
+        label="材料中心",
+        icon="material_center.svg",
+        eyebrow="材料与学情",
+        description="集中管理课本、课程标准与六类学情数据，支持浏览、编辑、导入和作答异常检测。",
     ),
     "学生分析": PageMeta(
         label="学生分析",
@@ -44,12 +44,6 @@ PAGE_META: dict[str, PageMeta] = {
         eyebrow="任务 3 · 教学决策",
         description="基于班级证据、分层观察和现有材料生成可审核的教学建议与脱敏案例。",
     ),
-    "学科分析": PageMeta(
-        label="学科分析",
-        icon="books.svg",
-        eyebrow="材料准备",
-        description="导入课标与教材，完成文字提取、章节切分、AI 结构化和逐单元人工审核。",
-    ),
     "AI 参数设置": PageMeta(
         label="AI 参数设置",
         icon="settings.svg",
@@ -59,6 +53,14 @@ PAGE_META: dict[str, PageMeta] = {
 }
 
 NAV_ORDER = list(PAGE_META)
+PAGE_SLUGS = {
+    "学习内容梳理": "outline",
+    "材料中心": "material_center",
+    "学生分析": "student",
+    "班级分析": "class",
+    "教学建议": "teaching",
+    "AI 参数设置": "ai_settings",
+}
 
 
 def apply_app_style() -> None:
@@ -69,7 +71,7 @@ def apply_app_style() -> None:
             display: flex;
             align-items: center;
             gap: 0.72rem;
-            padding: 0.2rem 0.15rem 0.9rem;
+            padding: 0 0.15rem 0.78rem;
         }
         .tl-brand img {
             width: 2.15rem;
@@ -89,30 +91,102 @@ def apply_app_style() -> None:
             line-height: 1.35;
             margin-top: 0.16rem;
         }
-        .st-key-main_navigation [role="radiogroup"] {
-            gap: 0.28rem;
+        .st-key-app_nav {
+            gap: 0.22rem;
         }
-        .st-key-main_navigation [role="radiogroup"] label {
-            width: 100%;
-            padding: 0.52rem 0.62rem;
+        .st-key-app_nav button {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 2.35rem;
+            padding: 0.48rem 0.62rem;
             border: 1px solid transparent;
             border-radius: 0.65rem;
-            transition: background-color 120ms ease, border-color 120ms ease;
+            background: transparent;
+            color: #4B5565;
+            font-size: 14px;
+            font-weight: 450;
+            box-shadow: none;
+            text-align: left;
+            transition:
+                background-color 120ms ease,
+                border-color 120ms ease,
+                color 120ms ease;
         }
-        .st-key-main_navigation [role="radiogroup"] label:hover {
+        .st-key-app_nav button > div {
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .st-key-app_nav button:hover {
             background: #EEF1F6;
             border-color: #E1E5EB;
+            color: #25324A;
         }
-        .st-key-main_navigation [role="radiogroup"] label:has(input:checked) {
-            background: #EDF2FF;
-            border-color: #D6E1FF;
+        .st-key-app_nav button p {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            width: 100%;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.35;
+            text-align: left;
         }
-        .st-key-main_navigation img {
-            width: 1.12rem;
-            height: 1.12rem;
+        .st-key-app_nav img {
+            display: block;
+            flex: 0 0 16px;
+            width: 16px;
+            height: 16px;
+            margin: 0;
             object-fit: contain;
-            margin-right: 0.18rem;
-            vertical-align: -0.2rem;
+        }
+        .st-key-material_center_nav {
+            gap: 0.35rem;
+            padding: 0.75rem;
+            border: 1px solid #E1E5EB;
+            border-radius: 1rem;
+            background: #FFFFFF;
+        }
+        .st-key-material_center_nav button {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 2.35rem;
+            padding: 0.45rem 0.68rem;
+            border: 1px solid transparent;
+            border-radius: 0.65rem;
+            background: transparent;
+            color: #4B5565;
+            font-size: 14px;
+            font-weight: 450;
+            box-shadow: none;
+            transition:
+                background-color 120ms ease,
+                border-color 120ms ease,
+                color 120ms ease;
+        }
+        .st-key-material_center_nav button:hover {
+            background: #EEF1F6;
+            border-color: #E1E5EB;
+            color: #25324A;
+        }
+        .st-key-material_center_nav button p {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.35;
+            text-align: left;
+        }
+        .st-key-material_center_nav img {
+            display: block;
+            flex: 0 0 16px;
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            object-fit: contain;
         }
         .st-key-page_header {
             padding: 1.08rem 1.22rem 0.92rem;
@@ -144,12 +218,23 @@ def apply_app_style() -> None:
     )
 
 
-def navigation_label(page: str) -> str:
+def navigation_key(page: str) -> str:
+    return f"nav_{PAGE_SLUGS[page]}"
+
+
+def navigation_label(page: str, *, active: bool) -> str:
     meta = PAGE_META[page]
-    return f"![]({'app/static/icons/' + meta.icon}) {page}"
+    title = f"**{page}**" if active else page
+    return f"![]({'app/static/icons/' + meta.icon}) {title}"
 
 
 def render_sidebar_navigation() -> str:
+    active_page = st.session_state.get("active_page")
+    if active_page not in NAV_ORDER:
+        legacy_page = st.session_state.get("main_navigation")
+        active_page = legacy_page if legacy_page in NAV_ORDER else NAV_ORDER[0]
+        st.session_state["active_page"] = active_page
+
     with st.sidebar:
         st.html(
             """
@@ -162,18 +247,34 @@ def render_sidebar_navigation() -> str:
             </div>
             """
         )
-        st.caption("工作流")
-        page = st.radio(
-            "导航",
-            NAV_ORDER,
-            format_func=navigation_label,
-            label_visibility="collapsed",
-            key="main_navigation",
-            width="stretch",
+        with st.container(key="app_nav"):
+            for page in NAV_ORDER:
+                if st.button(
+                    navigation_label(page, active=page == active_page),
+                    key=navigation_key(page),
+                    type="secondary",
+                    width="stretch",
+                ):
+                    st.session_state["active_page"] = page
+                    st.rerun()
+        active_key = navigation_key(str(active_page))
+        st.html(
+            f"""
+            <style>
+            .st-key-{active_key} button {{
+                background: #EDF2FF !important;
+                border-color: #D6E1FF !important;
+                color: #1F46C5 !important;
+                font-weight: 700;
+                box-shadow: inset 3px 0 0 #2F5BEA;
+            }}
+            .st-key-{active_key} button p {{
+                font-weight: 700;
+            }}
+            </style>
+            """
         )
-        st.space("small")
-        st.caption("证据优先 · AI 草稿 · 教师复核")
-    return str(page)
+    return str(active_page)
 
 
 def render_page_header(page: str) -> None:

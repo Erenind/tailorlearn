@@ -16,7 +16,11 @@ from tailorlearn.db import Repository
 from tailorlearn.extraction import page_as_png
 from tailorlearn.ingest import IngestionService
 from tailorlearn.learning_data import LearningDataService
-from tailorlearn.learning_data_ui import render_learning_data_page
+from tailorlearn.learning_data_ui import (
+    render_answer_anomalies,
+    render_data_type_page,
+    render_dataset_context,
+)
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
 from tailorlearn.outline import OutlineService
 from tailorlearn.outline_ui import render_outline_page
@@ -84,6 +88,67 @@ def app_services() -> tuple[
 MATERIAL_LABELS = {
     MaterialType.TEXTBOOK.value: "课本",
     MaterialType.STANDARD.value: "课程标准",
+}
+MATERIAL_CENTER_ITEMS = (
+    {
+        "key": "textbook",
+        "label": "课本",
+        "icon": "textbook.svg",
+        "kind": "material",
+        "data_type": MaterialType.TEXTBOOK.value,
+    },
+    {
+        "key": "standard",
+        "label": "课程标准",
+        "icon": "standard.svg",
+        "kind": "material",
+        "data_type": MaterialType.STANDARD.value,
+    },
+    {
+        "key": "students",
+        "label": "学生",
+        "icon": "student.svg",
+        "kind": "learning",
+        "data_type": "student",
+    },
+    {
+        "key": "requirements",
+        "label": "课程要求",
+        "icon": "requirements.svg",
+        "kind": "learning",
+        "data_type": "requirement",
+    },
+    {
+        "key": "materials",
+        "label": "题目与材料",
+        "icon": "question_material.svg",
+        "kind": "learning",
+        "data_type": "material",
+    },
+    {
+        "key": "nodes",
+        "label": "测验节点",
+        "icon": "node.svg",
+        "kind": "learning",
+        "data_type": "node",
+    },
+    {
+        "key": "answers",
+        "label": "作答记录",
+        "icon": "answers.svg",
+        "kind": "learning",
+        "data_type": "answer",
+    },
+    {
+        "key": "fields",
+        "label": "字段说明",
+        "icon": "field_spec.svg",
+        "kind": "learning",
+        "data_type": "field_spec",
+    },
+)
+MATERIAL_CENTER_ITEM_BY_KEY = {
+    item["key"]: item for item in MATERIAL_CENTER_ITEMS
 }
 STATUS_LABELS = {
     UnitStatus.DRAFT.value: "草稿",
@@ -484,12 +549,49 @@ def _document_label(documents: list[dict[str, Any]], document_id: str) -> str:
     return f"{document['order_index']}. {document['file_name']} · {document['extraction_status']}"
 
 
-def render_material_library() -> None:
-    st.subheader("材料库")
-    materials = REPO.list_material_sets()
+def render_material_library(
+    material_type: str,
+    *,
+    mode: str,
+) -> None:
+    if mode not in {"browse", "edit"}:
+        raise ValueError("未知材料中心材料栏目")
+    material_type_label = MATERIAL_LABELS[material_type]
+    st.subheader(f"{material_type_label}材料库")
+    materials = [
+        item
+        for item in REPO.list_material_sets(material_type=material_type)
+    ]
     if not materials:
-        st.info("尚未导入材料。请先在“导入课本”或“导入课程标准”中创建材料。")
+        st.info(f"尚未导入{material_type_label}材料，请切换到“导入”栏目。")
         return
+    material_query = st.text_input(
+        f"搜索{material_type_label}材料",
+        type="search",
+        placeholder="输入名称、学科、年级、版本或备注",
+        key=f"material_library_search_{material_type}_{mode}",
+    )
+    if material_query.strip():
+        needle = material_query.casefold().strip()
+        materials = [
+            item
+            for item in materials
+            if any(
+                needle in str(item.get(key) or "").casefold()
+                for key in (
+                    "name",
+                    "subject",
+                    "stage",
+                    "grade",
+                    "semester",
+                    "edition",
+                    "notes",
+                )
+            )
+        ]
+        if not materials:
+            st.info("没有匹配当前搜索条件的材料。")
+            return
     material_ids = [item["id"] for item in materials]
     pending_material_id = st.session_state.pop("_pending_material_library_id", None)
     if pending_material_id in material_ids:
@@ -513,41 +615,76 @@ def render_material_library() -> None:
         st.error("材料不存在")
         return
     with st.expander("材料元数据", expanded=False):
-        with st.form("material_metadata"):
-            columns = st.columns(3)
-            subject = columns[0].text_input("学科", value=material["subject"] or "")
-            stage = columns[1].text_input("学段", value=material["stage"] or "")
-            grade = columns[2].text_input("年级", value=material["grade"] or "")
-            columns_2 = st.columns(3)
-            semester = columns_2[0].text_input("学期", value=material["semester"] or "")
-            edition = columns_2[1].text_input("教材版本", value=material["edition"] or "")
-            notes = columns_2[2].text_input("备注", value=material["notes"] or "")
-            if st.form_submit_button("保存元数据"):
-                REPO.update_material_metadata(
-                    material_id,
-                    subject=subject,
-                    stage=stage,
-                    grade=grade,
-                    semester=semester,
-                    edition=edition,
-                    notes=notes,
+        if mode == "edit":
+            with st.form("material_metadata"):
+                columns = st.columns(3)
+                subject = columns[0].text_input(
+                    "学科",
+                    value=material["subject"] or "",
                 )
-                st.success("元数据已保存")
-                _rerun()
-        st.caption("空字段表示尚未确认，不用默认值代替推测结果。")
-        try:
-            metadata_sources = json.loads(
-                material.get("metadata_sources_json") or "{}"
-            )
-        except json.JSONDecodeError:
-            metadata_sources = {}
-        if metadata_sources:
-            st.caption(
-                "字段来源："
-                + "；".join(
-                    f"{field}={source}"
-                    for field, source in metadata_sources.items()
+                stage = columns[1].text_input("学段", value=material["stage"] or "")
+                grade = columns[2].text_input("年级", value=material["grade"] or "")
+                columns_2 = st.columns(3)
+                semester = columns_2[0].text_input(
+                    "学期",
+                    value=material["semester"] or "",
                 )
+                edition = columns_2[1].text_input(
+                    "教材版本",
+                    value=material["edition"] or "",
+                )
+                notes = columns_2[2].text_input(
+                    "备注",
+                    value=material["notes"] or "",
+                )
+                if st.form_submit_button("保存元数据"):
+                    REPO.update_material_metadata(
+                        material_id,
+                        subject=subject,
+                        stage=stage,
+                        grade=grade,
+                        semester=semester,
+                        edition=edition,
+                        notes=notes,
+                    )
+                    st.success("元数据已保存")
+                    _rerun()
+            st.caption("空字段表示尚未确认，不用默认值代替推测结果。")
+            try:
+                metadata_sources = json.loads(
+                    material.get("metadata_sources_json") or "{}"
+                )
+            except json.JSONDecodeError:
+                metadata_sources = {}
+            if metadata_sources:
+                st.caption(
+                    "字段来源："
+                    + "；".join(
+                        f"{field}={source}"
+                        for field, source in metadata_sources.items()
+                    )
+                )
+        else:
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "字段": label,
+                            "内容": material.get(key) or "未填写",
+                        }
+                        for key, label in (
+                            ("subject", "学科"),
+                            ("stage", "学段"),
+                            ("grade", "年级"),
+                            ("semester", "学期"),
+                            ("edition", "教材版本"),
+                            ("notes", "备注"),
+                        )
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+                alt=f"{material_type_label}材料元数据",
             )
 
     documents = REPO.list_documents(material_id)
@@ -584,9 +721,19 @@ def render_material_library() -> None:
     metrics[2].metric("结构化单元", len(units))
     metrics[3].metric("OCR 异常页", len(warnings))
     metrics[4].metric("提取状态", document["extraction_status"])
+    detail_query = st.text_input(
+        "搜索章节或单元",
+        type="search",
+        placeholder="输入章节标题、切分方式或单元标题",
+        key=f"material_detail_search_{material_type}_{mode}_{document_id}",
+    )
+    detail_needle = detail_query.casefold().strip()
 
     action_columns = st.columns(3)
-    if action_columns[0].button("提取/继续切分", width="stretch"):
+    if mode == "edit" and action_columns[0].button(
+        "提取/继续切分",
+        width="stretch",
+    ):
         try:
             with st.status("正在提取文字并切分", expanded=True):
                 progress = st.progress(0.0)
@@ -605,7 +752,7 @@ def render_material_library() -> None:
 
     profile = _active_profile()
     structure_disabled = not sections or profile is None
-    if action_columns[1].button(
+    if mode == "edit" and action_columns[1].button(
         "开始 AI 结构化",
         type="primary",
         width="stretch",
@@ -645,15 +792,27 @@ def render_material_library() -> None:
                 _rerun()
             except Exception as exc:
                 _show_error(exc)
-    if action_columns[2].button("刷新状态", width="stretch"):
+    if mode == "edit" and action_columns[2].button(
+        "刷新状态",
+        width="stretch",
+    ):
         _rerun()
-    if not sections:
+    if mode == "edit" and not sections:
         st.info("请先完成文字提取和章节切分，再调用 AI。")
-    elif profile is None:
+    elif mode == "edit" and profile is None:
         st.warning("尚未设置当前 AI 厂商，无法开始结构化。")
 
     with st.expander(f"查看章节切分（{len(sections)}）"):
         if sections:
+            visible_sections = [
+                item
+                for item in sections
+                if not detail_needle
+                or any(
+                    detail_needle in str(item.get(key) or "").casefold()
+                    for key in ("title", "path", "split_method", "id")
+                )
+            ]
             st.dataframe(
                 pd.DataFrame(
                     [
@@ -664,7 +823,7 @@ def render_material_library() -> None:
                             "切分方式": item["split_method"],
                             "ID": item["id"],
                         }
-                        for item in sections
+                        for item in visible_sections
                     ]
                 ),
                 hide_index=True,
@@ -699,30 +858,109 @@ def render_material_library() -> None:
                 )
             except Exception as exc:
                 col_image.warning(str(exc))
-            edited_text = col_text.text_area(
-                "识别文本",
-                value=page["final_text"],
-                height=360,
-                key=f"page_text_{document_id}_{page_number}",
-            )
-            if col_text.button("保存页面文本", key=f"save_page_{page_number}"):
-                REPO.update_page_text(document_id, page_number, edited_text)
-                if not REPO.list_units(document_id=document_id):
-                    INGEST.rebuild_sections(document_id)
-                    st.success("页面文本已保存，并已用新文本重建章节切分")
-                else:
-                    st.success(
-                        "页面文本已保存。重试所选单元时会使用最新页面文本；"
-                        "章节边界本身不会自动改写。"
-                    )
-                _rerun()
+            if mode == "edit":
+                edited_text = col_text.text_area(
+                    "识别文本",
+                    value=page["final_text"],
+                    height=360,
+                    key=f"page_text_{document_id}_{page_number}",
+                )
+                if col_text.button("保存页面文本", key=f"save_page_{page_number}"):
+                    REPO.update_page_text(document_id, page_number, edited_text)
+                    if not REPO.list_units(document_id=document_id):
+                        INGEST.rebuild_sections(document_id)
+                        st.success("页面文本已保存，并已用新文本重建章节切分")
+                    else:
+                        st.success(
+                            "页面文本已保存。重试所选单元时会使用最新页面文本；"
+                            "章节边界本身不会自动改写。"
+                        )
+                    _rerun()
+            else:
+                col_text.text_area(
+                    "识别文本",
+                    value=page["final_text"],
+                    height=360,
+                    disabled=True,
+                    key=f"page_text_read_{document_id}_{page_number}",
+                )
         else:
             st.success("没有低置信度、空白或识别失败页。")
+
+    if mode == "browse":
+        st.subheader("结构化单元")
+        visible_units = [
+            unit
+            for unit in units
+            if not detail_needle
+            or any(
+                detail_needle in str(unit.get(key) or "").casefold()
+                for key in (
+                    "title",
+                    "unit_type",
+                    "content",
+                    "section_title",
+                )
+            )
+        ]
+        if visible_units:
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "类型": unit["unit_type"],
+                            "标题": unit["title"],
+                            "章节": unit["section_title"],
+                            "状态": STATUS_LABELS.get(
+                                unit["status"],
+                                unit["status"],
+                            ),
+                            "版本": unit["current_version"],
+                        }
+                        for unit in visible_units
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+                alt=f"{material_type_label}结构化单元浏览",
+            )
+            selected_unit_id = st.selectbox(
+                "查看单元内容",
+                [unit["id"] for unit in visible_units],
+                format_func=lambda value: next(
+                    (
+                        unit["title"]
+                        for unit in visible_units
+                        if unit["id"] == value
+                    ),
+                    value,
+                ),
+                key=f"material_browse_unit_{document_id}",
+            )
+            selected_unit = next(
+                unit for unit in visible_units if unit["id"] == selected_unit_id
+            )
+            st.markdown(selected_unit["content"])
+        else:
+            st.info("没有匹配当前搜索条件的结构化单元。")
+        return
 
     st.divider()
     st.subheader("逐单元审核")
     if not units:
         st.info("尚未生成结构化单元。")
+        return
+    searchable_units = [
+        unit
+        for unit in units
+        if not detail_needle
+        or any(
+            detail_needle in str(unit.get(key) or "").casefold()
+            for key in ("title", "unit_type", "content", "section_title")
+        )
+    ]
+    if not searchable_units:
+        st.info("没有匹配当前搜索条件的结构化单元。")
         return
     filter_columns = st.columns(2)
     status_filter = filter_columns[0].multiselect(
@@ -732,7 +970,7 @@ def render_material_library() -> None:
         format_func=lambda value: STATUS_LABELS.get(value, value),
     )
     section_options = list(
-        dict.fromkeys(unit["section_id"] for unit in units)
+        dict.fromkeys(unit["section_id"] for unit in searchable_units)
     )
     section_filter = filter_columns[1].multiselect(
         "章节",
@@ -741,7 +979,7 @@ def render_material_library() -> None:
         format_func=lambda value: next(
             (
                 unit["section_title"]
-                for unit in units
+                for unit in searchable_units
                 if unit["section_id"] == value
             ),
             value,
@@ -749,7 +987,7 @@ def render_material_library() -> None:
     )
     visible = [
         unit
-        for unit in units
+        for unit in searchable_units
         if unit["status"] in status_filter and unit["section_id"] in section_filter
     ]
     if not visible:
@@ -940,16 +1178,101 @@ def render_material_library() -> None:
                 _rerun()
 
 
-def render_subject_analysis() -> None:
-    import_textbook, import_standard, library = st.tabs(
-        ["导入课本", "导入课程标准", "材料库与审核"]
+def _material_center_nav_label(item: dict[str, Any], *, active: bool) -> str:
+    title = f"**{item['label']}**" if active else item["label"]
+    return f"![]({'app/static/icons/' + item['icon']}) {title}"
+
+
+def _render_material_center_top_nav() -> str:
+    active_key = st.session_state.get("material_center_item")
+    if active_key not in MATERIAL_CENTER_ITEM_BY_KEY:
+        active_key = MATERIAL_CENTER_ITEMS[0]["key"]
+        st.session_state["material_center_item"] = active_key
+    with st.container(
+        horizontal=True,
+        wrap=False,
+        gap="xsmall",
+        key="material_center_nav",
+    ):
+        for item in MATERIAL_CENTER_ITEMS:
+            if st.button(
+                _material_center_nav_label(
+                    item,
+                    active=item["key"] == active_key,
+                ),
+                key=f"material_nav_{item['key']}",
+                type="secondary",
+                width="content",
+            ):
+                st.session_state["material_center_item"] = item["key"]
+                st.rerun()
+    st.html(
+        f"""
+        <style>
+        .st-key-material_nav_{active_key} button {{
+            background: #EDF2FF !important;
+            border-color: #D6E1FF !important;
+            color: #1F46C5 !important;
+            font-weight: 700;
+            box-shadow: inset 0 -2px 0 #2F5BEA;
+        }}
+        .st-key-material_nav_{active_key} button p {{
+            font-weight: 700;
+        }}
+        </style>
+        """
     )
-    with import_textbook:
-        render_import_tab(MaterialType.TEXTBOOK.value)
-    with import_standard:
-        render_import_tab(MaterialType.STANDARD.value)
-    with library:
-        render_material_library()
+    return str(active_key)
+
+
+def _render_material_center_section_nav(item: dict[str, Any]) -> str:
+    options = ["浏览", "编辑", "导入"]
+    if item["key"] == "answers":
+        options.append("异常检测")
+    section = st.segmented_control(
+        "材料操作",
+        options,
+        default="浏览",
+        required=True,
+        label_visibility="collapsed",
+        width="stretch",
+        wrap=False,
+        key=f"material_section_{item['key']}",
+    )
+    return str(section or "浏览")
+
+
+def render_material_center() -> None:
+    active_key = _render_material_center_top_nav()
+    item = MATERIAL_CENTER_ITEM_BY_KEY[active_key]
+    section = _render_material_center_section_nav(item)
+    if item["kind"] == "material":
+        if section == "导入":
+            render_import_tab(item["data_type"])
+        else:
+            render_material_library(
+                item["data_type"],
+                mode="browse" if section == "浏览" else "edit",
+            )
+        return
+
+    dataset_id = render_dataset_context(LEARNING_DATA)
+    if dataset_id is None:
+        return
+    if section == "异常检测":
+        render_answer_anomalies(LEARNING_DATA, dataset_id)
+        return
+    mode = {
+        "浏览": "browse",
+        "编辑": "edit",
+        "导入": "import",
+    }[section]
+    render_data_type_page(
+        LEARNING_DATA,
+        dataset_id,
+        item["data_type"],
+        mode=mode,
+    )
 
 
 def main() -> None:
@@ -958,12 +1281,10 @@ def main() -> None:
     render_page_header(page)
     if page == "AI 参数设置":
         render_ai_settings()
-    elif page == "学科分析":
-        render_subject_analysis()
+    elif page == "材料中心":
+        render_material_center()
     elif page == "学习内容梳理":
         render_outline_page(OUTLINES, _active_profile())
-    elif page == "学情数据":
-        render_learning_data_page(LEARNING_DATA)
     elif page == "学生分析":
         render_student_analysis_page(
             ANALYTICS,

@@ -40,7 +40,7 @@ def _dataset_selector(
 ) -> dict[str, Any] | None:
     datasets = _datasets(learning)
     if not datasets:
-        st.info("尚无学情数据集。请先在“学情数据”页面导入数据。")
+        st.info("尚无学情数据集。请先在“材料中心”导入数据。")
         return None
     dataset_id = st.selectbox(
         "学情数据集",

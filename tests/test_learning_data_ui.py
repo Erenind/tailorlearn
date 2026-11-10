@@ -39,7 +39,11 @@ def test_streamlit_learning_data_upload_preview_and_import(
     at = AppTest.from_file(str(app_file), default_timeout=20).run()
 
     assert not at.exception
-    at.radio(key="main_navigation").set_value("学情数据").run()
+    at.button(key="nav_material_center").click().run()
+    at.button(key="material_nav_students").click().run()
+    at.segmented_control(
+        key="material_section_students"
+    ).set_value("导入").run()
     assert not at.exception
     assert at.selectbox(key="learning_dataset_selector").value == dataset["id"]
 
@@ -64,4 +68,20 @@ def test_streamlit_learning_data_upload_preview_and_import(
     rows = service.list_records(dataset["id"], "student")
     assert len(rows) == 1
     assert rows[0]["student_code"] == "D01"
+
+    assert at.button(key="material_nav_textbook").label.endswith("课本")
+    assert at.button(key="material_nav_standard").label.endswith("课程标准")
+    assert at.button(key="material_nav_answers").label.endswith("作答记录")
+    at.button(key="material_nav_answers").click().run()
+    assert at.segmented_control(
+        key="material_section_answers"
+    ).options == ["浏览", "编辑", "导入", "异常检测"]
+    at.segmented_control(
+        key="material_section_answers"
+    ).set_value("异常检测").run()
+    assert not at.exception
+    assert any(
+        item.value == "作答记录异常检测"
+        for item in at.subheader
+    )
     st.cache_resource.clear()

@@ -584,6 +584,8 @@ def _render_records(
     service: LearningDataService,
     dataset_id: str,
     spec: DataTypeSpec,
+    *,
+    allow_edit: bool,
 ) -> None:
     all_active = service.list_records(dataset_id, spec.key)
     st.subheader("数据管理与导出")
@@ -690,6 +692,8 @@ def _render_records(
     else:
         st.info("当前筛选条件下没有记录。")
 
+    if not allow_edit:
+        return
     _render_add_form(service, dataset_id, spec)
     if not display_rows:
         return
@@ -717,7 +721,11 @@ def _render_type(
     service: LearningDataService,
     dataset_id: str,
     spec: DataTypeSpec,
+    *,
+    mode: str,
 ) -> None:
+    if mode not in {"browse", "edit", "import"}:
+        raise ValueError("未知材料中心栏目")
     active_count = len(service.list_records(dataset_id, spec.key))
     st.subheader(spec.label)
     if spec.key == "answer":
@@ -725,14 +733,20 @@ def _render_type(
             "原始修订全部保留。表格与导出默认显示全部记录，"
             "可切换“仅最新修订”。"
         )
-    _render_import(
+    if mode == "import":
+        _render_import(
+            service,
+            dataset_id,
+            spec,
+            has_records=bool(active_count),
+        )
+        return
+    _render_records(
         service,
         dataset_id,
         spec,
-        has_records=bool(active_count),
+        allow_edit=mode == "edit",
     )
-    st.divider()
-    _render_records(service, dataset_id, spec)
 
 
 def _render_quality(
@@ -820,6 +834,68 @@ def _render_quality(
             )
 
 
+def render_answer_anomalies(
+    service: LearningDataService,
+    dataset_id: str,
+) -> None:
+    st.subheader("作答记录异常检测")
+    st.caption(
+        "检查评分状态、得分范围、关联引用、修订版本和评分一致性；"
+        "异常记录只提示需要核对，不直接解释为未掌握。"
+    )
+    report = service.quality_report(dataset_id)
+    answer_issues = [
+        row for row in report["issues"] if row.get("数据类型") == "作答记录"
+    ]
+    answers = service.list_records(dataset_id, "answer")
+    pending = sum(row.get("grading_status") == "待评分" for row in answers)
+    unanswered = sum(row.get("grading_status") == "未作答" for row in answers)
+    affected_records = {
+        str(row.get("记录")) for row in answer_issues if row.get("记录")
+    }
+    summary = st.columns(4)
+    summary[0].metric("作答记录", len(answers), border=True)
+    summary[1].metric("异常项", len(answer_issues), border=True)
+    summary[2].metric("涉及记录", len(affected_records), border=True)
+    summary[3].metric("待评分/未作答", pending + unanswered, border=True)
+    if not answer_issues:
+        st.success("当前作答记录未发现已定义的异常。")
+        return
+    query = st.text_input(
+        "搜索异常记录",
+        type="search",
+        placeholder="输入记录、学生、材料或问题说明",
+        key=f"learning_answer_anomaly_search_{dataset_id}",
+    )
+    needle = query.casefold().strip()
+    visible = [
+        row
+        for row in answer_issues
+        if not needle
+        or any(
+            needle in str(value).casefold()
+            for value in row.values()
+        )
+    ]
+    issue_types = pd.DataFrame(answer_issues)["问题代码"].value_counts()
+    st.dataframe(
+        issue_types.rename_axis("问题代码").reset_index(name="数量"),
+        hide_index=True,
+        width="stretch",
+        alt="作答记录异常类型分布",
+    )
+    st.caption(f"当前显示 {len(visible)} / {len(answer_issues)} 个异常项。")
+    if visible:
+        st.dataframe(
+            pd.DataFrame(visible),
+            hide_index=True,
+            width="stretch",
+            alt="作答记录异常明细",
+        )
+    else:
+        st.info("没有匹配当前搜索条件的异常记录。")
+
+
 def _render_dataset_management(
     service: LearningDataService,
     dataset: dict[str, Any],
@@ -846,7 +922,7 @@ def _render_dataset_management(
                 _show_error(exc)
 
 
-def render_learning_data_page(service: LearningDataService) -> None:
+def render_dataset_context(service: LearningDataService) -> str | None:
     _show_notice("learning_dataset_notice")
     with st.expander("新建学情数据集", expanded=not service.list_datasets()):
         with st.form("learning_dataset_create"):
@@ -876,7 +952,7 @@ def render_learning_data_page(service: LearningDataService) -> None:
     datasets = service.list_datasets()
     if not datasets:
         st.info("请先创建一个学情数据集。")
-        return
+        return None
     dataset_ids = [row["id"] for row in datasets]
     selector_key = "learning_dataset_selector"
     if st.session_state.get(selector_key) not in dataset_ids:
@@ -901,7 +977,24 @@ def render_learning_data_page(service: LearningDataService) -> None:
     )
     dataset = next(row for row in datasets if row["id"] == dataset_id)
     _render_dataset_management(service, dataset)
+    return dataset_id
 
+
+def render_data_type_page(
+    service: LearningDataService,
+    dataset_id: str,
+    data_type: str,
+    *,
+    mode: str,
+) -> None:
+    spec = DATA_TYPE_SPECS[data_type]
+    _render_type(service, dataset_id, spec, mode=mode)
+
+
+def render_learning_data_page(service: LearningDataService) -> None:
+    dataset_id = render_dataset_context(service)
+    if dataset_id is None:
+        return
     tabs = st.tabs(
         [
             *[spec.label for spec in DATA_TYPE_SPECS.values()],
@@ -914,6 +1007,6 @@ def render_learning_data_page(service: LearningDataService) -> None:
         strict=True,
     ):
         with tab:
-            _render_type(service, dataset_id, spec)
+            _render_type(service, dataset_id, spec, mode="edit")
     with tabs[-1]:
         _render_quality(service, dataset_id)

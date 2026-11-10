@@ -87,11 +87,10 @@ def test_streamlit_renders_student_and_class_analysis_navigation(
     app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
     at = AppTest.from_file(str(app_file), default_timeout=20).run()
 
-    navigation_options = at.radio(key="main_navigation").options
-    assert any("学生分析" in option for option in navigation_options)
-    assert any("班级分析" in option for option in navigation_options)
-    assert any("教学建议" in option for option in navigation_options)
-    at.radio(key="main_navigation").set_value("学生分析").run()
+    assert "学生分析" in at.button(key="nav_student").label
+    assert "班级分析" in at.button(key="nav_class").label
+    assert "教学建议" in at.button(key="nav_teaching").label
+    at.button(key="nav_student").click().run()
     assert not at.exception
     assert any(item.value == "学生分析" for item in at.title)
     assert any(item.label == "AI 诊断与教师复核" for item in at.tabs)
