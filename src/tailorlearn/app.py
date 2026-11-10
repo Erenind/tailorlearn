@@ -556,6 +556,227 @@ def _document_label(documents: list[dict[str, Any]], document_id: str) -> str:
     return f"{document['order_index']}. {document['file_name']} · {document['extraction_status']}"
 
 
+def _render_material_browser_path(
+    material_type: str,
+    material: dict[str, Any] | None,
+    document: dict[str, Any] | None,
+) -> None:
+    material_type_label = MATERIAL_LABELS[material_type]
+    material_key = f"material_browser_material_{material_type}"
+    document_key = f"material_browser_document_{material_type}"
+    with st.container(
+        horizontal=True,
+        vertical_alignment="center",
+        key=f"material_browser_path_{material_type}",
+    ):
+        st.markdown("材料中心 /")
+        if st.button(
+            material_type_label,
+            type="tertiary",
+            key=f"material_browser_path_root_{material_type}",
+        ):
+            st.session_state[material_key] = None
+            st.session_state[document_key] = None
+            st.rerun()
+        if material is not None:
+            st.markdown("/")
+            if document is None:
+                st.markdown(f"**{material['name']}**")
+            else:
+                if st.button(
+                    material["name"],
+                    type="tertiary",
+                    key=f"material_browser_path_material_{material_type}",
+                ):
+                    st.session_state[document_key] = None
+                    st.rerun()
+                st.markdown("/")
+                st.markdown(f"**{document['file_name']}**")
+
+
+def _render_material_browser(material_type: str) -> None:
+    material_type_label = MATERIAL_LABELS[material_type]
+    material_key = f"material_browser_material_{material_type}"
+    document_key = f"material_browser_document_{material_type}"
+    materials = REPO.list_material_sets(material_type=material_type)
+    material_by_id = {str(item["id"]): item for item in materials}
+    selected_material_id = st.session_state.get(material_key)
+    if selected_material_id not in material_by_id:
+        selected_material_id = None
+        st.session_state[material_key] = None
+        st.session_state[document_key] = None
+    selected_material = (
+        material_by_id[str(selected_material_id)]
+        if selected_material_id
+        else None
+    )
+    documents = (
+        REPO.list_documents(str(selected_material["id"]))
+        if selected_material
+        else []
+    )
+    document_by_id = {str(item["id"]): item for item in documents}
+    selected_document_id = st.session_state.get(document_key)
+    if selected_document_id not in document_by_id:
+        selected_document_id = None
+        st.session_state[document_key] = None
+    selected_document = (
+        document_by_id[str(selected_document_id)]
+        if selected_document_id
+        else None
+    )
+    _render_material_browser_path(
+        material_type,
+        selected_material,
+        selected_document,
+    )
+
+    if selected_material is None:
+        if not materials:
+            st.info(f"尚未导入{material_type_label}，请切换到“导入”栏目。")
+            return
+        with st.container(key="material_browser_files"):
+            with st.grid("auto", min_column_width=220, gap="small"):
+                for material in materials:
+                    with st.container(
+                        border=True,
+                        key=f"material_catalog_card_{material['id']}",
+                    ):
+                        st.markdown(f"**{material['name']}**")
+                        st.caption(
+                            f"第 {material['version']} 版 · "
+                            f"{len(REPO.list_documents(material['id']))} 个切片"
+                        )
+                        if st.button(
+                            "查看",
+                            key=f"material_open_{material['id']}",
+                            width="stretch",
+                        ):
+                            st.session_state[material_key] = material["id"]
+                            st.session_state[document_key] = None
+                            st.rerun()
+        return
+
+    if selected_document is None:
+        if not documents:
+            st.info("该材料还没有切片。")
+            return
+        with st.container(key="material_browser_files"):
+            with st.grid("auto", min_column_width=200, gap="small"):
+                for document in documents:
+                    with st.container(
+                        border=True,
+                        key=f"material_catalog_card_{document['id']}",
+                    ):
+                        st.markdown(f"**{document['file_name']}**")
+                        st.caption(
+                            f"第 {document['order_index']} 个切片 · "
+                            f"{document['page_count']} 页 · "
+                            f"{document['extraction_status']}"
+                        )
+                        if st.button(
+                            "查看切片",
+                            key=f"material_document_open_{document['id']}",
+                            icon=":material/description:",
+                            width="stretch",
+                        ):
+                            st.session_state[document_key] = document["id"]
+                            st.rerun()
+        return
+
+    pages = REPO.list_pages(selected_document["id"])
+    sections = REPO.list_sections(selected_document["id"])
+    units = REPO.list_units(document_id=selected_document["id"])
+    warning_pages = [page for page in pages if page["status"] != "ok"]
+    with st.container(
+        horizontal=True,
+        wrap=True,
+        gap="xsmall",
+        key="material_slice_badges",
+    ):
+        st.badge(
+            "已结构化" if units else "未结构化",
+            icon=(
+                ":material/check_circle:"
+                if units
+                else ":material/pending:"
+            ),
+            color="green" if units else "orange",
+        )
+        st.badge(
+            f"页数 {len(pages) or selected_document['page_count']}",
+            icon=":material/description:",
+            color="blue",
+        )
+        st.badge(
+            f"章节块 {len(sections)}",
+            icon=":material/format_list_bulleted:",
+            color="gray",
+        )
+        st.badge(
+            f"提取状态 {selected_document['extraction_status']}",
+            icon=":material/sync:",
+            color="violet",
+        )
+        st.badge(
+            f"OCR 异常页 {len(warning_pages)}",
+            icon=":material/warning:",
+            color="red" if warning_pages else "gray",
+        )
+
+    directory, content = st.columns([1, 3], gap="large")
+    with directory:
+        with st.container(key="material_directory"):
+            st.markdown("**目录**")
+            if units:
+                for unit in units:
+                    st.markdown(f"**{unit['title']}**")
+                    st.badge(
+                        STATUS_LABELS.get(unit["status"], unit["status"]),
+                        color={
+                            UnitStatus.VERIFIED.value: "green",
+                            UnitStatus.NEEDS_REVIEW.value: "orange",
+                            UnitStatus.DRAFT.value: "gray",
+                        }.get(unit["status"], "blue"),
+                    )
+            else:
+                st.caption("该切片尚未结构化。")
+                if st.button(
+                    "前往编辑并开始结构化",
+                    type="primary",
+                    icon=":material/edit:",
+                    width="stretch",
+                    key=f"material_go_edit_{selected_document['id']}",
+                ):
+                    st.session_state["_pending_material_section"] = {
+                        "item": (
+                            "textbook"
+                            if material_type == MaterialType.TEXTBOOK.value
+                            else "standard"
+                        ),
+                        "section": "编辑",
+                    }
+                    st.session_state["_pending_material_library_id"] = (
+                        selected_material["id"]
+                    )
+                    st.session_state["_pending_material_library_document_id"] = (
+                        selected_document["id"]
+                    )
+                    st.rerun()
+    with content:
+        if units:
+            with st.container(key="material_unit_blocks"):
+                for unit in units:
+                    with st.container(
+                        key=f"material_unit_block_{unit['id']}",
+                    ):
+                        st.markdown(f"### {unit['title']}")
+                        st.divider()
+                        st.markdown(unit["content"])
+        else:
+            st.info("完成结构化后，这里将按目录显示各个单元的内容块。")
+
+
 def render_material_library(
     material_type: str,
     *,
@@ -1236,15 +1457,24 @@ def _render_material_center_section_nav(item: dict[str, Any]) -> str:
     options = ["浏览", "编辑", "导入"]
     if item["key"] == "answers":
         options.append("异常检测")
+    control_key = f"material_section_{item['key']}"
+    pending = st.session_state.pop("_pending_material_section", None)
+    if (
+        isinstance(pending, dict)
+        and pending.get("item") == item["key"]
+        and pending.get("section") in options
+    ):
+        st.session_state[control_key] = pending["section"]
+    if st.session_state.get(control_key) not in options:
+        st.session_state[control_key] = "浏览"
     section = st.segmented_control(
         "材料操作",
         options,
-        default="浏览",
         required=True,
         label_visibility="collapsed",
         width="stretch",
         wrap=False,
-        key=f"material_section_{item['key']}",
+        key=control_key,
     )
     return str(section or "浏览")
 
@@ -1256,10 +1486,12 @@ def render_material_center() -> None:
     if item["kind"] == "material":
         if section == "导入":
             render_import_tab(item["data_type"])
+        elif section == "浏览":
+            _render_material_browser(item["data_type"])
         else:
             render_material_library(
                 item["data_type"],
-                mode="browse" if section == "浏览" else "edit",
+                mode="edit",
             )
         return
 

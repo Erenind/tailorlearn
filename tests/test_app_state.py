@@ -119,6 +119,12 @@ def test_streamlit_restores_provider_selects_new_material_and_selects_all(
 
     at.button(key="nav_material_center").click().run()
     at.button(key="material_nav_textbook").click().run()
+    assert not any(item.label == "课本材料库" for item in at.subheader)
+    assert not any("搜索课本材料" == item.label for item in at.text_input)
+    at.button(key=f"material_open_{textbook['id']}").click().run()
+    at.button(key=f"material_document_open_{document['id']}").click().run()
+    assert not at.exception
+    assert any(item.value.startswith("### 单元") for item in at.markdown)
     at.segmented_control(
         key="material_section_textbook"
     ).set_value("导入").run()

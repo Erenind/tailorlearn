@@ -174,6 +174,27 @@ def apply_app_style() -> None:
             margin: 0;
             object-fit: contain;
         }
+        .st-key-material_browser_files [class*="st-key-material_catalog_card_"] {
+            min-height: 8.5rem;
+            padding: 0.9rem;
+            border: 1px solid #E1E5EB;
+            border-radius: 0.9rem;
+            background: #FFFFFF;
+        }
+        .st-key-material_directory {
+            position: sticky;
+            top: 1rem;
+            padding: 0.9rem;
+            border: 1px solid #E1E5EB;
+            border-radius: 0.9rem;
+            background: #F7F8FB;
+        }
+        .st-key-material_unit_blocks [class*="st-key-material_unit_block_"] {
+            padding: 1rem 1.1rem;
+            border: 1px solid #E1E5EB;
+            border-radius: 0.9rem;
+            background: #F7F8FB;
+        }
         .st-key-provider_summary {
             margin-bottom: 0.35rem;
         }
