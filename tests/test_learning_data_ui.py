@@ -43,7 +43,7 @@ def test_streamlit_learning_data_upload_preview_and_import(
     at.button(key="material_nav_students").click().run()
     at.segmented_control(
         key="material_section_students"
-    ).set_value("导入").run()
+    ).set_value("导入和导出").run()
     assert not at.exception
     assert at.selectbox(key="learning_dataset_selector").value == dataset["id"]
 
@@ -75,7 +75,7 @@ def test_streamlit_learning_data_upload_preview_and_import(
     at.button(key="material_nav_answers").click().run()
     assert at.segmented_control(
         key="material_section_answers"
-    ).options == ["浏览", "编辑", "导入", "异常检测"]
+    ).options == ["浏览", "编辑", "导入和导出", "异常检测"]
     at.segmented_control(
         key="material_section_answers"
     ).set_value("异常检测").run()

@@ -363,6 +363,99 @@ class IngestionService:
             results.append({"document_id": document["id"], **result})
         return results
 
+    def reprocess_document(
+        self,
+        document_id: str,
+        progress: Callable[[int, int, str], None] | None = None,
+    ) -> dict[str, Any]:
+        document = self.repo.get_document(document_id)
+        if document is None:
+            raise ValueError("找不到文档")
+        material = self.repo.get_material_set(document["material_set_id"])
+        if material is None:
+            raise ValueError("找不到材料集")
+        source = self.paths.db_dir / document["stored_path"]
+        if not source.exists():
+            raise ValueError("找不到原始 PDF")
+        job_id = f"job_{uuid.uuid4().hex[:12]}"
+        self.repo.create_job(
+            job_id=job_id,
+            material_set_id=material["id"],
+            document_id=document_id,
+            stage="reprocess",
+            total=max(document["page_count"], 1),
+        )
+        self.repo.update_document(document_id, extraction_status="running")
+        try:
+            def page_progress(current: int, total: int, message: str) -> None:
+                self.repo.update_job(
+                    job_id,
+                    completed=current,
+                    message=message,
+                )
+                if progress:
+                    progress(current, total, message)
+
+            pages = extract_pdf(
+                source,
+                page_progress,
+                on_page=lambda page: self.repo.upsert_page(document_id, page),
+            )
+            _write_jsonl(
+                self._document_root(document) / "extracted" / "pages.jsonl",
+                [page.model_dump() for page in pages],
+            )
+            stored_pages = self.repo.list_pages(document_id)
+            _write_jsonl(
+                self._document_root(document) / "ocr" / "pages.jsonl",
+                [
+                    page
+                    for page in stored_pages
+                    if page["source_kind"] in {"ocr", "failed"}
+                ],
+            )
+            units = self.repo.list_units(document_id=document_id)
+            if units:
+                sections = self.repo.list_sections(document_id)
+                self.repo.refresh_section_contents(document_id)
+                structure_mode = "preserved-sections"
+            else:
+                split = split_pages(document_id=document_id, pages=stored_pages)
+                self.repo.replace_sections(document_id, split)
+                sections = self.repo.list_sections(document_id)
+                structure_mode = "rebuilt-sections"
+                _write_json(
+                    self._document_root(document) / "structure" / "sections.json",
+                    sections,
+                )
+            self.repo.update_document(
+                document_id,
+                extraction_status="succeeded",
+                page_count=len(stored_pages),
+            )
+            self.repo.update_job(
+                job_id,
+                status="succeeded",
+                completed=len(stored_pages),
+                message=f"已重新识别，保留 {len(sections)} 个章节块",
+                finish=True,
+            )
+            self.sync_material_exports(material["id"])
+            return {
+                "pages": len(stored_pages),
+                "sections": len(sections),
+                "structure_mode": structure_mode,
+            }
+        except Exception as exc:
+            self.repo.update_document(document_id, extraction_status="failed")
+            self.repo.update_job(
+                job_id,
+                status="failed",
+                message=str(exc),
+                finish=True,
+            )
+            raise
+
     def rebuild_sections(self, document_id: str) -> dict[str, Any]:
         document = self.repo.get_document(document_id)
         if document is None:

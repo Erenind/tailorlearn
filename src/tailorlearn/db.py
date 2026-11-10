@@ -966,6 +966,27 @@ class Repository:
             ).fetchone()
             return dict(row) if row else None
 
+    def refresh_section_contents(self, document_id: str) -> int:
+        pages = self.list_pages(document_id)
+        sections = self.list_sections(document_id)
+        updated = 0
+        with self.connect() as connection:
+            for section in sections:
+                content = "\n\n".join(
+                    f"【第 {page['page_number']} 页】\n{page['final_text']}"
+                    for page in pages
+                    if section["page_start"]
+                    <= int(page["page_number"])
+                    <= section["page_end"]
+                    and str(page["final_text"]).strip()
+                )
+                connection.execute(
+                    "UPDATE sections SET content=? WHERE id=?",
+                    (content, section["id"]),
+                )
+                updated += 1
+        return updated
+
     def save_units_for_section(
         self,
         *,

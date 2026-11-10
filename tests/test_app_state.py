@@ -124,10 +124,18 @@ def test_streamlit_restores_provider_selects_new_material_and_selects_all(
     at.button(key=f"material_open_{textbook['id']}").click().run()
     at.button(key=f"material_document_open_{document['id']}").click().run()
     assert not at.exception
-    assert any(item.value.startswith("### 单元") for item in at.markdown)
+    workspace_html = next(
+        item.value for item in at.html if "tl-material-workspace" in item.value
+    )
+    assert "单元一" in workspace_html
+    assert 'href="#tl-unit-' in workspace_html
+    assert "height: calc(100vh - 20rem)" in workspace_html
+    assert workspace_html.count("height: 100%") >= 2
+    assert "tl-directory-pane" in workspace_html
+    assert "tl-content-pane" in workspace_html
     at.segmented_control(
         key="material_section_textbook"
-    ).set_value("导入").run()
+    ).set_value("导入和导出").run()
     assert any(item.label == "课本名称" for item in at.text_input)
     append_checkbox = next(
         item for item in at.checkbox if item.label == "追加到已有课本"
@@ -136,23 +144,46 @@ def test_streamlit_restores_provider_selects_new_material_and_selects_all(
     assert not any(item.label == "课本名称" for item in at.text_input)
     at.segmented_control(
         key="material_section_textbook"
-    ).set_value("编辑").run()
-    at.session_state["_pending_material_library_id"] = textbook["id"]
-    at.session_state["_material_library_notice"] = "测试导入完成"
-    at.run()
+    ).set_value("AI结构化和管理").run()
     assert not at.exception
-    assert at.selectbox(key="material_library_selector").value == textbook["id"]
-    assert any("测试导入完成" in item.value for item in at.success)
+    at.button(key=f"material_manage_open_{textbook['id']}").click().run()
+    at.button(key=f"material_manage_open_{document['id']}").click().run()
+    assert not at.exception
+    units = repository.list_units(document_id=document["id"])
+    assert len(units) == 2
+    assert at.button(key="material_reprocess_doc_test").label == "重新识别"
+    assert at.button(key=f"material_edit_unit_{units[0]['id']}").label == "编辑"
+    assert at.button(key=f"material_delete_unit_{units[0]['id']}").label == "删除"
 
-    at.button(key="select_all_doc_test").click().run()
+    at.button(key="material_select_all_doc_test").click().run()
     assert not at.exception
-    assert any(
-        "已全选当前筛选结果，共 2 个单元" in item.value
-        for item in at.caption
+    for unit in units:
+        checkbox = at.checkbox(
+            key=(
+                f"material_manage_directory_select_doc_test_"
+                f"{unit['id']}"
+            )
+        )
+        assert checkbox.value is True
+
+    at.button(key="material_confirm_selected_doc_test").click().run()
+    assert not at.exception
+    assert all(
+        unit["status"] == "verified"
+        for unit in repository.list_units(document_id=document["id"])
     )
-    assert at.button(key="clear_all_doc_test").label == "取消全选"
-
-    at.button(key="clear_all_doc_test").click().run()
-    assert not at.exception
-    assert any("已选择 0 个单元" in item.value for item in at.caption)
+    assert at.button(key="material_ai_structure_doc_test").label == (
+        "重新 AI 结构化"
+    )
+    at.button(key="material_select_all_doc_test").click().run()
+    at.button(key="material_delete_selected_doc_test").click().run()
+    assert all(
+        unit["deleted_at"] is not None
+        for unit in repository.list_units(
+            document_id=document["id"],
+            include_deleted=True,
+        )
+    )
+    at.button(key="material_trash_doc_test").click().run()
+    assert any(item.value == "回收站" for item in at.subheader)
     st.cache_resource.clear()

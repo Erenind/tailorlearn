@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from html import escape
 from typing import Any
 
 import pandas as pd
@@ -42,9 +43,11 @@ st.set_page_config(
     layout="wide",
 )
 
+_APP_SERVICES_CACHE_VERSION = "2026-11-11-remove-direct-pdf-ai"
+
 
 @st.cache_resource
-def app_services() -> tuple[
+def app_services(cache_version: str) -> tuple[
     AppPaths,
     Repository,
     IngestionService,
@@ -83,7 +86,7 @@ def app_services() -> tuple[
     ANALYTICS,
     DIAGNOSES,
     TEACHING_RECOMMENDATIONS,
-) = app_services()
+) = app_services(_APP_SERVICES_CACHE_VERSION)
 
 MATERIAL_LABELS = {
     MaterialType.TEXTBOOK.value: "课本",
@@ -463,6 +466,77 @@ def _import_uploaded(
     _rerun()
 
 
+def _render_material_import_export(material_type: str) -> None:
+    material_type_label = MATERIAL_LABELS[material_type]
+    materials = REPO.list_material_sets(material_type=material_type)
+    with st.expander(
+        f"导出{material_type_label}数据",
+        expanded=bool(materials),
+        icon=":material/download:",
+    ):
+        if not materials:
+            st.caption(f"暂无可导出的{material_type_label}数据。")
+        else:
+            options = ["__all__", *[str(item["id"]) for item in materials]]
+            selected_id = st.selectbox(
+                "导出范围",
+                options,
+                format_func=lambda value: (
+                    f"全部{material_type_label}"
+                    if value == "__all__"
+                    else next(
+                        (
+                            f"{item['name']} · 第 {item['version']} 版"
+                            for item in materials
+                            if item["id"] == value
+                        ),
+                        value,
+                    )
+                ),
+                key=f"material_export_scope_{material_type}",
+            )
+            selected_materials = (
+                materials
+                if selected_id == "__all__"
+                else [
+                    item for item in materials if item["id"] == selected_id
+                ]
+            )
+            export_rows = []
+            for material in selected_materials:
+                export_rows.append(
+                    {
+                        "material": material,
+                        "documents": REPO.list_documents(material["id"]),
+                        "units": [
+                            unit
+                            for unit in REPO.list_units(
+                                material_set_id=material["id"],
+                                include_deleted=True,
+                            )
+                        ],
+                    }
+                )
+            export_data = json.dumps(
+                {
+                    "material_type": material_type,
+                    "materials": export_rows,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            st.download_button(
+                f"下载{material_type_label} JSON",
+                data=export_data,
+                file_name=f"{material_type_label}_导出.json",
+                mime="application/json",
+                icon=":material/download:",
+                width="stretch",
+                key=f"material_export_download_{material_type}",
+            )
+    render_import_tab(material_type)
+
+
 def render_import_tab(material_type: str) -> None:
     label = MATERIAL_LABELS[material_type]
     st.subheader(f"导入{label}")
@@ -592,6 +666,734 @@ def _render_material_browser_path(
                     st.rerun()
                 st.markdown("/")
                 st.markdown(f"**{document['file_name']}**")
+
+
+def _render_material_unit_workspace(
+    units: list[dict[str, Any]],
+) -> None:
+    status_labels = {
+        UnitStatus.VERIFIED.value: "已确认",
+        UnitStatus.NEEDS_REVIEW.value: "待复核",
+        UnitStatus.DRAFT.value: "草稿",
+    }
+    status_classes = {
+        UnitStatus.VERIFIED.value: "verified",
+        UnitStatus.NEEDS_REVIEW.value: "review",
+        UnitStatus.DRAFT.value: "draft",
+    }
+    directory_items: list[str] = []
+    content_blocks: list[str] = []
+    for unit in units:
+        anchor_id = f"tl-unit-{unit['id']}"
+        status = status_labels.get(unit["status"], unit["status"])
+        status_class = status_classes.get(unit["status"], "draft")
+        directory_items.append(
+            f"""
+            <a class="tl-directory-item" href="#{escape(anchor_id, quote=True)}">
+                <span class="tl-directory-title">{escape(unit['title'])}</span>
+                <span class="tl-status tl-status-{status_class}">{escape(status)}</span>
+            </a>
+            """
+        )
+        content_blocks.append(
+            f"""
+            <section class="tl-unit-block" id="{escape(anchor_id, quote=True)}">
+                <h3>{escape(unit['title'])}</h3>
+                <div class="tl-unit-divider"></div>
+                <div class="tl-unit-content">{escape(unit['content'])}</div>
+            </section>
+            """
+        )
+    st.html(
+        f"""
+        <style>
+        .tl-material-workspace {{
+            display: grid;
+            grid-template-columns: minmax(220px, 0.85fr) minmax(0, 2.6fr);
+            gap: 1rem;
+            align-items: stretch;
+            height: calc(100vh - 20rem);
+            min-height: 24rem;
+        }}
+        .tl-directory-pane {{
+            position: sticky;
+            top: 0;
+            height: 100%;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-gutter: stable;
+            padding: 0.75rem;
+            border: 1px solid #E1E5EB;
+            border-radius: 0.9rem;
+            background: #F7F8FB;
+        }}
+        .tl-directory-heading {{
+            position: sticky;
+            top: -0.75rem;
+            z-index: 1;
+            margin: -0.75rem -0.75rem 0.6rem;
+            padding: 0.8rem 0.75rem 0.55rem;
+            background: #F7F8FB;
+            color: #344054;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }}
+        .tl-directory-item {{
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.55rem;
+            margin-bottom: 0.35rem;
+            padding: 0.55rem 0.6rem;
+            border: 1px solid transparent;
+            border-radius: 0.65rem;
+            color: #344054;
+            text-decoration: none;
+        }}
+        .tl-directory-item:hover {{
+            border-color: #D6E1FF;
+            background: #EDF2FF;
+            color: #1F46C5;
+        }}
+        .tl-directory-title {{
+            min-width: 0;
+            font-size: 0.82rem;
+            font-weight: 550;
+            line-height: 1.45;
+        }}
+        .tl-status {{
+            flex: 0 0 auto;
+            padding: 0.12rem 0.4rem;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 650;
+            white-space: nowrap;
+        }}
+        .tl-status-verified {{
+            background: #DCFCE7;
+            color: #166534;
+        }}
+        .tl-status-review {{
+            background: #FFEDD5;
+            color: #9A3412;
+        }}
+        .tl-status-draft {{
+            background: #E5E7EB;
+            color: #4B5563;
+        }}
+        .tl-content-pane {{
+            height: 100%;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scroll-behavior: smooth;
+            scrollbar-gutter: stable;
+            padding-right: 0.35rem;
+        }}
+        .tl-unit-block {{
+            margin-bottom: 1rem;
+            padding: 1rem 1.1rem;
+            border: 1px solid #E1E5EB;
+            border-radius: 0.9rem;
+            background: #F7F8FB;
+            scroll-margin-top: 1rem;
+        }}
+        .tl-unit-block h3 {{
+            margin: 0;
+            color: #172033;
+            font-size: 1rem;
+            line-height: 1.4;
+        }}
+        .tl-unit-divider {{
+            height: 1px;
+            margin: 0.75rem 0;
+            background: #DDE2E9;
+        }}
+        .tl-unit-content {{
+            color: #475467;
+            font-size: 0.88rem;
+            line-height: 1.72;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }}
+        .tl-directory-pane::-webkit-scrollbar,
+        .tl-content-pane::-webkit-scrollbar {{
+            width: 8px;
+        }}
+        .tl-directory-pane::-webkit-scrollbar-thumb,
+        .tl-content-pane::-webkit-scrollbar-thumb {{
+            border-radius: 999px;
+            background: #C9D0DB;
+        }}
+        </style>
+        <div class="tl-material-workspace">
+            <aside class="tl-directory-pane">
+                <div class="tl-directory-heading">目录</div>
+                {''.join(directory_items)}
+            </aside>
+            <div class="tl-content-pane">
+                {''.join(content_blocks)}
+            </div>
+        </div>
+        """
+    )
+
+
+def _unit_status_summary(units: list[dict[str, Any]]) -> str:
+    if not units:
+        return "未结构化"
+    total = len(units)
+    counts = {
+        status.value: sum(unit["status"] == status.value for unit in units)
+        for status in UnitStatus
+    }
+    return (
+        f"已确认 {round(counts[UnitStatus.VERIFIED.value] / total * 100)}% · "
+        f"草稿 {round(counts[UnitStatus.DRAFT.value] / total * 100)}% · "
+        f"待审核 {round(counts[UnitStatus.NEEDS_REVIEW.value] / total * 100)}%"
+    )
+
+
+def _material_unit_type_options(
+    material_type: str,
+) -> dict[str, str]:
+    if material_type == MaterialType.STANDARD.value:
+        return {
+            "content_requirement": "内容要求",
+            "academic_requirement": "学业要求",
+            "teaching_hint": "教学提示",
+            "core_competency": "核心素养",
+            "implementation_guidance": "实施建议",
+            "other": "其他",
+        }
+    return {
+        "concept": "概念",
+        "property": "性质",
+        "theorem": "定理",
+        "example": "例题",
+        "exercise": "习题",
+        "activity": "活动",
+        "summary": "小结",
+        "other": "其他",
+    }
+
+
+def _material_manage_selection_key(document_id: str) -> str:
+    return f"material_manage_selection_{document_id}"
+
+
+def _material_unit_checkbox_key(
+    document_id: str,
+    scope: str,
+    unit_id: str,
+) -> str:
+    return f"material_manage_{scope}_select_{document_id}_{unit_id}"
+
+
+def _sync_material_unit_selection(
+    document_id: str,
+    unit_id: str,
+    source_key: str,
+    mirror_key: str,
+) -> None:
+    checked = bool(st.session_state.get(source_key, False))
+    st.session_state[mirror_key] = checked
+    selection_key = _material_manage_selection_key(document_id)
+    selected = set(st.session_state.get(selection_key, []))
+    if checked:
+        selected.add(unit_id)
+    else:
+        selected.discard(unit_id)
+    st.session_state[selection_key] = sorted(selected)
+
+
+def _set_material_unit_selection(
+    document_id: str,
+    unit_ids: list[str],
+    *,
+    selected: bool,
+) -> None:
+    selection_key = _material_manage_selection_key(document_id)
+    st.session_state[selection_key] = unit_ids if selected else []
+    for unit_id in unit_ids:
+        st.session_state[
+            _material_unit_checkbox_key(document_id, "directory", unit_id)
+        ] = selected
+        st.session_state[
+            _material_unit_checkbox_key(document_id, "content", unit_id)
+        ] = selected
+
+
+def _render_material_management_path(
+    material_type: str,
+    material: dict[str, Any] | None,
+    document: dict[str, Any] | None,
+) -> None:
+    material_type_label = MATERIAL_LABELS[material_type]
+    material_key = f"material_manage_material_{material_type}"
+    document_key = f"material_manage_document_{material_type}"
+    with st.container(
+        horizontal=True,
+        vertical_alignment="center",
+        key=f"material_manage_path_{material_type}",
+    ):
+        st.markdown("材料中心 /")
+        if st.button(
+            material_type_label,
+            type="tertiary",
+            key=f"material_manage_path_root_{material_type}",
+        ):
+            st.session_state[material_key] = None
+            st.session_state[document_key] = None
+            st.rerun()
+        if material is not None:
+            st.markdown("/")
+            if document is None:
+                st.markdown(f"**{material['name']}**")
+            else:
+                if st.button(
+                    material["name"],
+                    type="tertiary",
+                    key=f"material_manage_path_material_{material_type}",
+                ):
+                    st.session_state[document_key] = None
+                    st.rerun()
+                st.markdown("/")
+                st.markdown(f"**{document['file_name']}**")
+
+
+def _render_material_management(material_type: str) -> None:
+    material_type_label = MATERIAL_LABELS[material_type]
+    manage_status_labels = {
+        UnitStatus.VERIFIED.value: "已确认",
+        UnitStatus.DRAFT.value: "草稿",
+        UnitStatus.NEEDS_REVIEW.value: "待审核",
+    }
+    material_key = f"material_manage_material_{material_type}"
+    document_key = f"material_manage_document_{material_type}"
+    materials = REPO.list_material_sets(material_type=material_type)
+    material_by_id = {str(item["id"]): item for item in materials}
+    selected_material_id = st.session_state.get(material_key)
+    if selected_material_id not in material_by_id:
+        selected_material_id = None
+        st.session_state[material_key] = None
+        st.session_state[document_key] = None
+    selected_material = (
+        material_by_id[str(selected_material_id)]
+        if selected_material_id
+        else None
+    )
+    documents = (
+        REPO.list_documents(str(selected_material["id"]))
+        if selected_material
+        else []
+    )
+    document_by_id = {str(item["id"]): item for item in documents}
+    selected_document_id = st.session_state.get(document_key)
+    if selected_document_id not in document_by_id:
+        selected_document_id = None
+        st.session_state[document_key] = None
+    selected_document = (
+        document_by_id[str(selected_document_id)]
+        if selected_document_id
+        else None
+    )
+    _render_material_management_path(
+        material_type,
+        selected_material,
+        selected_document,
+    )
+
+    if selected_material is None:
+        if not materials:
+            st.info(f"尚未导入{material_type_label}，请切换到“导入和导出”栏目。")
+            return
+        with st.container(key="material_browser_files"):
+            with st.grid("auto", min_column_width=220, gap="small"):
+                for material in materials:
+                    material_units = REPO.list_units(
+                        material_set_id=material["id"]
+                    )
+                    with st.container(
+                        border=True,
+                        key=f"material_manage_card_{material['id']}",
+                    ):
+                        st.markdown(f"**{material['name']}**")
+                        st.caption(
+                            f"第 {material['version']} 版 · "
+                            f"{_unit_status_summary(material_units)}"
+                        )
+                        if st.button(
+                            "查看",
+                            key=f"material_manage_open_{material['id']}",
+                            width="stretch",
+                        ):
+                            st.session_state[material_key] = material["id"]
+                            st.session_state[document_key] = None
+                            st.rerun()
+        return
+
+    if selected_document is None:
+        if not documents:
+            st.info("该材料还没有切片。")
+            return
+        with st.container(key="material_browser_files"):
+            with st.grid("auto", min_column_width=220, gap="small"):
+                for document in documents:
+                    document_units = REPO.list_units(
+                        document_id=document["id"]
+                    )
+                    with st.container(
+                        border=True,
+                        key=f"material_manage_card_{document['id']}",
+                    ):
+                        st.markdown(f"**{document['file_name']}**")
+                        st.caption(
+                            f"第 {document['order_index']} 个切片 · "
+                            f"{_unit_status_summary(document_units)}"
+                        )
+                        if st.button(
+                            "查看切片",
+                            key=f"material_manage_open_{document['id']}",
+                            width="stretch",
+                        ):
+                            st.session_state[document_key] = document["id"]
+                            st.rerun()
+        return
+
+    units = REPO.list_units(document_id=selected_document["id"])
+    unit_ids = [str(unit["id"]) for unit in units]
+    selection_key = _material_manage_selection_key(selected_document["id"])
+    selected_ids = sorted(
+        set(st.session_state.get(selection_key, [])) & set(unit_ids)
+    )
+    st.session_state[selection_key] = selected_ids
+    for unit_id in unit_ids:
+        selected = unit_id in selected_ids
+        for scope in ("directory", "content"):
+            key = _material_unit_checkbox_key(
+                selected_document["id"],
+                scope,
+                unit_id,
+            )
+            if key not in st.session_state:
+                st.session_state[key] = selected
+
+    trash_key = f"material_manage_trash_{selected_document['id']}"
+    editing_key = f"material_manage_editing_{selected_document['id']}"
+    with st.container(
+        horizontal=True,
+        wrap=True,
+        gap="xsmall",
+        key="material_manage_actions",
+    ):
+        if st.button(
+            "重新识别",
+            icon=":material/refresh:",
+            key=f"material_reprocess_{selected_document['id']}",
+            help="重新执行 PDF 文字提取、OCR 和章节识别。",
+        ):
+            try:
+                with st.status("正在重新识别 PDF", expanded=True) as status:
+                    progress = st.progress(0.0)
+
+                    def reprocess_progress(
+                        current: int,
+                        total: int,
+                        message: str,
+                    ) -> None:
+                        progress.progress(
+                            current / max(total, 1),
+                            text=message,
+                        )
+
+                    result = INGEST.reprocess_document(
+                        selected_document["id"],
+                        reprocess_progress,
+                    )
+                    status.update(
+                        label=(
+                            f"重新识别完成：{result['pages']} 页，"
+                            f"{result['sections']} 个章节块"
+                        ),
+                        state="complete",
+                    )
+                _rerun()
+            except Exception as exc:
+                _show_error(exc)
+        structure_label = "重新 AI 结构化" if units else "AI 结构化"
+        if st.button(
+            structure_label,
+            type="primary",
+            icon=":material/auto_awesome:",
+            key=f"material_ai_structure_{selected_document['id']}",
+        ):
+            profile = _active_profile()
+            if profile is None:
+                st.error("请先在“AI 参数设置”中启用厂商配置")
+            else:
+                try:
+                    with st.status("正在调用 AI 结构化", expanded=True) as status:
+                        progress = st.progress(0.0)
+
+                        def callback(current: int, total: int, title: str) -> None:
+                            progress.progress(
+                                current / max(total, 1),
+                                text=f"{current}/{total} · {title}",
+                            )
+
+                        result = INGEST.structure_document(
+                            document_id=selected_document["id"],
+                            profile=profile,
+                            force=bool(units),
+                            progress=callback,
+                        )
+                        status.update(
+                            label=(
+                                f"完成 {result['completed']}，"
+                                f"失败 {result['failed']}"
+                            ),
+                            state=(
+                                "complete"
+                                if not result["failed"]
+                                else "error"
+                            ),
+                        )
+                    if result["errors"]:
+                        for error in result["errors"][:5]:
+                            st.code(error, language=None)
+                    _rerun()
+                except Exception as exc:
+                    _show_error(exc)
+        if st.button(
+            "全选",
+            icon=":material/select_all:",
+            key=f"material_select_all_{selected_document['id']}",
+            disabled=not units,
+        ):
+            _set_material_unit_selection(
+                selected_document["id"],
+                unit_ids,
+                selected=True,
+            )
+            st.rerun()
+        if st.button(
+            "退出回收站" if st.session_state.get(trash_key) else "回收站",
+            icon=":material/delete_sweep:",
+            key=f"material_trash_{selected_document['id']}",
+        ):
+            st.session_state[trash_key] = not st.session_state.get(trash_key)
+            st.rerun()
+        if st.button(
+            "设为已确认",
+            icon=":material/check_circle:",
+            key=f"material_confirm_selected_{selected_document['id']}",
+            disabled=not selected_ids,
+        ):
+            REPO.set_units_status(selected_ids, UnitStatus.VERIFIED.value)
+            INGEST.sync_material_exports(selected_material["id"])
+            _set_material_unit_selection(
+                selected_document["id"],
+                unit_ids,
+                selected=False,
+            )
+            _rerun()
+        if st.button(
+            "删除",
+            icon=":material/delete:",
+            key=f"material_delete_selected_{selected_document['id']}",
+            disabled=not selected_ids,
+        ):
+            REPO.soft_delete_units(selected_ids)
+            INGEST.sync_material_exports(selected_material["id"])
+            _set_material_unit_selection(
+                selected_document["id"],
+                unit_ids,
+                selected=False,
+            )
+            _rerun()
+
+    if st.session_state.get(trash_key):
+        deleted_units = [
+            unit
+            for unit in REPO.list_units(
+                document_id=selected_document["id"],
+                include_deleted=True,
+            )
+            if unit.get("deleted_at")
+        ]
+        st.subheader("回收站")
+        if not deleted_units:
+            st.caption("回收站为空。")
+        for unit in deleted_units:
+            with st.container(border=True):
+                info, action = st.columns([5, 1])
+                info.markdown(f"**{unit['title']}**")
+                info.caption(
+                    f"{_material_unit_type_options(material_type).get(unit['unit_type'], unit['unit_type'])} · "
+                    f"{manage_status_labels.get(unit['status'], unit['status'])}"
+                )
+                if action.button(
+                    "恢复",
+                    key=f"material_restore_{unit['id']}",
+                    width="stretch",
+                ):
+                    REPO.restore_units([unit["id"]])
+                    INGEST.sync_material_exports(selected_material["id"])
+                    _rerun()
+        return
+
+    st.markdown(
+        f":green-badge[已确认 {sum(unit['status'] == UnitStatus.VERIFIED.value for unit in units)}] "
+        f":gray-badge[草稿 {sum(unit['status'] == UnitStatus.DRAFT.value for unit in units)}] "
+        f":orange-badge[待审核 {sum(unit['status'] == UnitStatus.NEEDS_REVIEW.value for unit in units)}]"
+    )
+    if not units:
+        st.info("该切片尚未结构化，可使用上方“AI 结构化”开始处理。")
+        return
+
+    type_labels = _material_unit_type_options(material_type)
+    directory, content_area = st.columns([1, 3], gap="large")
+    with directory:
+        with st.container(key="material_manage_directory"):
+            st.markdown("**目录**")
+            for unit in units:
+                unit_id = str(unit["id"])
+                check_col, title_col, status_col = st.columns([0.14, 0.58, 0.28])
+                directory_key = _material_unit_checkbox_key(
+                    selected_document["id"],
+                    "directory",
+                    unit_id,
+                )
+                content_key = _material_unit_checkbox_key(
+                    selected_document["id"],
+                    "content",
+                    unit_id,
+                )
+                check_col.checkbox(
+                    f"选择目录条目 {unit['title']}",
+                    key=directory_key,
+                    label_visibility="collapsed",
+                    on_change=_sync_material_unit_selection,
+                    args=(
+                        selected_document["id"],
+                        unit_id,
+                        directory_key,
+                        content_key,
+                    ),
+                )
+                title_col.markdown(f"**{unit['title']}**")
+                status_col.markdown(
+                    f":gray-badge[{manage_status_labels.get(unit['status'], unit['status'])}]"
+                )
+
+    with content_area:
+        editing_id = st.session_state.get(editing_key)
+        for unit in units:
+            unit_id = str(unit["id"])
+            with st.container(border=True):
+                check_col, title_col, type_col, status_col, edit_col, delete_col = (
+                    st.columns([0.08, 0.38, 0.18, 0.16, 0.1, 0.1])
+                )
+                content_key = _material_unit_checkbox_key(
+                    selected_document["id"],
+                    "content",
+                    unit_id,
+                )
+                directory_key = _material_unit_checkbox_key(
+                    selected_document["id"],
+                    "directory",
+                    unit_id,
+                )
+                check_col.checkbox(
+                    f"选择内容条目 {unit['title']}",
+                    key=content_key,
+                    label_visibility="collapsed",
+                    on_change=_sync_material_unit_selection,
+                    args=(
+                        selected_document["id"],
+                        unit_id,
+                        content_key,
+                        directory_key,
+                    ),
+                )
+                title_col.markdown(f"**{unit['title']}**")
+                type_col.markdown(
+                    f":blue-badge[{type_labels.get(unit['unit_type'], unit['unit_type'])}]"
+                )
+                status_col.markdown(
+                    f":gray-badge[{manage_status_labels.get(unit['status'], unit['status'])}]"
+                )
+                if edit_col.button(
+                    "编辑",
+                    key=f"material_edit_unit_{unit_id}",
+                    width="stretch",
+                ):
+                    st.session_state[editing_key] = (
+                        None if editing_id == unit_id else unit_id
+                    )
+                    st.rerun()
+                if delete_col.button(
+                    "删除",
+                    key=f"material_delete_unit_{unit_id}",
+                    width="stretch",
+                ):
+                    REPO.soft_delete_units([unit_id])
+                    INGEST.sync_material_exports(selected_material["id"])
+                    _rerun()
+
+                if editing_id == unit_id:
+                    type_options = list(type_labels)
+                    if unit["unit_type"] not in type_options:
+                        type_options.append(unit["unit_type"])
+                    status_options = [status.value for status in UnitStatus]
+                    with st.form(f"material_edit_form_{unit_id}", border=False):
+                        edited_title = st.text_input(
+                            "标题",
+                            value=unit["title"],
+                        )
+                        edited_type = st.selectbox(
+                            "类型",
+                            type_options,
+                            index=type_options.index(unit["unit_type"]),
+                            format_func=lambda value: type_labels.get(
+                                value,
+                                value,
+                            ),
+                        )
+                        edited_status = st.selectbox(
+                            "状态",
+                            status_options,
+                            index=status_options.index(unit["status"]),
+                            format_func=lambda value: manage_status_labels.get(
+                                value,
+                                value,
+                            ),
+                        )
+                        edited_content = st.text_area(
+                            "内容",
+                            value=unit["content"],
+                            height=260,
+                        )
+                        submitted = st.form_submit_button(
+                            "保存修改",
+                            type="primary",
+                        )
+                    if submitted:
+                        REPO.update_unit(
+                            unit_id=unit_id,
+                            title=edited_title,
+                            unit_type=edited_type,
+                            content=edited_content,
+                        )
+                        if edited_status != UnitStatus.DRAFT.value:
+                            REPO.set_units_status([unit_id], edited_status)
+                        INGEST.sync_material_exports(selected_material["id"])
+                        st.session_state[editing_key] = None
+                        _rerun()
+                else:
+                    st.divider()
+                    st.markdown(unit["content"])
 
 
 def _render_material_browser(material_type: str) -> None:
@@ -724,57 +1526,39 @@ def _render_material_browser(material_type: str) -> None:
             color="red" if warning_pages else "gray",
         )
 
+    if units:
+        _render_material_unit_workspace(units)
+        return
+
     directory, content = st.columns([1, 3], gap="large")
     with directory:
         with st.container(key="material_directory"):
             st.markdown("**目录**")
-            if units:
-                for unit in units:
-                    st.markdown(f"**{unit['title']}**")
-                    st.badge(
-                        STATUS_LABELS.get(unit["status"], unit["status"]),
-                        color={
-                            UnitStatus.VERIFIED.value: "green",
-                            UnitStatus.NEEDS_REVIEW.value: "orange",
-                            UnitStatus.DRAFT.value: "gray",
-                        }.get(unit["status"], "blue"),
-                    )
-            else:
-                st.caption("该切片尚未结构化。")
-                if st.button(
-                    "前往编辑并开始结构化",
-                    type="primary",
-                    icon=":material/edit:",
-                    width="stretch",
-                    key=f"material_go_edit_{selected_document['id']}",
-                ):
-                    st.session_state["_pending_material_section"] = {
-                        "item": (
-                            "textbook"
-                            if material_type == MaterialType.TEXTBOOK.value
-                            else "standard"
-                        ),
-                        "section": "编辑",
-                    }
-                    st.session_state["_pending_material_library_id"] = (
-                        selected_material["id"]
-                    )
-                    st.session_state["_pending_material_library_document_id"] = (
-                        selected_document["id"]
-                    )
-                    st.rerun()
+            st.caption("该切片尚未结构化。")
+            if st.button(
+                "前往编辑并开始结构化",
+                type="primary",
+                icon=":material/edit:",
+                width="stretch",
+                key=f"material_go_edit_{selected_document['id']}",
+            ):
+                st.session_state["_pending_material_section"] = {
+                    "item": (
+                        "textbook"
+                        if material_type == MaterialType.TEXTBOOK.value
+                        else "standard"
+                    ),
+                    "section": "AI结构化和管理",
+                }
+                st.session_state["_pending_material_library_id"] = (
+                    selected_material["id"]
+                )
+                st.session_state["_pending_material_library_document_id"] = (
+                    selected_document["id"]
+                )
+                st.rerun()
     with content:
-        if units:
-            with st.container(key="material_unit_blocks"):
-                for unit in units:
-                    with st.container(
-                        key=f"material_unit_block_{unit['id']}",
-                    ):
-                        st.markdown(f"### {unit['title']}")
-                        st.divider()
-                        st.markdown(unit["content"])
-        else:
-            st.info("完成结构化后，这里将按目录显示各个单元的内容块。")
+        st.info("完成结构化后，这里将按目录显示各个单元的内容块。")
 
 
 def render_material_library(
@@ -1454,7 +2238,10 @@ def _render_material_center_top_nav() -> str:
 
 
 def _render_material_center_section_nav(item: dict[str, Any]) -> str:
-    options = ["浏览", "编辑", "导入"]
+    if item["kind"] == "material":
+        options = ["浏览", "AI结构化和管理", "导入和导出"]
+    else:
+        options = ["浏览", "编辑", "导入和导出"]
     if item["key"] == "answers":
         options.append("异常检测")
     control_key = f"material_section_{item['key']}"
@@ -1484,15 +2271,12 @@ def render_material_center() -> None:
     item = MATERIAL_CENTER_ITEM_BY_KEY[active_key]
     section = _render_material_center_section_nav(item)
     if item["kind"] == "material":
-        if section == "导入":
-            render_import_tab(item["data_type"])
+        if section == "导入和导出":
+            _render_material_import_export(item["data_type"])
         elif section == "浏览":
             _render_material_browser(item["data_type"])
         else:
-            render_material_library(
-                item["data_type"],
-                mode="edit",
-            )
+            _render_material_management(item["data_type"])
         return
 
     dataset_id = render_dataset_context(LEARNING_DATA)
@@ -1504,7 +2288,7 @@ def render_material_center() -> None:
     mode = {
         "浏览": "browse",
         "编辑": "edit",
-        "导入": "import",
+        "导入和导出": "import",
     }[section]
     render_data_type_page(
         LEARNING_DATA,

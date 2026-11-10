@@ -1,0 +1,19 @@
+{
+  "units": [
+    {
+      "unit_type": "other",
+      "title": "第一章 有理数",
+      "content": "第一章　有理数",
+      "source_refs": [
+        {
+          "page": 1,
+          "quote": "第一章　有理数"
+        }
+      ],
+      "related_unit_ids": [],
+      "review_warnings": [
+        "本页仅见章节标题，未提供可供进一步结构化的正文内容。"
+      ]
+    }
+  ]
+}

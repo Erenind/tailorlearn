@@ -205,6 +205,42 @@ def _preview_frame(preview: ImportPreview) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _render_data_export(
+    service: LearningDataService,
+    dataset_id: str,
+    spec: DataTypeSpec,
+) -> None:
+    rows = service.list_records(
+        dataset_id,
+        spec.key,
+        latest_answers=spec.key == "answer",
+    )
+    with st.expander(
+        f"导出{spec.label}",
+        expanded=bool(rows),
+        icon=":material/download:",
+    ):
+        if not rows:
+            st.caption(f"暂无可导出的{spec.label}数据。")
+            return
+        csv_content, filename = service.export_csv(
+            dataset_id,
+            spec.key,
+            rows=rows,
+        )
+        suffix = "（仅最新修订）" if spec.key == "answer" else ""
+        st.caption(f"将导出 {len(rows)} 条记录{suffix}。")
+        st.download_button(
+            f"下载{spec.label} CSV",
+            data=csv_content,
+            file_name=filename,
+            mime="text/csv",
+            icon=":material/download:",
+            width="stretch",
+            key=f"learning_export_{dataset_id}_{spec.key}",
+        )
+
+
 def _render_import(
     service: LearningDataService,
     dataset_id: str,
@@ -734,6 +770,7 @@ def _render_type(
             "可切换“仅最新修订”。"
         )
     if mode == "import":
+        _render_data_export(service, dataset_id, spec)
         _render_import(
             service,
             dataset_id,

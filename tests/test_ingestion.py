@@ -63,3 +63,27 @@ def test_process_document_resumes_from_cached_pages(
     assert len(pages) == 3
     assert pages[0]["final_text"] == "缓存页"
 
+
+def test_reprocess_document_forces_fresh_text_extraction(
+    tmp_path: Path,
+    sample_pdf: Path,
+):
+    paths = AppPaths(tmp_path)
+    paths.ensure()
+    repo = Repository(paths.database_file)
+    repo.initialize()
+    service = IngestionService(paths, repo)
+    _, documents = service.create_material_from_paths(
+        name="重新识别测试课本",
+        material_type="textbook",
+        pdf_paths=[sample_pdf],
+    )
+    document_id = documents[0]["id"]
+    service.process_document(document_id)
+    repo.update_page_text(document_id, 1, "人工修改后的缓存文本")
+
+    result = service.reprocess_document(document_id)
+
+    assert result["pages"] == 3
+    assert result["structure_mode"] == "rebuilt-sections"
+    assert repo.list_pages(document_id)[0]["final_text"] != "人工修改后的缓存文本"
