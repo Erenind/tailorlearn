@@ -9,46 +9,32 @@ import streamlit as st
 class PageMeta:
     label: str
     icon: str
-    eyebrow: str
-    description: str
 
 
 PAGE_META: dict[str, PageMeta] = {
     "学习内容梳理": PageMeta(
         label="学习内容梳理",
         icon="outline.svg",
-        eyebrow="任务 1 · 内容基准",
-        description="按主题梳理学习内容、课标要求、必要联系与教材出处，并生成可核对的成果包。",
     ),
     "材料中心": PageMeta(
         label="材料中心",
         icon="material_center.svg",
-        eyebrow="材料与学情",
-        description="集中管理课本、课程标准与六类学情数据，支持浏览、编辑、导入和作答异常检测。",
     ),
     "学生分析": PageMeta(
         label="学生分析",
         icon="student.svg",
-        eyebrow="任务 2 · 个体表现",
-        description="从有效作答中观察学生表现、证据充分度与节点变化，信息不足时不作负面判定。",
     ),
     "班级分析": PageMeta(
         label="班级分析",
         icon="class.svg",
-        eyebrow="任务 2 · 群体表现",
-        description="比较班级主题表现与证据覆盖，识别下一步最值得补充观察的共同主题。",
     ),
     "教学建议": PageMeta(
         label="教学建议",
         icon="teaching.svg",
-        eyebrow="任务 3 · 教学决策",
-        description="基于班级证据、分层观察和现有材料生成可审核的教学建议与脱敏案例。",
     ),
     "AI 参数设置": PageMeta(
         label="AI 参数设置",
         icon="settings.svg",
-        eyebrow="系统配置",
-        description="管理本机 AI 厂商配置。日常工作以内容证据为主，参数仅在使用 AI 能力时需要维护。",
     ),
 }
 
@@ -188,28 +174,6 @@ def apply_app_style() -> None:
             margin: 0;
             object-fit: contain;
         }
-        .st-key-page_header {
-            padding: 1.08rem 1.22rem 0.92rem;
-            border: 1px solid #E1E5EB;
-            border-radius: 1rem;
-            background: #FFFFFF;
-            box-shadow: 0 1px 2px rgba(24, 34, 48, 0.04);
-            margin-bottom: 0.8rem;
-        }
-        .st-key-page_header h1 {
-            margin: 0.28rem 0 0.2rem;
-            color: #172033;
-            font-size: 1.78rem;
-            line-height: 1.2;
-            letter-spacing: -0.025em;
-        }
-        .st-key-page_header p {
-            max-width: 72rem;
-            margin-bottom: 0;
-            color: #667085;
-            font-size: 0.9rem;
-            line-height: 1.55;
-        }
         .st-key-provider_summary {
             margin-bottom: 0.35rem;
         }
@@ -279,7 +243,4 @@ def render_sidebar_navigation() -> str:
 
 def render_page_header(page: str) -> None:
     meta = PAGE_META[page]
-    with st.container(key="page_header"):
-        st.markdown(f":blue-badge[{meta.eyebrow}]")
-        st.title(meta.label)
-        st.caption(meta.description)
+    st.title(meta.label)
