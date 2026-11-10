@@ -25,6 +25,11 @@ from tailorlearn.providers import ProviderStore
 from tailorlearn.student_diagnosis import StudentDiagnosisService
 from tailorlearn.teaching_recommendations import TeachingRecommendationService
 from tailorlearn.teaching_recommendations_ui import render_teaching_recommendations_page
+from tailorlearn.ui import (
+    apply_app_style,
+    render_page_header,
+    render_sidebar_navigation,
+)
 
 
 st.set_page_config(
@@ -131,8 +136,6 @@ def _on_provider_selected() -> None:
 
 
 def render_ai_settings() -> None:
-    st.title("AI 参数设置")
-    st.caption("支持多个 OpenAI-compatible 厂商配置；密钥仅保存在本机。")
     notice = st.session_state.pop("_provider_settings_notice", None)
     if notice:
         st.success(notice)
@@ -194,90 +197,114 @@ def render_ai_settings() -> None:
         None,
     )
 
-    with st.form("provider_form"):
-        vendor_name = st.text_input(
-            "厂商名称",
-            key=PROVIDER_FIELD_KEYS["vendor_name"],
-            placeholder="例如 OpenAI、DeepSeek、Moonshot",
-        )
-        base_url = st.text_input(
-            "Base URL",
-            key=PROVIDER_FIELD_KEYS["base_url"],
-            help="填写 OpenAI-compatible API 根地址，不在代码中自动追加 /v1。",
-        )
-        model = st.text_input(
-            "默认模型",
-            key=PROVIDER_FIELD_KEYS["model"],
-            placeholder="填写服务端支持的模型名称",
-        )
-        if selected and selected.api_key:
-            st.text_input(
-                "已保存的密钥",
-                value=selected.masked_api_key,
-                disabled=True,
+    with st.container(key="provider_summary"):
+        if selected:
+            summary = st.columns(3)
+            summary[0].metric(
+                "当前厂商",
+                selected.vendor_name or "未填写",
+                border=True,
             )
-        api_key = st.text_input(
-            "更新 API Key（留空保留）",
-            key=PROVIDER_FIELD_KEYS["api_key"],
-            type="password",
-            placeholder=(
-                selected.masked_api_key
-                if selected and selected.api_key
-                else "请输入 API Key"
-            ),
-            help=(
-                "已保存的密钥不会回填到浏览器。留空提交会保留当前密钥。"
-                if selected
-                else "首次创建时必须填写，之后可单独清除。"
-            ),
-        )
-        if selected and selected.api_key:
-            st.caption(
-                "已安全保存；完整密钥不会回填到浏览器。"
-                "上方密码输入框仅用于替换密钥，留空提交会保留当前值。"
+            summary[1].metric(
+                "默认模型",
+                selected.model or "未填写",
+                border=True,
+            )
+            summary[2].metric(
+                "密钥状态",
+                "已安全保存" if selected.api_key else "尚未设置",
+                border=True,
             )
         else:
-            st.caption("当前尚未保存 API Key。")
-        make_active = st.checkbox(
-            "保存后设为当前配置",
-            value=selected is None or selected.id == config.active_profile_id,
-        )
-        submitted = st.form_submit_button("保存配置", type="primary")
-    if submitted:
-        try:
-            profile = PROVIDERS.upsert(
-                profile_id=selected.id if selected else None,
-                vendor_name=vendor_name,
-                base_url=base_url,
-                model=model,
-                api_key=api_key if api_key else None,
+            st.caption("正在创建新的厂商配置。保存后会在上方显示配置摘要。")
+
+    with st.expander(
+        "编辑厂商配置",
+        expanded=selected is None,
+        icon=":material/tune:",
+    ):
+        with st.form("provider_form"):
+            vendor_name = st.text_input(
+                "厂商名称",
+                key=PROVIDER_FIELD_KEYS["vendor_name"],
+                placeholder="例如 OpenAI、DeepSeek、Moonshot",
             )
-            if make_active:
-                PROVIDERS.set_active(profile.id)
-            st.session_state["_pending_provider_select"] = profile.id
-            st.session_state["_provider_settings_notice"] = "厂商配置已保存"
-            _rerun()
-        except Exception as exc:
-            _show_error(exc)
+            base_url = st.text_input(
+                "Base URL",
+                key=PROVIDER_FIELD_KEYS["base_url"],
+                help="填写 OpenAI-compatible API 根地址，不在代码中自动追加 /v1。",
+            )
+            model = st.text_input(
+                "默认模型",
+                key=PROVIDER_FIELD_KEYS["model"],
+                placeholder="填写服务端支持的模型名称",
+            )
+            if selected and selected.api_key:
+                st.text_input(
+                    "已保存的密钥",
+                    value=selected.masked_api_key,
+                    disabled=True,
+                )
+            api_key = st.text_input(
+                "更新 API Key（留空保留）",
+                key=PROVIDER_FIELD_KEYS["api_key"],
+                type="password",
+                placeholder=(
+                    selected.masked_api_key
+                    if selected and selected.api_key
+                    else "请输入 API Key"
+                ),
+                help=(
+                    "已保存的密钥不会回填到浏览器。留空提交会保留当前密钥。"
+                    if selected
+                    else "首次创建时必须填写，之后可单独清除。"
+                ),
+            )
+            if selected and selected.api_key:
+                st.caption(
+                    "已安全保存；完整密钥不会回填到浏览器。"
+                    "上方密码输入框仅用于替换密钥，留空提交会保留当前值。"
+                )
+            else:
+                st.caption("当前尚未保存 API Key。")
+            make_active = st.checkbox(
+                "保存后设为当前配置",
+                value=selected is None or selected.id == config.active_profile_id,
+            )
+            submitted = st.form_submit_button("保存配置", type="primary")
+        if submitted:
+            try:
+                profile = PROVIDERS.upsert(
+                    profile_id=selected.id if selected else None,
+                    vendor_name=vendor_name,
+                    base_url=base_url,
+                    model=model,
+                    api_key=api_key if api_key else None,
+                )
+                if make_active:
+                    PROVIDERS.set_active(profile.id)
+                st.session_state["_pending_provider_select"] = profile.id
+                st.session_state["_provider_settings_notice"] = "厂商配置已保存"
+                _rerun()
+            except Exception as exc:
+                _show_error(exc)
 
     if selected:
-        key_status = "已保存" if selected.api_key else "未设置"
-        st.info(
-            f"当前配置：{selected.vendor_name} · {selected.model} · "
-            f"Key {key_status}"
-            + (
-                f"（{selected.masked_api_key}）"
-                if selected.api_key
-                else ""
-            )
-            + f" · `{selected.base_url}`"
-        )
+        st.caption(f"接口地址：{selected.base_url}")
         action_col_1, action_col_2, action_col_3 = st.columns(3)
-        if action_col_1.button("设为当前配置", width="stretch"):
+        if action_col_1.button(
+            "设为当前配置",
+            icon=":material/check_circle:",
+            width="stretch",
+        ):
             PROVIDERS.set_active(selected.id)
             st.session_state["_provider_settings_notice"] = "当前配置已切换"
             _rerun()
-        if action_col_2.button("测试连接", width="stretch"):
+        if action_col_2.button(
+            "测试连接",
+            icon=":material/sync:",
+            width="stretch",
+        ):
             try:
                 with st.spinner("正在测试 AI 连接..."):
                     message = OpenAICompatibleClient(selected).test_connection()
@@ -286,7 +313,11 @@ def render_ai_settings() -> None:
                 st.error(str(exc))
             except Exception as exc:
                 _show_error(exc)
-        if action_col_3.button("清除密钥", width="stretch"):
+        if action_col_3.button(
+            "清除密钥",
+            icon=":material/key_off:",
+            width="stretch",
+        ):
             PROVIDERS.clear_key(selected.id)
             st.session_state["_pending_clear_provider_key"] = True
             st.session_state["_provider_settings_notice"] = (
@@ -408,13 +439,17 @@ def render_import_tab(material_type: str) -> None:
             type=["pdf"],
             accept_multiple_files=True,
         )
-        meta_columns = st.columns(3)
-        subject = meta_columns[0].text_input("学科（可留空推测）")
-        stage = meta_columns[1].text_input("学段（可留空）")
-        grade = meta_columns[2].text_input("年级（可留空）")
-        meta_columns_2 = st.columns(3)
-        semester = meta_columns_2[0].text_input("学期（可留空）")
-        edition = meta_columns_2[1].text_input("教材版本（可留空）")
+        with st.expander(
+            "补充材料信息（可选）",
+            icon=":material/info:",
+        ):
+            meta_columns = st.columns(3)
+            subject = meta_columns[0].text_input("学科（可留空推测）")
+            stage = meta_columns[1].text_input("学段（可留空）")
+            grade = meta_columns[2].text_input("年级（可留空）")
+            meta_columns_2 = st.columns(3)
+            semester = meta_columns_2[0].text_input("学期（可留空）")
+            edition = meta_columns_2[1].text_input("教材版本（可留空）")
         submitted = st.form_submit_button("保存并提取文字", type="primary")
     if submitted:
         if append_mode and append_id is None:
@@ -906,8 +941,6 @@ def render_material_library() -> None:
 
 
 def render_subject_analysis() -> None:
-    st.title("学科分析")
-    st.caption("结构化导入阶段不生成最终知识点，也不建立跨材料联系。")
     import_textbook, import_standard, library = st.tabs(
         ["导入课本", "导入课程标准", "材料库与审核"]
     )
@@ -920,21 +953,9 @@ def render_subject_analysis() -> None:
 
 
 def main() -> None:
-    st.sidebar.title("TailorLearn")
-    page = st.sidebar.radio(
-        "导航",
-        [
-            "AI 参数设置",
-            "学科分析",
-            "学习内容梳理",
-            "学情数据",
-            "学生分析",
-            "班级分析",
-            "教学建议",
-        ],
-        key="main_navigation",
-    )
-    st.sidebar.caption("学习内容梳理可输出可机读成果包")
+    apply_app_style()
+    page = render_sidebar_navigation()
+    render_page_header(page)
     if page == "AI 参数设置":
         render_ai_settings()
     elif page == "学科分析":
@@ -952,7 +973,7 @@ def main() -> None:
         )
     elif page == "班级分析":
         render_class_analysis_page(ANALYTICS, LEARNING_DATA)
-    else:
+    elif page == "教学建议":
         render_teaching_recommendations_page(
             TEACHING_RECOMMENDATIONS,
             LEARNING_DATA,

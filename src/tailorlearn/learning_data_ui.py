@@ -847,11 +847,6 @@ def _render_dataset_management(
 
 
 def render_learning_data_page(service: LearningDataService) -> None:
-    st.title("学情数据")
-    st.caption(
-        "按数据集隔离六类赛题 CSV，支持独立导入导出、"
-        "重复合并、可恢复删除和确定性质量检查。"
-    )
     _show_notice("learning_dataset_notice")
     with st.expander("新建学情数据集", expanded=not service.list_datasets()):
         with st.form("learning_dataset_create"):

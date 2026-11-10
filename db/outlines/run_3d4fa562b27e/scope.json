@@ -1,0 +1,403 @@
+{
+  "dataset": {
+    "id": "lds_7b8931b7eec0",
+    "name": "模拟2",
+    "description": ""
+  },
+  "themes": [
+    {
+      "theme_code": "T01",
+      "theme_name": "代数式与整式运算",
+      "theme_goal": "能用代数式表示简单数量关系、代入求值，并进行整式加减与解释。",
+      "indicators": [
+        {
+          "indicator_code": "T01I1",
+          "indicator_name": "表示数量关系并代入求值",
+          "standard_ref": "CR01",
+          "standard_page": "62／55",
+          "textbook_page": "上册68—109"
+        },
+        {
+          "indicator_code": "T01I2",
+          "indicator_name": "识别同类项、去括号并化简",
+          "standard_ref": "CR01",
+          "standard_page": "62／55",
+          "textbook_page": "上册68—109"
+        },
+        {
+          "indicator_code": "T01I3",
+          "indicator_name": "用整式解释具体问题",
+          "standard_ref": "CR01",
+          "standard_page": "62／55",
+          "textbook_page": "上册68—109"
+        }
+      ]
+    },
+    {
+      "theme_code": "T02",
+      "theme_name": "方程与方程组",
+      "theme_goal": "能解一元一次方程和二元一次方程组，依据等量关系建立模型并检验答案。",
+      "indicators": [
+        {
+          "indicator_code": "T02I1",
+          "indicator_name": "运用等式性质解一元一次方程",
+          "standard_ref": "CR02",
+          "standard_page": "63／56",
+          "textbook_page": "上册110—148；下册87—119"
+        },
+        {
+          "indicator_code": "T02I2",
+          "indicator_name": "用消元法解二元一次方程组",
+          "standard_ref": "CR02",
+          "standard_page": "63／56",
+          "textbook_page": "上册110—148；下册87—119"
+        },
+        {
+          "indicator_code": "T02I3",
+          "indicator_name": "列方程或方程组解决简单实际问题并检验",
+          "standard_ref": "CR02",
+          "standard_page": "63／56",
+          "textbook_page": "上册110—148；下册87—119"
+        }
+      ]
+    },
+    {
+      "theme_code": "T03",
+      "theme_name": "不等式与不等式组",
+      "theme_goal": "能解一元一次不等式及简单不等式组，表示解集，并解决范围约束问题。",
+      "indicators": [
+        {
+          "indicator_code": "T03I1",
+          "indicator_name": "运用不等式性质求解，负数乘除时正确改变方向",
+          "standard_ref": "CR03",
+          "standard_page": "63／56",
+          "textbook_page": "下册120—145"
+        },
+        {
+          "indicator_code": "T03I2",
+          "indicator_name": "求两个一元一次不等式解集的交集",
+          "standard_ref": "CR03",
+          "standard_page": "63／56",
+          "textbook_page": "下册120—145"
+        },
+        {
+          "indicator_code": "T03I3",
+          "indicator_name": "根据实际限制列不等式并解释取值范围",
+          "standard_ref": "CR03",
+          "standard_page": "63／56",
+          "textbook_page": "下册120—145"
+        }
+      ]
+    }
+  ],
+  "standard": {
+    "material_set_id": "set_790c195dad4d",
+    "material_name": "义务教育数学课程标准（2022年版）",
+    "document_id": "doc_1183b95c_5dad4d",
+    "file_name": "课程标准_2022.pdf",
+    "page_window": [
+      55,
+      63
+    ],
+    "themes": [
+      {
+        "theme_code": "T01",
+        "theme_name": "代数式与整式运算",
+        "block_title": "代数式",
+        "level": 2,
+        "page_start": 62,
+        "page_end": 63,
+        "clause_count": 9,
+        "matched": true
+      },
+      {
+        "theme_code": "T02",
+        "theme_name": "方程与方程组",
+        "block_title": "方程与方程组",
+        "level": 2,
+        "page_start": 63,
+        "page_end": 63,
+        "clause_count": 8,
+        "matched": true
+      },
+      {
+        "theme_code": "T03",
+        "theme_name": "不等式与不等式组",
+        "block_title": "不等式与不等式组",
+        "level": 2,
+        "page_start": 63,
+        "page_end": 63,
+        "clause_count": 3,
+        "matched": true
+      }
+    ]
+  },
+  "textbook": {
+    "material_set_id": "set_d2790a62db59",
+    "material_name": "七年级数学课本切片（B02）",
+    "file_names": [
+      "B02_相关资料切片.pdf",
+      "B05_相关资料切片.pdf",
+      "B06_相关资料切片.pdf"
+    ],
+    "sections": [
+      {
+        "section_id": "doc_3f5e0575_62db59_p002_s002",
+        "document_id": "doc_3f5e0575_62db59",
+        "file_name": "B05_相关资料切片.pdf",
+        "level": 2,
+        "title": "3.1 列代数式表示数量关系",
+        "path": "第三章 代数式 / 3.1 列代数式表示数量关系",
+        "page_start": 2,
+        "page_end": 11,
+        "chapter": "第三章 代数式",
+        "theme_code": "T01",
+        "match_score": 0.595,
+        "theme_name": "代数式与整式运算"
+      },
+      {
+        "section_id": "doc_ccde81c9_62db59_p012_s006",
+        "document_id": "doc_ccde81c9_62db59",
+        "file_name": "B02_相关资料切片.pdf",
+        "level": 2,
+        "title": "11.2 一元一次不等式",
+        "path": "第十一章 不等式与不等式组 / 11.2 一元一次不等式",
+        "page_start": 12,
+        "page_end": 18,
+        "chapter": "第十一章 不等式与不等式组",
+        "theme_code": "T01",
+        "match_score": 0.707,
+        "theme_name": "代数式与整式运算"
+      },
+      {
+        "section_id": "doc_3f5e0575_62db59_p022_s007",
+        "document_id": "doc_3f5e0575_62db59",
+        "file_name": "B05_相关资料切片.pdf",
+        "level": 2,
+        "title": "4.1 整式",
+        "path": "第四章 整式的加减 / 4.1 整式",
+        "page_start": 22,
+        "page_end": 27,
+        "chapter": "第四章 整式的加减",
+        "theme_code": "T01",
+        "match_score": 0.578,
+        "theme_name": "代数式与整式运算"
+      },
+      {
+        "section_id": "doc_3f5e0575_62db59_p028_s008",
+        "document_id": "doc_3f5e0575_62db59",
+        "file_name": "B05_相关资料切片.pdf",
+        "level": 2,
+        "title": "4.2 整式的加法与减法",
+        "path": "第四章 整式的加减 / 4.2 整式的加法与减法",
+        "page_start": 28,
+        "page_end": 33,
+        "chapter": "第四章 整式的加减",
+        "theme_code": "T01",
+        "match_score": 0.72,
+        "theme_name": "代数式与整式运算"
+      },
+      {
+        "section_id": "doc_ccee907e_62db59_p002_s003",
+        "document_id": "doc_ccee907e_62db59",
+        "file_name": "B06_相关资料切片.pdf",
+        "level": 2,
+        "title": "5.1 方程",
+        "path": "第五章 一元一次方程 / 5.1 方程",
+        "page_start": 2,
+        "page_end": 10,
+        "chapter": "第五章 一元一次方程",
+        "theme_code": "T02",
+        "match_score": 0.618,
+        "theme_name": "方程与方程组"
+      },
+      {
+        "section_id": "doc_ccee907e_62db59_p011_s008",
+        "document_id": "doc_ccee907e_62db59",
+        "file_name": "B06_相关资料切片.pdf",
+        "level": 2,
+        "title": "5.2 解一元一次方程",
+        "path": "第五章 一元一次方程 / 5.2 解一元一次方程",
+        "page_start": 11,
+        "page_end": 23,
+        "chapter": "第五章 一元一次方程",
+        "theme_code": "T02",
+        "match_score": 0.7,
+        "theme_name": "方程与方程组"
+      },
+      {
+        "section_id": "doc_ccee907e_62db59_p024_s009",
+        "document_id": "doc_ccee907e_62db59",
+        "file_name": "B06_相关资料切片.pdf",
+        "level": 2,
+        "title": "5.3 实际问题与一元一次方程",
+        "path": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+        "page_start": 24,
+        "page_end": 39,
+        "chapter": "第五章 一元一次方程",
+        "theme_code": "T02",
+        "match_score": 0.714,
+        "theme_name": "方程与方程组"
+      },
+      {
+        "section_id": "doc_ccee907e_62db59_p041_s012",
+        "document_id": "doc_ccee907e_62db59",
+        "file_name": "B06_相关资料切片.pdf",
+        "level": 2,
+        "title": "10.1 二元一次方程组的概念",
+        "path": "第十章 二元一次方程组 / 10.1 二元一次方程组的概念",
+        "page_start": 41,
+        "page_end": 43,
+        "chapter": "第十章 二元一次方程组",
+        "theme_code": "T02",
+        "match_score": 0.628,
+        "theme_name": "方程与方程组"
+      },
+      {
+        "section_id": "doc_ccee907e_62db59_p044_s013",
+        "document_id": "doc_ccee907e_62db59",
+        "file_name": "B06_相关资料切片.pdf",
+        "level": 2,
+        "title": "10.2 消元———解二元一次方程组",
+        "path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组",
+        "page_start": 44,
+        "page_end": 53,
+        "chapter": "第十章 二元一次方程组",
+        "theme_code": "T02",
+        "match_score": 0.643,
+        "theme_name": "方程与方程组"
+      },
+      {
+        "section_id": "doc_ccee907e_62db59_p054_s016",
+        "document_id": "doc_ccee907e_62db59",
+        "file_name": "B06_相关资料切片.pdf",
+        "level": 2,
+        "title": "10.3 实际问题与二元一次方程组",
+        "path": "第十章 二元一次方程组 / 10.3 实际问题与二元一次方程组",
+        "page_start": 54,
+        "page_end": 71,
+        "chapter": "第十章 二元一次方程组",
+        "theme_code": "T02",
+        "match_score": 0.798,
+        "theme_name": "方程与方程组"
+      },
+      {
+        "section_id": "doc_ccde81c9_62db59_p002_s003",
+        "document_id": "doc_ccde81c9_62db59",
+        "file_name": "B02_相关资料切片.pdf",
+        "level": 2,
+        "title": "11.1 不等式",
+        "path": "第十一章 不等式与不等式组 / 11.1 不等式",
+        "page_start": 2,
+        "page_end": 11,
+        "chapter": "第十一章 不等式与不等式组",
+        "theme_code": "T03",
+        "match_score": 0.705,
+        "theme_name": "不等式与不等式组"
+      },
+      {
+        "section_id": "doc_3f5e0575_62db59_p012_s003",
+        "document_id": "doc_3f5e0575_62db59",
+        "file_name": "B05_相关资料切片.pdf",
+        "level": 2,
+        "title": "3.2 代数式的值",
+        "path": "第三章 代数式 / 3.2 代数式的值",
+        "page_start": 12,
+        "page_end": 18,
+        "chapter": "第三章 代数式",
+        "theme_code": "T03",
+        "match_score": 0.574,
+        "theme_name": "不等式与不等式组"
+      },
+      {
+        "section_id": "doc_ccde81c9_62db59_p019_s007",
+        "document_id": "doc_ccde81c9_62db59",
+        "file_name": "B02_相关资料切片.pdf",
+        "level": 2,
+        "title": "11.3 一元一次不等式组",
+        "path": "第十一章 不等式与不等式组 / 11.3 一元一次不等式组",
+        "page_start": 19,
+        "page_end": 26,
+        "chapter": "第十一章 不等式与不等式组",
+        "theme_code": "T03",
+        "match_score": 0.677,
+        "theme_name": "不等式与不等式组"
+      }
+    ],
+    "excluded": [
+      {
+        "file_name": "B01_相关资料切片.pdf",
+        "chapter": "第八章 实数",
+        "page_start": 2,
+        "page_end": 24,
+        "section_count": 3,
+        "titles": [
+          "8.1 平方根",
+          "8.2 立方根",
+          "8.3 实数及其简单运算"
+        ]
+      },
+      {
+        "file_name": "B03_相关资料切片.pdf",
+        "chapter": "第十二章 数据的收集、整理与描述",
+        "page_start": 2,
+        "page_end": 38,
+        "section_count": 2,
+        "titles": [
+          "12.1 统计调查",
+          "12.2 用统计图描述数据"
+        ]
+      },
+      {
+        "file_name": "B04_相关资料切片.pdf",
+        "chapter": "第六章 几何图形初步",
+        "page_start": 2,
+        "page_end": 21,
+        "section_count": 2,
+        "titles": [
+          "6.1 几何图形",
+          "6.2 直线、射线、线段"
+        ]
+      },
+      {
+        "file_name": "B07_相关资料切片.pdf",
+        "chapter": "第二章 有理数的运算",
+        "page_start": 2,
+        "page_end": 39,
+        "section_count": 3,
+        "titles": [
+          "2.1 有理数的加法与减法",
+          "2.2 有理数的乘法与除法",
+          "2.3 有理数的乘方"
+        ]
+      },
+      {
+        "file_name": "B08_相关资料切片.pdf",
+        "chapter": "第七章 相交线与平行线",
+        "page_start": 2,
+        "page_end": 21,
+        "section_count": 2,
+        "titles": [
+          "7.1 相交线",
+          "7.2 平行线"
+        ]
+      },
+      {
+        "file_name": "B08_相关资料切片.pdf",
+        "chapter": "目录",
+        "page_start": 26,
+        "page_end": 38,
+        "section_count": 1,
+        "titles": [
+          "7.4 平移"
+        ]
+      }
+    ]
+  },
+  "boundary": {
+    "statement": "本次梳理范围：学情数据集“模拟2”；主题 3 个（T01 代数式与整式运算、T02 方程与方程组、T03 不等式与不等式组）；观察指标 9 项；课程标准“义务教育数学课程标准（2022年版）”内容要求“代数式”、“方程与方程组”、“不等式与不等式组”（文件第 62–63 页，正文第 55–56 页）；教材“七年级数学课本切片（B02）”3 份切片、5 个章节、13 个小节（B02_相关资料切片.pdf、B05_相关资料切片.pdf、B06_相关资料切片.pdf）。",
+    "excluded_note": "已确定主题范围，其余内容未纳入本次梳理：第八章 实数（B01_相关资料切片.pdf，第 2–24 页，3 个小节）；第十二章 数据的收集、整理与描述（B03_相关资料切片.pdf，第 2–38 页，2 个小节）；第六章 几何图形初步（B04_相关资料切片.pdf，第 2–21 页，2 个小节）；第二章 有理数的运算（B07_相关资料切片.pdf，第 2–39 页，3 个小节）；第七章 相交线与平行线（B08_相关资料切片.pdf，第 2–21 页，2 个小节）；目录（B08_相关资料切片.pdf，第 26–38 页，1 个小节）。",
+    "warnings": []
+  },
+  "created_at": "2026-11-10T05:22:28+00:00"
+}

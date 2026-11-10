@@ -103,6 +103,8 @@ def test_streamlit_restores_provider_selects_new_material_and_selects_all(
     at = AppTest.from_file(str(app_file), default_timeout=20).run()
 
     assert not at.exception
+    at.radio(key="main_navigation").set_value("AI 参数设置").run()
+    assert not at.exception
     assert at.selectbox(key="ai_provider_selector").value == profile.id
     assert at.text_input(key="provider_vendor_name").value == "测试厂商"
     assert at.text_input(key="provider_base_url").value == "https://example.test/v1"
@@ -115,7 +117,7 @@ def test_streamlit_restores_provider_selects_new_material_and_selects_all(
     assert any("已安全保存" in item.value for item in at.caption)
     assert "test-key" not in repr(at.caption)
 
-    at.radio[0].set_value("学科分析").run()
+    at.radio(key="main_navigation").set_value("学科分析").run()
     at.session_state["_pending_material_library_id"] = textbook["id"]
     at.session_state["_material_library_notice"] = "测试导入完成"
     at.run()

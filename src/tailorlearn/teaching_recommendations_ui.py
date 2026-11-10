@@ -145,8 +145,6 @@ def render_teaching_recommendations_page(
     learning: LearningDataService,
     profile: ProviderProfile | None,
 ) -> None:
-    st.title("教学建议")
-    st.caption("AI 仅解释已核验的班级证据；信息不足时只提出补充观察，不判定未掌握。")
     dataset = _dataset_selector(learning)
     if dataset is None:
         return
@@ -160,6 +158,30 @@ def render_teaching_recommendations_page(
     except ValueError as exc:
         st.info(str(exc))
         return
+    summary = st.columns(4)
+    summary[0].metric(
+        "班级主题",
+        len(evidence["class_themes"]),
+        border=True,
+    )
+    summary[1].metric(
+        "证据充分",
+        sum(
+            item["evidence_status"] == "sufficient"
+            for item in evidence["class_themes"]
+        ),
+        border=True,
+    )
+    summary[2].metric(
+        "分层观察",
+        len(evidence["groups"]),
+        border=True,
+    )
+    summary[3].metric(
+        "候选材料",
+        len(evidence["candidate_materials"]),
+        border=True,
+    )
     st.subheader("班级主题证据")
     if evidence["class_themes"]:
         st.dataframe(evidence["class_themes"], hide_index=True, width="stretch")

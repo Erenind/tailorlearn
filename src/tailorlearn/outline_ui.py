@@ -1013,11 +1013,6 @@ def render_outline_page(
     service: OutlineService,
     profile: ProviderProfile | None,
 ) -> None:
-    st.title("学习内容梳理")
-    st.caption(
-        "依据课程标准与配套教材，按指定主题范围整理学习内容、对应要求、"
-        "必要联系和材料出处，作为学情分析与学习建议的共同基准。"
-    )
     _show_notice()
     datasets = service.list_datasets()
     if not datasets:

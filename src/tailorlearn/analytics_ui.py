@@ -335,8 +335,6 @@ def render_student_analysis_page(
     diagnosis: StudentDiagnosisService,
     profile: ProviderProfile | None,
 ) -> None:
-    st.title("学生分析")
-    st.caption("展示已有学习表现与证据充分度；信息不足不解释为未掌握。")
     dataset = _dataset_selector(learning, key="analytics_student_dataset")
     if dataset is None:
         return
@@ -364,12 +362,21 @@ def render_student_analysis_page(
         st.info("所选学生和节点没有作答记录。")
         return
     summary = st.columns(4)
-    summary[0].metric("主题数", len(metrics))
-    summary[1].metric("有效记录", sum(item["scored_records"] for item in metrics))
-    summary[2].metric("待评分/未作答", sum(item["pending_records"] + item["unanswered_records"] for item in metrics))
+    summary[0].metric("主题数", len(metrics), border=True)
+    summary[1].metric(
+        "有效记录",
+        sum(item["scored_records"] for item in metrics),
+        border=True,
+    )
+    summary[2].metric(
+        "待评分/未作答",
+        sum(item["pending_records"] + item["unanswered_records"] for item in metrics),
+        border=True,
+    )
     summary[3].metric(
         "需补充观察",
         sum(item["evidence_status"] != "sufficient" for item in metrics),
+        border=True,
     )
     radar_tab, indicator_tab, trend_tab, evidence_tab, diagnosis_tab = st.tabs(
         ["主题概览", "观察指标", "节点变化", "依据与补充观察", "AI 诊断与教师复核"]
@@ -496,8 +503,6 @@ def render_class_analysis_page(
     analytics: AnalyticsService,
     learning: LearningDataService,
 ) -> None:
-    st.title("班级分析")
-    st.caption("按主题比较班级的已观察表现，并同时呈现证据覆盖。")
     dataset = _dataset_selector(learning, key="analytics_class_dataset")
     if dataset is None:
         return
@@ -506,6 +511,27 @@ def render_class_analysis_page(
     if not metrics:
         st.info("所选范围没有可比较的班级作答记录。")
         return
+    summary = st.columns(4)
+    summary[0].metric(
+        "班级数",
+        len({item["class_code"] for item in metrics}),
+        border=True,
+    )
+    summary[1].metric(
+        "主题数",
+        len({item["theme_code"] for item in metrics}),
+        border=True,
+    )
+    summary[2].metric(
+        "证据充分",
+        sum(item["evidence_status"] == "sufficient" for item in metrics),
+        border=True,
+    )
+    summary[3].metric(
+        "待补充观察",
+        sum(item["evidence_status"] != "sufficient" for item in metrics),
+        border=True,
+    )
     figure = go.Figure()
     for class_code in sorted({item["class_code"] for item in metrics}):
         rows = [item for item in metrics if item["class_code"] == class_code]
@@ -623,4 +649,3 @@ def render_class_analysis_page(
     else:
         st.info("暂无证据充分的共同主题可排序；请先补充有效作答。")
     st.dataframe(_metric_table(metrics), hide_index=True, width="stretch")
-
