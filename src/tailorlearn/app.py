@@ -472,6 +472,7 @@ def render_import_tab(material_type: str) -> None:
     )
     existing = REPO.list_material_sets(material_type=material_type)
     append_id: str | None = None
+    append_name = ""
     append_mode = False
     if existing:
         append_mode = st.checkbox(f"追加到已有{label}", value=False)
@@ -489,16 +490,22 @@ def render_import_tab(material_type: str) -> None:
             ),
         )
         append_id = selected_existing
+        append_name = next(
+            item["name"] for item in existing if item["id"] == selected_existing
+        )
 
     with st.form(f"import_{material_type}"):
-        name = st.text_input(
-            f"{label}名称",
-            placeholder=(
-                "例如：义务教育数学课程标准（2022年版）"
-                if material_type == MaterialType.STANDARD
-                else "例如：七年级数学课本切片"
-            ),
-        )
+        if append_mode:
+            name = append_name
+        else:
+            name = st.text_input(
+                f"{label}名称",
+                placeholder=(
+                    "例如：义务教育数学课程标准（2022年版）"
+                    if material_type == MaterialType.STANDARD
+                    else "例如：七年级数学课本切片"
+                ),
+            )
         files = st.file_uploader(
             "PDF 文件",
             type=["pdf"],

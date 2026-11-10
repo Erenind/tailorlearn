@@ -121,6 +121,15 @@ def test_streamlit_restores_provider_selects_new_material_and_selects_all(
     at.button(key="material_nav_textbook").click().run()
     at.segmented_control(
         key="material_section_textbook"
+    ).set_value("导入").run()
+    assert any(item.label == "课本名称" for item in at.text_input)
+    append_checkbox = next(
+        item for item in at.checkbox if item.label == "追加到已有课本"
+    )
+    append_checkbox.set_value(True).run()
+    assert not any(item.label == "课本名称" for item in at.text_input)
+    at.segmented_control(
+        key="material_section_textbook"
     ).set_value("编辑").run()
     at.session_state["_pending_material_library_id"] = textbook["id"]
     at.session_state["_material_library_notice"] = "测试导入完成"
