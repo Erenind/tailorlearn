@@ -5,6 +5,7 @@ import io
 import json
 from pathlib import Path
 
+from tailorlearn.ai import OpenAICompatibleClient
 from tailorlearn.db import Repository
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import (
@@ -426,3 +427,205 @@ def test_ai_draft_is_resolved_against_scope(tmp_path):
     assert items[0].requirements[0].evidence is not None
     assert items[0].sources[0].section_id == document["section_id"]
     assert relations == []
+
+
+def test_two_stage_ai_selects_directories_then_generates_formatted_blocks(
+    tmp_path,
+    monkeypatch,
+):
+    service, dataset_id, base_scope = _basic_scope(tmp_path)
+    textbook_id = base_scope["textbook"]["material_set_id"]
+    scope = service.prepare_two_stage_scope(
+        mode="theme",
+        dataset_id=dataset_id,
+        theme_codes=["T01"],
+        standard_material_id=base_scope["standard"]["material_set_id"],
+        standard_document_id="doc_standard",
+        textbook_material_ids=[textbook_id],
+    )
+    textbook_section = next(
+        item
+        for item in scope["textbook"]["directory"]
+        if item["title"] == "5.2 解一元一次方程"
+    )
+    prompts: list[str] = []
+
+    def fake_complete(self, messages):
+        prompts.append(messages[-1]["content"])
+        if len(prompts) == 1:
+            return (
+                json.dumps(
+                    {
+                        "standard_section_ids": [
+                            "doc_standard_p001_s001"
+                        ],
+                        "textbook_section_ids": [
+                            textbook_section["section_id"]
+                        ],
+                        "reasons": ["主题和目录匹配"],
+                    },
+                    ensure_ascii=False,
+                ),
+                "stop",
+            )
+        return (
+            json.dumps(
+                {
+                    "scope_note": "两阶段测试",
+                    "items": [
+                        {
+                            "item_key": "T01I1",
+                            "theme_code": "T01",
+                            "item_type": "skill",
+                            "content": "解一元一次方程",
+                            "key_points": ["等式性质"],
+                            "indicator_codes": ["T01I1"],
+                            "requirements": [
+                                {
+                                    "text": "掌握等式的基本性质，能解一元一次方程",
+                                    "clause": "②",
+                                    "level": "掌握",
+                                    "standard_page": 1,
+                                    "quote": "②掌握等式的基本性质，能解一元一次方程。",
+                                }
+                            ],
+                            "sources": [
+                                {
+                                    "kind": "textbook",
+                                    "material_set_id": textbook_id,
+                                    "document_id": "doc_textbook",
+                                    "section_id": textbook_section[
+                                        "section_id"
+                                    ],
+                                    "page": 1,
+                                    "quote": "解一元一次方程要依据等式的基本性质",
+                                }
+                            ],
+                            "review_notes": [],
+                        }
+                    ],
+                    "relations": [],
+                },
+                ensure_ascii=False,
+            ),
+            "stop",
+        )
+
+    monkeypatch.setattr(OpenAICompatibleClient, "_complete", fake_complete)
+    profile = ProviderProfile(
+        id="p",
+        vendor_name="测试",
+        base_url="https://example.test/v1",
+        model="test",
+        api_key="key",
+    )
+    selection = service.select_materials(scope=scope, profile=profile)
+    result = service.generate_from_selection(
+        scope=scope,
+        selection=selection,
+        specific_requirements="SPECIAL-REQUIREMENT",
+        profile=profile,
+    )
+
+    assert len(prompts) == 2
+    assert "SPECIAL-REQUIREMENT" not in prompts[0]
+    assert "SPECIAL-REQUIREMENT" in prompts[1]
+    assert result["run"]["method"] == "ai_two_stage_theme"
+    assert result["run"]["item_count"] == 1
+    assert service.items(result["run"]["id"])[0].sources
+    workflow = service.scope_of(result["run"])["workflow"]
+    assert [entry["stage"] for entry in workflow] == [
+        "范围准备与目录提交",
+        "目录检索阶段",
+        "内容提取阶段",
+        "结构化生成阶段",
+        "结果校验与保存",
+    ]
+
+
+def test_cleanup_removes_legacy_outline_runs(tmp_path):
+    service, _, scope = _basic_scope(tmp_path)
+    result = service.generate(scope=scope, method="rule")
+    assert service.get_run(result["run"]["id"]) is not None
+
+    assert service.cleanup_legacy_runs() == 1
+    assert service.get_run(result["run"]["id"]) is None
+
+
+def test_textbook_mode_does_not_require_learning_dataset(
+    tmp_path,
+    monkeypatch,
+):
+    service, _, base_scope = _basic_scope(tmp_path)
+    textbook_id = base_scope["textbook"]["material_set_id"]
+    scope = service.prepare_two_stage_scope(
+        mode="textbook",
+        standard_material_id=base_scope["standard"]["material_set_id"],
+        standard_document_id="doc_standard",
+        textbook_material_ids=[textbook_id],
+        textbook_document_ids=["doc_textbook"],
+    )
+    textbook_section = scope["textbook"]["directory"][0]
+    calls = {"count": 0}
+
+    def fake_complete(self, messages):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            return (
+                json.dumps(
+                    {
+                        "standard_section_ids": [
+                            "doc_standard_p001_s001"
+                        ],
+                        "textbook_section_ids": [
+                            textbook_section["section_id"]
+                        ],
+                        "reasons": [],
+                    }
+                ),
+                "stop",
+            )
+        return (
+            json.dumps(
+                {
+                    "scope_note": "",
+                    "items": [
+                        {
+                            "item_key": "KP01",
+                            "theme_code": "",
+                            "item_type": "knowledge_point",
+                            "content": "课本模式学习内容",
+                            "key_points": [],
+                            "indicator_codes": [],
+                            "requirements": [],
+                            "sources": [],
+                            "review_notes": [],
+                        }
+                    ],
+                    "relations": [],
+                },
+                ensure_ascii=False,
+            ),
+            "stop",
+        )
+
+    monkeypatch.setattr(OpenAICompatibleClient, "_complete", fake_complete)
+    profile = ProviderProfile(
+        id="p",
+        vendor_name="测试",
+        base_url="https://example.test/v1",
+        model="test",
+        api_key="key",
+    )
+    selection = service.select_materials(scope=scope, profile=profile)
+    result = service.generate_from_selection(
+        scope=scope,
+        selection=selection,
+        specific_requirements="",
+        profile=profile,
+    )
+
+    assert result["run"]["method"] == "ai_two_stage_textbook"
+    history = service.list_runs()
+    assert history[0]["dataset_name"] == "课本模式"
+    assert service.scope_mode(result["run"]) == "textbook"

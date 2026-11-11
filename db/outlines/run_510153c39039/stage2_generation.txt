@@ -1,0 +1,435 @@
+{
+  "scope_note": "本次梳理依据课本切片中可读取的第八章“实数”正文展开；第七章切片仅有章标题、无具体正文，故仅列为范围条目，不细化学习要求；图形与几何课程标准内容因课本切片未提供对应正文，不纳入具体学习条目。输入未提供学情数据，未使用学情数据。课标原文编号及符号按输入原文保留。",
+  "items": [
+    {
+      "item_key": "T02I0",
+      "theme_code": "T02",
+      "item_type": "chapter_outline",
+      "content": "第七章 相交线与平行线（仅章标题）",
+      "key_points": [],
+      "indicator_codes": [],
+      "requirements": [],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p001_s001",
+          "page": 1,
+          "quote": "第七章　相交线与平行线"
+        }
+      ],
+      "review_notes": [
+        "教材切片仅有章标题，未提供具体正文，故不细化学习内容与要求。"
+      ]
+    },
+    {
+      "item_key": "T01I1",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "平方根的概念、性质与开平方运算",
+      "key_points": [
+        "平方根与二次方根的定义",
+        "开平方运算及平方与开平方互为逆运算",
+        "正数有两个平方根且互为相反数，0的平方根是0，负数没有平方根",
+        "用根号表示平方根"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "了解平方根、算术平方根、立方根的概念，会用根号表示数的平方根、算术平方根、立方根。",
+          "clause": "④",
+          "level": "了解/会用",
+          "standard_page": 62,
+          "quote": "了解平方根、算术平方根、立方根的概念，会用根号表示数的平方根、算术平方根、立方根。"
+        },
+        {
+          "text": "了解乘方与开方互为逆运算，会用平方运算求百以内完全平方数的平方根，会用立方运算求千以内完全立方数（及对应的负整数）的立方根，会用计算器计算平方根和立方根。",
+          "clause": "原文显示③",
+          "level": "了解/会用",
+          "standard_page": 62,
+          "quote": "了解乘方与开方互为逆运算，会用平方运算求百以内完全平方数的平方根，会用立方运算求千以内完全立方数（及对应的负整数）的立方根，会用计算器计算平方根和立方根。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 2,
+          "quote": "如果一个数狓的平方等于犪，即狓２＝犪，那么这个数狓叫作犪的平方根（ｓｑｕａｒｅｒｏｏｔ）或二次方根．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 2,
+          "quote": "求一个数的平方根的运算，叫作开平方．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 2,
+          "quote": "平方与开平方互为逆运算"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 3,
+          "quote": "正数有两个平方根，它们互为相反数．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 3,
+          "quote": "负数没有平方根．"
+        }
+      ],
+      "review_notes": [
+        "课标原文编号在输入中显示为“③”的条目，按输入原文保留。"
+      ]
+    },
+    {
+      "item_key": "T01I2",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "算术平方根及用有理数估计无理数范围",
+      "key_points": [
+        "正数a的正平方根叫作算术平方根，0的算术平方根是0",
+        "用根号表示算术平方根",
+        "无限不循环小数与开方开不尽的数",
+        "利用夹逼估算√2的大致范围"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "会用根号表示数的平方根、算术平方根、立方根。",
+          "clause": "④",
+          "level": "会用",
+          "standard_page": 62,
+          "quote": "会用根号表示数的平方根、算术平方根、立方根。"
+        },
+        {
+          "text": "能用有理数估计一个无理数的大致范围。",
+          "clause": "原文显示6",
+          "level": "能",
+          "standard_page": 62,
+          "quote": "能用有理数估计一个无理数的大致范围。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 4,
+          "quote": "正数犪有两个平方根，其中正的平方根槡犪叫作犪的算术平方根．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 4,
+          "quote": "规定：０的算术平方根是０．０的算术平方根也记为槡０．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 5,
+          "quote": "１＜槡２＜２；"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 5,
+          "quote": "事实上，槡２＝１．４１４２１３５６２３７３…，它是一个无限不循环小数．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I3",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "立方根的概念、性质与开立方运算",
+      "key_points": [
+        "立方根与三次方根的定义",
+        "开立方运算及开立方与立方互为逆运算",
+        "正数的立方根是正数，负数的立方根是负数，0的立方根是0",
+        "用三次根号表示立方根"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "了解平方根、算术平方根、立方根的概念，会用根号表示数的平方根、算术平方根、立方根。",
+          "clause": "④",
+          "level": "了解/会用",
+          "standard_page": 62,
+          "quote": "了解平方根、算术平方根、立方根的概念，会用根号表示数的平方根、算术平方根、立方根。"
+        },
+        {
+          "text": "了解乘方与开方互为逆运算，会用平方运算求百以内完全平方数的平方根，会用立方运算求千以内完全立方数（及对应的负整数）的立方根，会用计算器计算平方根和立方根。",
+          "clause": "原文显示③",
+          "level": "了解/会用",
+          "standard_page": 62,
+          "quote": "了解乘方与开方互为逆运算，会用平方运算求百以内完全平方数的平方根，会用立方运算求千以内完全立方数（及对应的负整数）的立方根，会用计算器计算平方根和立方根。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p010_s004",
+          "page": 10,
+          "quote": "如果一个数狓的立方等于犪，即狓３＝犪，那么这个数狓叫作犪的立方根（ｃｕｂｅｒｏｏｔ）或三次方根．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p010_s004",
+          "page": 10,
+          "quote": "求一个数的立方根的运算，叫作开立方．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p010_s004",
+          "page": 10,
+          "quote": "正数的立方根是正数，负数的立方根是负数，０的立方根是０．"
+        }
+      ],
+      "review_notes": [
+        "课标原文编号在输入中显示为“③”的条目，按输入原文保留。"
+      ]
+    },
+    {
+      "item_key": "T01I4",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "无理数与实数的概念及分类",
+      "key_points": [
+        "无限不循环小数叫作无理数",
+        "有理数和无理数统称实数",
+        "实数可按有理数、无理数分类，也可按正实数、0、负实数分类",
+        "开方开不尽的数、π等可作为无理数实例"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "了解无理数和实数，知道实数由有理数和无理数组成",
+          "clause": "①",
+          "level": "了解",
+          "standard_page": 61,
+          "quote": "了解无理数和实数，知道实数由有理数和无理数组成"
+        },
+        {
+          "text": "了解无理数和实数，知道实数由有理数和无理数组成，感悟数的扩充；",
+          "clause": "学业要求（2）实数",
+          "level": "了解/感悟",
+          "standard_page": 65,
+          "quote": "了解无理数和实数，知道实数由有理数和无理数组成，感悟数的扩充；"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 14,
+          "quote": "无限不循环小数又叫作无理数（ｉｒｒａｔｉｏｎａｌｎｕｍｂｅｒ）．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 15,
+          "quote": "有理数和无理数统称实数（ｒｅａｌｎｕｍｂｅｒ）．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I5",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "实数与数轴、实数的相反数和绝对值",
+      "key_points": [
+        "实数与数轴上的点一一对应",
+        "用数轴比较实数大小",
+        "实数的相反数是－a",
+        "实数的绝对值表示数轴上对应点与原点的距离"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "能用数轴上的点表示实数，能比较实数的大小。",
+          "clause": "②",
+          "level": "能",
+          "standard_page": 62,
+          "quote": "能用数轴上的点表示实数，能比较实数的大小。"
+        },
+        {
+          "text": "能借助数轴理解相反数和绝对值的意义，会求实数的相反数和绝对值。",
+          "clause": "③",
+          "level": "理解/会",
+          "standard_page": 62,
+          "quote": "能借助数轴理解相反数和绝对值的意义，会求实数的相反数和绝对值。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 16,
+          "quote": "因此，实数与数轴上的点是一一对应的．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 17,
+          "quote": "数犪的相反数是－犪．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 17,
+          "quote": "一个实数的绝对值就是它在数轴上的对应点与原点的距离．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I6",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "实数的简单运算、运算律与近似计算",
+      "key_points": [
+        "实数范围内可进行加、减、乘、除、乘方运算",
+        "正数及0可开平方，任意实数可开立方",
+        "有理数的运算法则及运算性质在实数运算中同样适用",
+        "遇到无理数求近似值时，可先用近似有限小数代替，再计算并四舍五入"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "会进行实数的运算；",
+          "clause": "教学提示",
+          "level": "会",
+          "standard_page": 68,
+          "quote": "会进行实数的运算；"
+        },
+        {
+          "text": "了解近似数，在解决实际问题中，能用计算器进行近似计算，会按问题的要求进行简单的近似计算（例65）。",
+          "clause": "原文显示①",
+          "level": "了解/能",
+          "standard_page": 62,
+          "quote": "了解近似数，在解决实际问题中，能用计算器进行近似计算，会按问题的要求进行简单的近似计算（例65）。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 18,
+          "quote": "有理数的运算法则及运算性质等同样适用．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 18,
+          "quote": "最后对计算结果四舍五入．"
+        }
+      ],
+      "review_notes": [
+        "课标原文编号在输入中显示为“①”的近似数条目，按输入原文保留。"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "source_key": "T01I1",
+      "target_key": "T01I2",
+      "relation_type": "prerequisite",
+      "note": "先认识平方根，再学习正数平方根中的算术平方根及其估算。",
+      "basis": "教材8.1先讲平方根，后讲算术平方根；课标第62页实数条目④同时涉及平方根、算术平方根与根号表示。"
+    },
+    {
+      "source_key": "T01I1",
+      "target_key": "T01I3",
+      "relation_type": "analogy",
+      "note": "平方根的学习为立方根学习提供类比基础。",
+      "basis": "教材8.2开头说明“通过研究平方的逆运算学习了平方根，本节来研究立方的逆运算”。"
+    },
+    {
+      "source_key": "T01I1",
+      "target_key": "T01I4",
+      "relation_type": "prerequisite",
+      "note": "开方开不尽的数引出无限不循环小数，进而引入无理数与实数。",
+      "basis": "教材8.3开头说明本章认识了像√2、∛3这样的无限不循环小数，并再次扩充数的范围。"
+    },
+    {
+      "source_key": "T01I3",
+      "target_key": "T01I4",
+      "relation_type": "prerequisite",
+      "note": "立方根及开立方中出现的无限不循环小数，为无理数和实数概念提供实例。",
+      "basis": "教材8.2说明很多有理数的立方根是无限不循环小数；8.3由此引入无理数。"
+    },
+    {
+      "source_key": "T01I2",
+      "target_key": "T01I4",
+      "relation_type": "supports",
+      "note": "用有理数估计√2的大致范围，有助于认识无限不循环小数与无理数。",
+      "basis": "教材8.1对√2进行夹逼估算并指出其为无限不循环小数；8.3据此引入无理数。"
+    },
+    {
+      "source_key": "T01I4",
+      "target_key": "T01I5",
+      "relation_type": "prerequisite",
+      "note": "在实数概念基础上，进一步学习实数在数轴上的表示、比较大小、相反数和绝对值。",
+      "basis": "教材8.3先引入无理数和实数，再讲实数与数轴的一一对应及相反数、绝对值；课标第62页实数条目②③承接条目①。"
+    },
+    {
+      "source_key": "T01I4",
+      "target_key": "T01I6",
+      "relation_type": "prerequisite",
+      "note": "明确实数范围后，学习实数范围内的简单运算、运算律适用性与近似计算。",
+      "basis": "教材8.3在实数概念之后安排“实数及其简单运算”中的运算与近似计算内容。"
+    },
+    {
+      "source_key": "T01I5",
+      "target_key": "T01I6",
+      "relation_type": "supports",
+      "note": "数轴、相反数和绝对值的理解为实数运算及结果理解提供支持。",
+      "basis": "教材8.3在实数与数轴、相反数、绝对值之后安排实数运算例题与近似计算。"
+    }
+  ]
+}

@@ -1,0 +1,558 @@
+{
+  "scope_note": "依据提供的《义务教育数学课程标准（2022年版）》图形与几何内容要求，以及七年级数学课本切片《第七章 相交线与平行线》整理。范围限于课本中直接呈现的相交线、平行线、平移及章复习中涉及命题的片段；未提供的图形与几何其他主题、未提供独立正文的命题内容不扩展，不涉及学情数据。",
+  "items": [
+    {
+      "item_key": "T01I1",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "邻补角、对顶角的概念与性质",
+      "key_points": [
+        "有公共边且另一边互为反向延长线的两个角互为邻补角",
+        "有一个公共顶点且两边分别互为反向延长线的两个角互为对顶角",
+        "对顶角相等",
+        "利用邻补角互补、对顶角相等进行角度计算"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "理解对顶角、余角、补角等概念，探索并掌握对顶角相等、同角（或等角）的余角相等、同角（或等角）的补角相等的性质。",
+          "clause": "①",
+          "level": "理解、探索并掌握",
+          "standard_page": 71,
+          "quote": "①理解对顶角、余角、补角等概念，探索并掌握对顶角相等、同角（或等角）的余角相等、同角（或等角）的补角相等的性质。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p002_s003",
+          "page": 2,
+          "quote": "具有这种位置关系的两个角，互为邻补角．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p002_s003",
+          "page": 2,
+          "quote": "具有这种位置关系的两个角，互为对顶角．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p002_s003",
+          "page": 2,
+          "quote": "对顶角相等．"
+        }
+      ],
+      "review_notes": [
+        "课标要求含余角、补角；提供的课本片段主要呈现邻补角、对顶角及补角性质。"
+      ]
+    },
+    {
+      "item_key": "T01I2",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "垂线、垂线段与点到直线的距离",
+      "key_points": [
+        "两条直线相交所成四个角中有一个角是直角时，两条直线互相垂直",
+        "两条直线互相垂直，其中的一条直线叫作另一条直线的垂线，它们的交点叫作垂足",
+        "同一平面内，过一点有且只有一条直线与已知直线垂直",
+        "连接直线外一点与直线上各点的所有线段中，垂线段最短",
+        "直线外一点到这条直线的垂线段的长度，叫作点到直线的距离"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "理解垂线、垂线段等概念，能用三角板或量角器过一点画已知直线的垂线。",
+          "clause": "②",
+          "level": "理解、能",
+          "standard_page": 71,
+          "quote": "②理解垂线、垂线段等概念，能用三角板或量角器过一点画已知直线的垂线。"
+        },
+        {
+          "text": "掌握基本事实：同一平面内，过一点有且只有一条直线与已知直线垂直。",
+          "clause": "④",
+          "level": "掌握",
+          "standard_page": 71,
+          "quote": "④掌握基本事实：同一平面内，过一点有且只有一条直线与已知直线垂直。"
+        },
+        {
+          "text": "理解点到直线的距离的意义，能度量点到直线的距离。",
+          "clause": "5",
+          "level": "理解、能",
+          "standard_page": 71,
+          "quote": "5理解点到直线的距离的意义，能度量点到直线的距离。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p003_s004",
+          "page": 4,
+          "quote": "两条直线互相垂直，其中的一条直线叫作另一条直线的垂线，它们的交点叫作垂足．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p003_s004",
+          "page": 5,
+          "quote": "在同一平面内，过一点有且只有一条直线与已知直线垂直．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p003_s004",
+          "page": 6,
+          "quote": "连接直线外一点与直线上各点的所有线段中，垂线段最短．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p003_s004",
+          "page": 6,
+          "quote": "直线外一点到这条直线的垂线段的长度，叫作点到直线的距离．"
+        }
+      ],
+      "review_notes": [
+        "提供的课本片段呈现了用三角尺或量角器画垂线，未呈现课标中尺规作图的相应要求，故未单列。"
+      ]
+    },
+    {
+      "item_key": "T01I3",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "同位角、内错角、同旁内角的识别",
+      "key_points": [
+        "在两条被截直线的同一侧、截线同侧的一对角是同位角",
+        "在两条被截直线之间、截线两侧的一对角是内错角",
+        "在两条被截直线之间、截线同旁的一对角是同旁内角"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "识别同位角、内错角、同旁内角。",
+          "clause": "6",
+          "level": "识别",
+          "standard_page": 71,
+          "quote": "6识别同位角、内错角、同旁内角。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p007_s005",
+          "page": 7,
+          "quote": "具有这种位置关系的一对角叫作同位角．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p007_s005",
+          "page": 7,
+          "quote": "具有这种位置关系的一对角叫作内错角．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p007_s005",
+          "page": 7,
+          "quote": "具有这种位置关系的一对角叫作同旁内角．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I4",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "平行线的概念与平行基本事实",
+      "key_points": [
+        "同一平面内不重合的两条直线只有相交与平行两种位置关系",
+        "同一平面内不相交的两条直线互相平行",
+        "过直线外一点有且只有一条直线与这条直线平行",
+        "如果两条直线都与第三条直线平行，那么这两条直线也互相平行"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "理解平行线的概念。",
+          "clause": "?",
+          "level": "理解",
+          "standard_page": 71,
+          "quote": "?理解平行线的概念。"
+        },
+        {
+          "text": "掌握平行线基本事实I：过直线外一点有且只有一条直线与这条直线平行。",
+          "clause": "⑧",
+          "level": "掌握",
+          "standard_page": 71,
+          "quote": "⑧掌握平行线基本事实I：过直线外一点有且只有一条直线与这条直线平行。"
+        },
+        {
+          "text": "了解平行于同一条直线的两条直线平行。",
+          "clause": "（未标号）",
+          "level": "了解",
+          "standard_page": 72,
+          "quote": "了解平行于同一条直线的两条直线平行。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p011_s007",
+          "page": 11,
+          "quote": "在同一平面内，当直线犪，犫不相交时，我们说直线犪与犫互相平行（ｐａｒａｌｌｅｌ），记作“犪∥犫”．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p011_s007",
+          "page": 11,
+          "quote": "在同一平面内，不重合的两条直线只有两种位置关系：相交与平行．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p011_s007",
+          "page": 12,
+          "quote": "过直线外一点有且只有一条直线与这条直线平行．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p011_s007",
+          "page": 12,
+          "quote": "如果两条直线都与第三条直线平行，那么这两条直线也互相平行．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I5",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "平行线的判定",
+      "key_points": [
+        "同位角相等，两直线平行",
+        "内错角相等，两直线平行",
+        "同旁内角互补，两直线平行",
+        "用平行线的判定进行简单推理"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "掌握平行线基本事实Ⅱ：两条直线被第三条直线所截，如果同位角相等，那么这两条直线平行。",
+          "clause": "9",
+          "level": "掌握",
+          "standard_page": 71,
+          "quote": "9掌握平行线基本事实Ⅱ：两条直线被第三条直线所截，如果同位角相等，那么这两条直线平行。"
+        },
+        {
+          "text": "探索并证明平行线的判定定理：两条直线被第三条直线所截，如果内错角相等（或同旁内角互补），那么这两条直线平行。",
+          "clause": "0",
+          "level": "探索并证明",
+          "standard_page": 71,
+          "quote": "0探索并证明平行线的判定定理：两条直线被第三条直线所截，如果内错角相等（或同旁内角互补），那么这两条直线平行。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p013_s008",
+          "page": 13,
+          "quote": "两条直线被第三条直线所截，如果同位角相等，那么这两条直线平行．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p013_s008",
+          "page": 14,
+          "quote": "两条直线被第三条直线所截，如果内错角相等，那么这两条直线平行．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p013_s008",
+          "page": 14,
+          "quote": "两条直线被第三条直线所截，如果同旁内角互补，那么这两条直线平行．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I6",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "平行线的性质",
+      "key_points": [
+        "两直线平行，同位角相等",
+        "两直线平行，内错角相等",
+        "两直线平行，同旁内角互补",
+        "平行线的判定和性质经常结合使用"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "掌握平行线的性质定理I：两条平行直线被第三条直线所截，同位角相等；了解定理的证明。",
+          "clause": "①",
+          "level": "掌握、了解",
+          "standard_page": 71,
+          "quote": "①掌握平行线的性质定理I：两条平行直线被第三条直线所截，同位角相等。*了解定理的证明（例74）。"
+        },
+        {
+          "text": "探索并证明平行线的性质定理Ⅱ：两条平行直线被第三条直线所截，内错角相等（或同旁内角互补）。",
+          "clause": "（未标号）",
+          "level": "探索并证明",
+          "standard_page": 71,
+          "quote": "探索并证明平行线的性质定理Ⅱ：两条平行直线被第三条直线所截，内错角相等（或同旁内角互补）。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p015_s009",
+          "page": 16,
+          "quote": "两条平行直线被第三条直线所截，同位角相等．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p015_s009",
+          "page": 16,
+          "quote": "两条平行直线被第三条直线所截，内错角相等．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p015_s009",
+          "page": 16,
+          "quote": "两条平行直线被第三条直线所截，同旁内角互补．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p015_s009",
+          "page": 17,
+          "quote": "前面我们学习了平行线的判定和性质，在解决问题时，经常需要把它们结合起来使用．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I7",
+      "theme_code": "T02",
+      "item_type": "knowledge_point",
+      "content": "平移的概念、性质与图案设计",
+      "key_points": [
+        "在平面内，将一个图形按某一方向移动一定的距离，这样的图形运动叫作平移",
+        "平移后的新图形与原图形的形状和大小完全相同",
+        "连接各组对应点的线段平行（或在同一条直线上）且相等",
+        "利用平移可以设计图案"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "通过具体实例认识平移，探索它的基本性质：一个图形和它经过平移所得的图形中，两组对应点的连线平行（或在同一条直线上）且相等。",
+          "clause": "①",
+          "level": "认识、探索",
+          "standard_page": 75,
+          "quote": "①通过具体实例认识平移，探索它的基本性质：一个图形和它经过平移所得的图形中，两组对应点的连线平行（或在同一条直线上）且相等。"
+        },
+        {
+          "text": "认识并欣赏平移在自然界和现实生活中的应用。",
+          "clause": "②",
+          "level": "认识并欣赏",
+          "standard_page": 75,
+          "quote": "②认识并欣赏平移在自然界和现实生活中的应用。"
+        },
+        {
+          "text": "运用图形的轴对称、旋转、平移进行图案设计。",
+          "clause": "③",
+          "level": "运用",
+          "standard_page": 75,
+          "quote": "③运用图形的轴对称、旋转、平移进行图案设计。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p026_s011",
+          "page": 26,
+          "quote": "一般地，在平面内，将一个图形按某一方向移动一定的距离，这样的图形运动叫作平移（ｔｒａｎｓｌａｔｉｏｎ）．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p026_s011",
+          "page": 27,
+          "quote": "新图形与原图形的形状和大小完全相同．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p026_s011",
+          "page": 27,
+          "quote": "连接各组对应点的线段平行（或在同一条直线上）且相等．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p026_s011",
+          "page": 28,
+          "quote": "利用平移，人们可以设计出美丽的图案，许多装饰图案就是利用平移设计的（图７．４６）．"
+        }
+      ],
+      "review_notes": [
+        "课本片段主要呈现平移，未呈现轴对称、旋转的图案设计内容。"
+      ]
+    },
+    {
+      "item_key": "T01I8",
+      "theme_code": "T03",
+      "item_type": "method",
+      "content": "命题的题设、结论与反例",
+      "key_points": [
+        "命题需要区分题设和结论",
+        "判断命题正确或错误",
+        "如果是错误命题，可以举出一个反例",
+        "通过简单推理得出数学结论，养成言之有据的思考习惯"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "结合具体实例，会区分命题的条件和结论。",
+          "clause": "②",
+          "level": "会",
+          "standard_page": 74,
+          "quote": "②结合具体实例，会区分命题的条件和结论"
+        },
+        {
+          "text": "了解反例的作用。",
+          "clause": "④",
+          "level": "了解",
+          "standard_page": 74,
+          "quote": "④了解反例的作用"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p001_s001",
+          "page": 1,
+          "quote": "在本章中，我们还将学习通过简单的推理得出数学结论的方法，逐步养成言之有据的思考习惯．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p026_s011",
+          "page": 35,
+          "quote": "什么是命题？如何判断一个命题是正确的还是错误的？请结合具体例子说明．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_410bfc4f_62db59",
+          "section_id": "doc_410bfc4f_62db59_p026_s011",
+          "page": 38,
+          "quote": "指出下列命题的题设和结论，并判断它们是正确的还是错误的．如果是错误的，举出一个反例．"
+        }
+      ],
+      "review_notes": [
+        "提供的课本材料中，命题内容主要见于章复习与复习题，未提供独立小节课文；本条目仅依据这些片段梳理。"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "source_key": "T01I1",
+      "target_key": "T01I2",
+      "relation_type": "prerequisite",
+      "note": "先研究两条直线相交形成的邻补角、对顶角，再研究相交的特殊情形——垂直。",
+      "basis": "教材第3页指出垂直是相交的一种特殊情形。"
+    },
+    {
+      "source_key": "T01I1",
+      "target_key": "T01I3",
+      "relation_type": "prerequisite",
+      "note": "先从有公共顶点的角研究相交线，再研究两条直线被第三条直线所截形成的无公共顶点的角。",
+      "basis": "教材第7页指出前面研究一条直线与另一条直线相交，接下来进一步研究一条直线与两条直线分别相交。"
+    },
+    {
+      "source_key": "T01I3",
+      "target_key": "T01I5",
+      "relation_type": "prerequisite",
+      "note": "识别同位角、内错角、同旁内角是学习平行线判定的基础。",
+      "basis": "教材第11页指出借助两条直线被第三条直线所截形成的角，研究平行线的判定与性质。"
+    },
+    {
+      "source_key": "T01I3",
+      "target_key": "T01I6",
+      "relation_type": "prerequisite",
+      "note": "平行线的性质讨论两直线平行时同位角、内错角、同旁内角的关系。",
+      "basis": "教材7.2.3借助两条平行线被第三条直线所截形成的角研究性质。"
+    },
+    {
+      "source_key": "T01I4",
+      "target_key": "T01I5",
+      "relation_type": "prerequisite",
+      "note": "平行线的概念和平行基本事实是学习平行线判定的基础。",
+      "basis": "教材7.2.1先学习平行线的概念与基本事实，7.2.2再学习平行线的判定。"
+    },
+    {
+      "source_key": "T01I5",
+      "target_key": "T01I6",
+      "relation_type": "related_to",
+      "note": "平行线的判定与性质相互关联，解决问题时经常结合使用。",
+      "basis": "教材第15页提出“反过来”研究平行线的性质，第17页指出解决问题时经常需要把判定和性质结合起来使用。"
+    },
+    {
+      "source_key": "T01I4",
+      "target_key": "T01I7",
+      "relation_type": "prerequisite",
+      "note": "平移性质涉及对应点连线平行，学习平移以相交线、平行线知识为基础。",
+      "basis": "教材第1页指出在相交线与平行线知识基础上还要学习图形的平移等。"
+    },
+    {
+      "source_key": "T01I8",
+      "target_key": "T01I5",
+      "relation_type": "related_to",
+      "note": "章复习题通过判断命题真假和举反例，联系平行线的判定与性质等结论。",
+      "basis": "教材第38页复习题要求指出命题的题设和结论，并判断正误、举反例。"
+    }
+  ]
+}

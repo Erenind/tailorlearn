@@ -10,10 +10,13 @@ from tailorlearn.outline import (
     ITEM_TYPE_LABELS,
     OUTLINE_FIELD_DEFINITIONS,
     RELATION_TYPE_LABELS,
+    SCOPE_MODE_LABELS,
     SOURCE_KIND_LABELS,
     STATUS_LABELS,
     OutlineService,
 )
+
+OUTLINE_UI_VERSION = "2026-11-11-outline-history-state-fix"
 
 
 def _rerun() -> None:
@@ -32,8 +35,9 @@ def _show_notice() -> None:
 
 def _section_label(row: dict[str, Any], show_theme: bool = False) -> str:
     prefix = f"[{row.get('theme_code') or '未分配'}] " if show_theme else ""
+    chapter = row.get("chapter") or row.get("path") or "未分章节"
     return (
-        f"{prefix}{row['file_name']} · {row['chapter']} / {row['title']}"
+        f"{prefix}{row['file_name']} · {chapter} / {row['title']}"
         f"（第 {row['page_start']}–{row['page_end']} 页）"
     )
 
@@ -1009,107 +1013,706 @@ def _render_export_tab(
         )
 
 
+def _history_label(service: OutlineService, run: dict[str, Any]) -> str:
+    scope = service.scope_of(run)
+    mode = SCOPE_MODE_LABELS.get(
+        str(scope.get("mode") or ""),
+        str(scope.get("mode_label") or "旧格式"),
+    )
+    dataset = scope.get("dataset") or {}
+    dataset_name = dataset.get("name") if mode == "主题模式" else "不涉及学情数据"
+    return (
+        f"{mode} · {dataset_name} · {run['created_at'][:16].replace('T', ' ')}"
+        f" · {run['item_count']} 条"
+    )
+
+
+def _render_outline_settings(
+    service: OutlineService,
+    profile: ProviderProfile | None,
+) -> tuple[dict[str, Any] | None, bool]:
+    with st.container(border=True, key="outline_settings_panel"):
+        st.subheader("梳理设置")
+        mode_label = st.segmented_control(
+            "范围模式",
+            ["课本模式", "主题模式"],
+            default="课本模式",
+            key="outline_scope_mode",
+            required=True,
+        )
+        mode = "textbook" if mode_label == "课本模式" else "theme"
+        dataset_id: str | None = None
+        theme_codes: list[str] = []
+        textbook_material_ids: list[str] = []
+        textbook_document_ids: list[str] = []
+
+        datasets = service.list_datasets()
+        if mode == "textbook":
+            st.info(
+                "课本模式不涉及学情数据，仅使用课本目录和课程标准目录。",
+                icon=":material/info:",
+            )
+            materials = service.materials("textbook")
+            if materials:
+                material_ids = [item["id"] for item in materials]
+                material_key = "outline_textbook_scope_material"
+                if st.session_state.get(material_key) not in material_ids:
+                    st.session_state[material_key] = material_ids[0]
+                material_id = st.selectbox(
+                    "课本",
+                    material_ids,
+                    key=material_key,
+                    format_func=lambda value: next(
+                        f"{item['name']} · 第 {item['version']} 版"
+                        for item in materials
+                        if item["id"] == value
+                    ),
+                )
+                textbook_material_ids = [material_id]
+                documents = service.documents(material_id)
+                doc_ids = [document["id"] for document in documents]
+                textbook_document_ids = st.multiselect(
+                    "课本切片",
+                    doc_ids,
+                    key=f"outline_textbook_scope_docs_{material_id}",
+                    format_func=lambda value: next(
+                        document["file_name"]
+                        for document in documents
+                        if document["id"] == value
+                    ),
+                )
+            else:
+                st.warning("尚未导入课本。")
+        else:
+            if datasets:
+                dataset_ids = [item["id"] for item in datasets]
+                dataset_key = "outline_theme_scope_dataset"
+                if st.session_state.get(dataset_key) not in dataset_ids:
+                    st.session_state[dataset_key] = dataset_ids[0]
+                dataset_id = st.selectbox(
+                    "学情数据集",
+                    dataset_ids,
+                    key=dataset_key,
+                    format_func=lambda value: next(
+                        item["name"] for item in datasets if item["id"] == value
+                    ),
+                )
+                themes = service.list_themes(dataset_id)
+                theme_by_code = {
+                    theme["theme_code"]: theme for theme in themes
+                }
+                theme_codes = st.multiselect(
+                    "主题",
+                    list(theme_by_code),
+                    key=f"outline_theme_scope_themes_{dataset_id}",
+                    format_func=lambda value: (
+                        f"{value} {theme_by_code[value]['theme_name']}"
+                    ),
+                )
+            else:
+                st.warning("主题模式需要先导入学情数据和课程要求。")
+            materials = service.materials("textbook")
+            textbook_material_ids = st.multiselect(
+                "课本",
+                [item["id"] for item in materials],
+                key="outline_theme_scope_textbooks",
+                format_func=lambda value: next(
+                    f"{item['name']} · 第 {item['version']} 版"
+                    for item in materials
+                    if item["id"] == value
+                ),
+            )
+
+        st.markdown("**课程标准版本**")
+        standard_materials = service.materials("curriculum_standard")
+        standard_material_id: str | None = None
+        standard_document_id: str | None = None
+        if standard_materials:
+            standard_ids = [item["id"] for item in standard_materials]
+            standard_key = "outline_standard_scope_material"
+            if st.session_state.get(standard_key) not in standard_ids:
+                st.session_state[standard_key] = standard_ids[0]
+            standard_material_id = st.selectbox(
+                "课程标准材料",
+                standard_ids,
+                key=standard_key,
+                format_func=lambda value: next(
+                    f"{item['name']} · 第 {item['version']} 版"
+                    for item in standard_materials
+                    if item["id"] == value
+                ),
+            )
+            standard_documents = service.documents(standard_material_id)
+            standard_document_ids = [
+                document["id"] for document in standard_documents
+            ]
+            if standard_document_ids:
+                doc_key = f"outline_standard_scope_doc_{standard_material_id}"
+                if st.session_state.get(doc_key) not in standard_document_ids:
+                    st.session_state[doc_key] = standard_document_ids[0]
+                standard_document_id = st.selectbox(
+                    "课程标准切片",
+                    standard_document_ids,
+                    key=doc_key,
+                    format_func=lambda value: next(
+                        document["file_name"]
+                        for document in standard_documents
+                        if document["id"] == value
+                    ),
+                )
+        else:
+            st.warning("尚未导入课程标准。")
+
+        with st.expander(
+            "具体要求（结构化生成阶段）",
+            expanded=False,
+        ):
+            specific_requirements = st.text_area(
+                "具体要求",
+                value=st.session_state.get(
+                    "outline_specific_requirements", ""
+                ),
+                height=150,
+                key="outline_specific_requirements",
+                placeholder=(
+                    "可留空。例如：重点整理先备关系，排除未教学内容；"
+                    "学习内容按教材顺序编号。"
+                ),
+            )
+        can_start = bool(
+            profile
+            and standard_material_id
+            and standard_document_id
+            and textbook_material_ids
+            and (
+                mode == "textbook"
+                and textbook_document_ids
+                or mode == "theme"
+                and dataset_id
+                and theme_codes
+            )
+        )
+        start = st.button(
+            "开始梳理",
+            type="primary",
+            icon=":material/auto_awesome:",
+            width="stretch",
+            disabled=not can_start,
+            key="outline_two_stage_start",
+        )
+        if profile is None:
+            st.warning("请先在“AI 参数设置”中启用厂商配置。")
+    if not start:
+        return None, False
+    assert (
+        profile is not None
+        and standard_material_id is not None
+        and standard_document_id is not None
+    )
+    return (
+        {
+            "mode": mode,
+            "dataset_id": dataset_id,
+            "theme_codes": theme_codes,
+            "textbook_material_ids": textbook_material_ids,
+            "textbook_document_ids": textbook_document_ids,
+            "standard_material_id": standard_material_id,
+            "standard_document_id": standard_document_id,
+            "specific_requirements": specific_requirements.strip(),
+        },
+        True,
+    )
+
+
+def _directory_names(
+    scope: dict[str, Any],
+    selection: dict[str, Any],
+) -> str:
+    standard_by_id = {
+        item["section_id"]: item["title"]
+        for item in scope["standard"]["directory"]
+    }
+    textbook_by_id = {
+        item["section_id"]: (
+            f"{item['file_name']} · {item['path']}"
+        )
+        for item in scope["textbook"]["directory"]
+    }
+    names = [
+        *[
+            standard_by_id[item]
+            for item in selection["standard_section_ids"]
+            if item in standard_by_id
+        ],
+        *[
+            textbook_by_id[item]
+            for item in selection["textbook_section_ids"]
+            if item in textbook_by_id
+        ],
+    ]
+    return "；".join(names) if names else "无"
+
+
+def _queue_history_run(run_id: str) -> None:
+    st.session_state["_outline_pending_history_run"] = run_id
+
+
+def _apply_pending_history_run() -> None:
+    run_id = st.session_state.pop(
+        "_outline_pending_history_run",
+        None,
+    )
+    if run_id:
+        st.session_state["outline_history_run"] = run_id
+
+
+def _run_two_stage_generation(
+    service: OutlineService,
+    settings: dict[str, Any],
+    profile: ProviderProfile,
+) -> dict[str, Any] | None:
+    process = st.container(border=True, key="outline_live_process")
+    process.markdown("**处理过程**")
+    progress = process.progress(0)
+    try:
+        process.markdown(
+            "**01 范围准备与目录提交** · 正在构建范围并准备目录"
+        )
+        progress.progress(12)
+        scope = service.prepare_two_stage_scope(
+            mode=settings["mode"],
+            dataset_id=settings["dataset_id"],
+            theme_codes=settings["theme_codes"],
+            standard_material_id=settings["standard_material_id"],
+            standard_document_id=settings["standard_document_id"],
+            textbook_material_ids=settings["textbook_material_ids"],
+            textbook_document_ids=settings["textbook_document_ids"],
+        )
+        process.markdown(
+            f"已提交范围：{scope['boundary']['statement']}"
+        )
+        process.markdown(
+            f"课程标准目录 {len(scope['standard']['directory'])} 项；"
+            f"课本目录 {len(scope['textbook']['directory'])} 项。"
+        )
+        progress.progress(24)
+        process.markdown(
+            "**02 目录检索阶段** · 正在匹配需要读取的课程标准与课本目录"
+        )
+        selection = service.select_materials(scope=scope, profile=profile)
+        st.session_state["_outline_pending_stage"] = {
+            "scope": scope,
+            "selection": selection,
+            "specific_requirements": settings["specific_requirements"],
+        }
+        process.markdown(
+            "目录检索完成：需要读取"
+            f"课程标准目录 {len(selection['standard_section_ids'])} 项、"
+            f"课本目录 {len(selection['textbook_section_ids'])} 项。"
+        )
+        progress.progress(48)
+        process.markdown(
+            "**03 内容提取阶段** · 正在从本地读取："
+            f"{_directory_names(scope, selection)}"
+        )
+        progress.progress(62)
+        process.markdown(
+            "**04 结构化生成阶段** · 正在生成学习内容、要求、来源与联系"
+        )
+        result = service.generate_from_selection(
+            scope=scope,
+            selection=selection,
+            specific_requirements=settings["specific_requirements"],
+            profile=profile,
+        )
+        progress.progress(90)
+        process.markdown(
+            "**05 结果校验与保存** · 正在核对来源并写入历史清单"
+        )
+        st.session_state.pop("_outline_pending_stage", None)
+        _queue_history_run(result["run"]["id"])
+        progress.progress(100)
+        process.success(
+            f"梳理完成：生成 {len(result['items'])} 条学习内容、"
+            f"{len(result['relations'])} 条联系。"
+        )
+        return result
+    except Exception as exc:
+        process.markdown("**处理中止**")
+        process.error(str(exc))
+        return None
+
+
+def _render_requirement_sources(item: Any) -> None:
+    rows = []
+    for requirement in item.requirements:
+        evidence = requirement.evidence
+        rows.append(
+            {
+                "要求": requirement.text,
+                "层级": requirement.level,
+                "课标页": evidence.page if evidence else "",
+                "正文页": evidence.printed_page if evidence else "",
+                "来源原文": evidence.quote if evidence else "",
+                "核对": "通过" if requirement.verified else "待核对",
+            }
+        )
+    if rows:
+        st.dataframe(
+            pd.DataFrame(rows),
+            hide_index=True,
+            width="stretch",
+            alt=f"{item.item_key}对应要求与来源",
+        )
+    else:
+        st.caption("未附对应要求。")
+
+
+def _render_item_source_content(item: Any) -> None:
+    if not item.sources:
+        st.caption("未附学习内容来源。")
+        return
+    st.dataframe(
+        pd.DataFrame(
+            [
+                {
+                    "材料": source.material_name,
+                    "文件": source.file_name,
+                    "章节": source.section_path or source.section_id,
+                    "页码": source.page,
+                    "原文": source.quote,
+                    "核对": "通过" if source.verified else "待核对",
+                }
+                for source in item.sources
+            ]
+        ),
+        hide_index=True,
+        width="stretch",
+        alt=f"{item.item_key}学习内容来源",
+    )
+
+
+def _render_item_relations(
+    item: Any,
+    relations: list[Any],
+) -> None:
+    related = [
+        relation
+        for relation in relations
+        if item.item_key
+        in {relation.source_item_key, relation.target_item_key}
+    ]
+    if not related:
+        st.caption("暂无与其他学习内容的联系。")
+        return
+    st.dataframe(
+        pd.DataFrame(
+            [
+                {
+                    "起点": relation.source_item_key,
+                    "终点": relation.target_item_key,
+                    "类型": RELATION_TYPE_LABELS.get(
+                        relation.relation_type,
+                        relation.relation_type,
+                    ),
+                    "说明": relation.note,
+                    "依据": relation.basis,
+                }
+                for relation in related
+            ]
+        ),
+        hide_index=True,
+        width="stretch",
+        alt=f"{item.item_key}与其他学习内容的联系",
+    )
+
+
+def _render_item_block(
+    service: OutlineService,
+    run: dict[str, Any],
+    item: Any,
+    relations: list[Any],
+) -> None:
+    with st.container(border=True, key=f"outline_block_{item.id}"):
+        heading = st.columns([4, 1], vertical_alignment="center")
+        heading[0].markdown(
+            f"### {item.ordinal:02d} · {item.content}"
+        )
+        heading[0].caption(
+            f"{item.item_key} · {item.theme_code} {item.theme_name} · "
+            f"{ITEM_TYPE_LABELS.get(item.item_type, item.item_type)}"
+        )
+        heading[1].markdown(
+            f":{('green' if item.status == 'verified' else 'gray')}-badge["
+            f"{STATUS_LABELS.get(item.status, item.status)}]"
+        )
+        st.markdown(":blue-badge[内容]")
+        st.markdown(item.content)
+        if item.key_points:
+            for point in item.key_points:
+                st.markdown(f"- {point}")
+        st.markdown(":green-badge[要求]")
+        _render_requirement_sources(item)
+        st.markdown(":orange-badge[要求来源]")
+        requirements_with_source = [
+            requirement
+            for requirement in item.requirements
+            if requirement.evidence
+        ]
+        if requirements_with_source:
+            for requirement in requirements_with_source:
+                evidence = requirement.evidence
+                st.caption(
+                    f"第 {evidence.page} 页"
+                    + (
+                        f"（正文第 {evidence.printed_page} 页）"
+                        if evidence.printed_page
+                        else ""
+                    )
+                    + f"：{evidence.quote}"
+                )
+        else:
+            st.caption("未附要求来源。")
+        st.markdown(":violet-badge[内容来源]")
+        _render_item_source_content(item)
+        st.markdown(":gray-badge[与其他学习内容的联系]")
+        _render_item_relations(item, relations)
+        with st.expander("编辑与管理", expanded=False):
+            with st.form(f"outline_block_edit_{item.id}"):
+                content = st.text_input("学习内容", value=item.content)
+                key_points = st.text_area(
+                    "学习要点（每行一条）",
+                    value="\n".join(item.key_points),
+                    height=100,
+                )
+                indicator_codes = st.text_input(
+                    "指标编号（用、分隔）",
+                    value="、".join(item.indicator_codes),
+                )
+                notes = st.text_area("备注", value=item.notes, height=70)
+                submitted = st.form_submit_button("保存为新版本")
+            if submitted:
+                try:
+                    service.update_item(
+                        item_id=item.id,
+                        content=content,
+                        key_points=key_points.splitlines(),
+                        indicator_codes=[
+                            value.strip()
+                            for value in indicator_codes.replace("，", "、")
+                            .replace(",", "、")
+                            .split("、")
+                            if value.strip()
+                        ],
+                        notes=notes,
+                        theme_code=item.theme_code,
+                        theme_name=item.theme_name,
+                        item_type=item.item_type,
+                        status=item.status,
+                    )
+                    _notify("学习内容已保存为新版本。")
+                    _rerun()
+                except Exception as exc:
+                    st.error(str(exc))
+            action_columns = st.columns(3)
+            if action_columns[0].button(
+                "标记已确认",
+                key=f"outline_block_verify_{item.id}",
+                width="stretch",
+            ):
+                service.set_items_status(
+                    [item.id],
+                    OutlineItemStatus.VERIFIED.value,
+                )
+                _notify("已标记为已确认。")
+                _rerun()
+            if action_columns[1].button(
+                "标记待复核",
+                key=f"outline_block_review_{item.id}",
+                width="stretch",
+            ):
+                service.set_items_status(
+                    [item.id],
+                    OutlineItemStatus.NEEDS_REVIEW.value,
+                )
+                _notify("已标记为待复核。")
+                _rerun()
+            if action_columns[2].button(
+                "软删除",
+                key=f"outline_block_delete_{item.id}",
+                width="stretch",
+            ):
+                service.delete_item(item.id)
+                _notify("已软删除该学习内容。")
+                _rerun()
+
+
+def _workflow_rows(workflow: list[Any]) -> list[tuple[str, str]]:
+    legacy_labels = {
+        "已发送范围与课程标准目录": (
+            "范围准备与目录提交",
+            "范围与课程标准目录已提交",
+        ),
+        "第一次 AI 返回需要读取的目录": (
+            "目录检索阶段",
+            "已返回需要读取的课程标准目录和课本目录",
+        ),
+        "已获取具体内容": (
+            "内容提取阶段",
+            "已读取目录检索阶段选中的具体内容",
+        ),
+        "第二次 AI 返回格式化结果": (
+            "结构化生成阶段",
+            "已生成学习内容、要求、来源和联系",
+        ),
+    }
+    rows: list[tuple[str, str]] = []
+    for index, entry in enumerate(workflow, start=1):
+        if isinstance(entry, dict):
+            stage = str(entry.get("stage") or f"步骤 {index}")
+            detail = str(entry.get("detail") or "")
+        else:
+            raw = str(entry)
+            stage, detail = legacy_labels.get(
+                raw,
+                (f"步骤 {index}", raw),
+            )
+        rows.append((stage, detail))
+    return rows
+
+
+def _render_workflow(
+    scope: dict[str, Any],
+    run_id: str,
+) -> None:
+    workflow = scope.get("workflow") or []
+    if not workflow:
+        return
+    with st.container(
+        border=True,
+        key=f"outline_workflow_{run_id}",
+    ):
+        st.markdown("**处理过程**")
+        for index, (stage, detail) in enumerate(
+            _workflow_rows(workflow),
+            start=1,
+        ):
+            st.markdown(
+                f"{index:02d}. **{stage}**"
+                + (f" · {detail}" if detail else "")
+            )
+
+
+def _render_run_blocks(
+    service: OutlineService,
+    run: dict[str, Any],
+) -> None:
+    items = service.items(run["id"])
+    relations = service.relations(run["id"])
+    scope = service.scope_of(run)
+    mode_label = SCOPE_MODE_LABELS.get(
+        str(scope.get("mode") or ""),
+        str(scope.get("mode_label") or "旧格式"),
+    )
+    st.markdown(
+        f"### {mode_label} · 学习内容清单"
+    )
+    st.caption(scope.get("boundary", {}).get("statement", ""))
+    _render_workflow(scope, run["id"])
+    if scope.get("specific_requirements"):
+        st.caption(
+            "具体要求：" + str(scope["specific_requirements"])
+        )
+    if not items:
+        st.info("本次梳理没有学习内容。")
+    for item in items:
+        _render_item_block(service, run, item, relations)
+    with st.expander("导出、字段说明与高级管理", expanded=False):
+        _render_export_tab(service, run, items, relations)
+        _render_relations_tab(service, run, items, relations)
+        if items:
+            _render_manual_item(service, run, items[0])
+
+
 def render_outline_page(
     service: OutlineService,
     profile: ProviderProfile | None,
 ) -> None:
+    service.cleanup_legacy_runs()
     _show_notice()
-    datasets = service.list_datasets()
-    if not datasets:
-        st.info("请先在“材料与数据 → 课程要求”中创建数据集并导入课程要求。")
-        return
-    dataset_ids = [row["id"] for row in datasets]
-    dataset_key = "outline_dataset_selector"
-    latest_runs = service.list_runs()
-    preferred_dataset = (
-        latest_runs[0]["dataset_id"] if latest_runs else dataset_ids[0]
-    )
-    if (
-        st.session_state.get(dataset_key) not in dataset_ids
-        or dataset_key not in st.session_state
-    ):
-        st.session_state[dataset_key] = (
-            preferred_dataset
-            if preferred_dataset in dataset_ids
-            else dataset_ids[0]
-        )
-    dataset_id = st.selectbox(
-        "学情数据集（提供主题、指标与范围依据）",
-        dataset_ids,
-        key=dataset_key,
-        format_func=lambda value: next(
-            (
-                f"{row['name']}"
-                + (f" · {row['description']}" if row.get("description") else "")
-                for row in datasets
-                if row["id"] == value
-            ),
-            value,
-        ),
-    )
-    requirements = service.list_requirements(dataset_id)
-    if not requirements:
-        st.warning(
-            "该数据集没有课程要求，无法确定范围。"
-            "请先在“材料与数据 → 课程要求”导入。"
-        )
-        return
-    (
-        themes,
-        selected_themes,
-        standard_material,
-        standard_document,
-        textbook_materials,
-        textbook_documents,
-    ) = _render_selectors(service, dataset_id)
-    textbook_material = textbook_materials[0] if textbook_materials else None
-    scope = _render_scope_editor(
-        service,
-        dataset_id,
-        selected_themes,
-        standard_material,
-        standard_document,
-        textbook_material,
-        textbook_documents,
-        themes,
-    )
-    if scope is None:
-        return
-    _render_generate(service, scope, profile)
-    st.divider()
-    runs = service.list_runs(dataset_id)
-    if not runs:
-        st.info("尚未生成梳理结果。确认范围后点击“开始规则梳理”。")
-        return
-    run_ids = [row["id"] for row in runs]
-    run_key = f"outline_run_selector_{dataset_id}"
-    if st.session_state.get(run_key) not in run_ids:
-        st.session_state[run_key] = run_ids[0]
-    run_id = st.selectbox(
-        "梳理记录",
-        run_ids,
-        key=run_key,
-        format_func=lambda value: next(
-            (
-                f"{row['name']} · {row['item_count']} 条 · {row['created_at']}"
-                for row in runs
-                if row["id"] == value
-            ),
-            value,
-        ),
-    )
-    run = next(row for row in runs if row["id"] == run_id)
-    items = service.items(run_id)
-    relations = service.relations(run_id)
-    _run_metrics(run, items, relations)
-    tabs = st.tabs(
-        ["学习内容与要求", "必要联系", "材料出处与核对", "导出与字段说明"]
-    )
-    with tabs[0]:
-        _render_items_tab(service, run, items, relations, profile)
-    with tabs[1]:
-        _render_relations_tab(service, run, items, relations)
-    with tabs[2]:
-        _render_sources_tab(service, run, items, relations)
-    with tabs[3]:
-        _render_export_tab(service, run, items, relations)
+    _apply_pending_history_run()
+    center, settings_column = st.columns([2.7, 1.0], gap="large")
+    with settings_column:
+        settings, start = _render_outline_settings(service, profile)
+    with center:
+        runs = service.list_runs()
+        selected_run: dict[str, Any] | None = None
+        if runs:
+            run_ids = [run["id"] for run in runs]
+            run_key = "outline_history_run"
+            if st.session_state.get(run_key) not in run_ids:
+                st.session_state[run_key] = run_ids[0]
+            run_id = st.selectbox(
+                "历史梳理清单",
+                run_ids,
+                key=run_key,
+                format_func=lambda value: _history_label(
+                    service,
+                    next(run for run in runs if run["id"] == value),
+                ),
+            )
+            selected_run = next(
+                run for run in runs if run["id"] == run_id
+            )
+        if start and settings and profile:
+            result = _run_two_stage_generation(service, settings, profile)
+            if result:
+                selected_run = result["run"]
+        pending = st.session_state.get("_outline_pending_stage")
+        if isinstance(pending, dict) and profile and not start:
+            if st.button(
+                "重试结构化生成阶段",
+                type="primary",
+                icon=":material/refresh:",
+                key="outline_retry_stage_two",
+            ):
+                process = st.container(
+                    border=True,
+                    key="outline_retry_process",
+                )
+                process.markdown("**处理过程**")
+                process.markdown(
+                    "**01 内容读取** · 正在读取目录检索阶段选中的具体内容"
+                )
+                try:
+                    process.markdown(
+                        "**02 结构化生成阶段** · 正在进行内容结构化生成"
+                    )
+                    result = service.generate_from_selection(
+                        scope=pending["scope"],
+                        selection=pending["selection"],
+                        specific_requirements=pending[
+                            "specific_requirements"
+                        ],
+                        profile=profile,
+                    )
+                    st.session_state.pop(
+                        "_outline_pending_stage",
+                        None,
+                    )
+                    _queue_history_run(result["run"]["id"])
+                    selected_run = result["run"]
+                    process.markdown(
+                        "**03 结果校验与保存** · 已完成来源核对并写入历史清单"
+                    )
+                    process.success("内容生成阶段重试完成。")
+                except Exception as exc:
+                    process.markdown("**处理中止**")
+                    process.error(str(exc))
+        if selected_run is not None:
+            _render_run_blocks(service, selected_run)
+        elif not start:
+            st.info(
+                "在右侧选择范围并点击“开始梳理”。"
+                "流程将先完成目录检索，再读取所需内容并生成结构化结果。"
+            )

@@ -290,6 +290,14 @@ class OutlineDraftResponse(BaseModel):
     relations: list[OutlineDraftRelation] = Field(default_factory=list)
 
 
+class OutlineSelectionResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    standard_section_ids: list[str] = Field(default_factory=list)
+    textbook_section_ids: list[str] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
+
+
 class DiagnosisObservation(BaseModel):
     model_config = ConfigDict(extra="ignore")
 

@@ -1,0 +1,213 @@
+{
+  "scope_note": "本梳理仅覆盖主题T02“方程与方程组”及其指标T02I1、T02I2、T02I3；依据给定课标条目与七年级课本章节切片，不扩展到不等式、函数或未提供的教材页码。",
+  "items": [
+    {
+      "item_key": "T02I1",
+      "theme_code": "T02",
+      "item_type": "knowledge_point",
+      "content": "运用等式的基本性质解一元一次方程",
+      "key_points": [
+        "等式的基本性质",
+        "利用等式性质进行等式变形",
+        "将一元一次方程逐步转化为x=m的形式",
+        "解方程后代入原方程检验"
+      ],
+      "indicator_codes": [
+        "T02I1"
+      ],
+      "requirements": [
+        {
+          "text": "掌握等式的基本性质，能解一元一次方程。",
+          "clause": "②",
+          "level": "掌握",
+          "standard_page": 63,
+          "quote": "掌握等式的基本性质；能解一元一次方程和可化为一元一次方程的分式方程。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p006_s007",
+          "page": 7,
+          "quote": "等式的性质１　等式两边加（或减）同一个数（或式子），结果仍相等．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p006_s007",
+          "page": 7,
+          "quote": "利用等式的性质可以解方程．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p011_s008",
+          "page": 19,
+          "quote": "解一元一次方程的一般步骤包括：去分母、去括号、移项、合并同类项、系数化为１等．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p006_s007",
+          "page": 8,
+          "quote": "一般地，从方程解出未知数的值以后，通常需要代入原方程检验，看这个值能否使方程左、右两边的值相等．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T02I2",
+      "theme_code": "T02",
+      "item_type": "knowledge_point",
+      "content": "用消元法解二元一次方程组",
+      "key_points": [
+        "消元思想",
+        "代入消元法",
+        "加减消元法",
+        "根据方程组的具体情况选择适合的解法"
+      ],
+      "indicator_codes": [
+        "T02I2"
+      ],
+      "requirements": [
+        {
+          "text": "掌握消元法，能解二元一次方程组。",
+          "clause": "③",
+          "level": "掌握",
+          "standard_page": 63,
+          "quote": "掌握消元法，能解二元一次方程组。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p044_s014",
+          "page": 44,
+          "quote": "这种将未知数的个数由多化少、逐一解决的思想，叫作消元思想．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p044_s014",
+          "page": 45,
+          "quote": "这种解二元一次方程组的方法叫作代入消元法，简称代入法．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p048_s015",
+          "page": 49,
+          "quote": "这种解二元一次方程组的方法叫作加减消元法，简称加减法．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p048_s015",
+          "page": 51,
+          "quote": "解方程组的基本思想是消元．代入消元法和加减消元法是二元一次方程组的两种解法，它们都是通过消元使方程组转化为一元一次方程，只是消元的方法不同．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T02I3",
+      "theme_code": "T02",
+      "item_type": "application",
+      "content": "列方程或方程组解决简单实际问题并检验",
+      "key_points": [
+        "分析问题中的数量关系并找出相等关系",
+        "设未知数、列方程或方程组",
+        "解方程或方程组",
+        "检验所得结果是否符合实际意义",
+        "设、列、解、检、答"
+      ],
+      "indicator_codes": [
+        "T02I3"
+      ],
+      "requirements": [
+        {
+          "text": "能根据现实情境理解方程的意义，能针对具体问题列出方程；理解方程解的意义，经历估计方程解的过程。",
+          "clause": "①",
+          "level": "理解",
+          "standard_page": 63,
+          "quote": "能根据现实情境理解方程的意义，能针对具体问题列出方程；理解方程解的意义，经历估计方程解的过程。"
+        },
+        {
+          "text": "能根据具体问题的实际意义，检验方程解的合理性。",
+          "clause": "⑧",
+          "level": "能",
+          "standard_page": 63,
+          "quote": "能根据具体问题的实际意义，检验方程解的合理性。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p024_s009",
+          "page": 25,
+          "quote": "这一过程一般包括设、列、解、检、答等步骤，即设未知数、列方程、解方程、检验所得结果、确定答案．正确分析问题中的相等关系是列方程的基础．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p024_s009",
+          "page": 28,
+          "quote": "用方程解决实际问题时，不仅要注意解方程的过程是否正确，还要检验方程的解是否符合问题的实际意义．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p041_s012",
+          "page": 41,
+          "quote": "列方程要先找到相等关系．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccee907e_62db59",
+          "section_id": "doc_ccee907e_62db59_p054_s016",
+          "page": 57,
+          "quote": "用方程组解决问题时，要根据问题中的数量关系列出方程组，求出方程组的解后，应进一步考虑它是否符合问题的实际意义。"
+        }
+      ],
+      "review_notes": []
+    }
+  ],
+  "relations": [
+    {
+      "source_key": "T02I1",
+      "target_key": "T02I2",
+      "relation_type": "prerequisite",
+      "note": "先掌握等式性质和一元一次方程求解，才能理解二元一次方程组消元后转化为一元一次方程求解。",
+      "basis": "课标第63页要求掌握等式的基本性质并解一元一次方程，也要求掌握消元法解二元一次方程组。"
+    },
+    {
+      "source_key": "T02I1",
+      "target_key": "T02I3",
+      "relation_type": "prerequisite",
+      "note": "列一元一次方程解决实际问题后，需要运用等式性质和一元一次方程解法求解并检验。",
+      "basis": "课本5.3实际问题与一元一次方程位于5.2解一元一次方程之后；5.3第25页列出设、列、解、检、答的步骤。"
+    },
+    {
+      "source_key": "T02I2",
+      "target_key": "T02I3",
+      "relation_type": "prerequisite",
+      "note": "列二元一次方程组解决实际问题后，需要运用代入消元法或加减消元法求解，并检验解是否符合实际意义。",
+      "basis": "课标第63页③要求掌握消元法解二元一次方程组，⑧要求检验方程解的合理性；课本10.3位于10.2消元法之后，第57页提出求出方程组解后应检验实际意义。"
+    }
+  ]
+}

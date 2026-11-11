@@ -1512,6 +1512,38 @@ class Repository:
                 for row in connection.execute(query, params).fetchall()
             ]
 
+    def delete_outline_run(self, run_id: str) -> bool:
+        with self.connect() as connection:
+            item_ids = [
+                row["id"]
+                for row in connection.execute(
+                    "SELECT id FROM outline_items WHERE run_id=?",
+                    (run_id,),
+                ).fetchall()
+            ]
+            if item_ids:
+                placeholders = ",".join("?" for _ in item_ids)
+                connection.execute(
+                    f"""
+                    DELETE FROM outline_item_versions
+                    WHERE item_id IN ({placeholders})
+                    """,
+                    item_ids,
+                )
+            connection.execute(
+                "DELETE FROM outline_relations WHERE run_id=?",
+                (run_id,),
+            )
+            connection.execute(
+                "DELETE FROM outline_items WHERE run_id=?",
+                (run_id,),
+            )
+            cursor = connection.execute(
+                "DELETE FROM outline_runs WHERE id=?",
+                (run_id,),
+            )
+            return cursor.rowcount > 0
+
     def save_outline_items(
         self,
         *,

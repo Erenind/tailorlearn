@@ -1,0 +1,2463 @@
+{
+  "run": {
+    "id": "run_14a643f3cb83",
+    "name": "主题模式 · AI 两阶段梳理 · 11-11 21:33",
+    "method": "ai_two_stage_theme",
+    "status": "draft",
+    "dataset_id": "lds_28761a48f2e5",
+    "created_at": "2026-11-11T13:33:59+00:00",
+    "ai_vendor": "deepseek",
+    "ai_model": "deepseek-flash"
+  },
+  "scope": {
+    "mode": "theme",
+    "mode_label": "主题模式",
+    "dataset": {
+      "id": "lds_28761a48f2e5",
+      "name": "公开模拟学情数据",
+      "description": "赛题资料包公开模拟学情数据，六类 CSV"
+    },
+    "themes": [
+      {
+        "theme_code": "T02",
+        "theme_name": "方程与方程组",
+        "theme_goal": "能解一元一次方程和二元一次方程组，依据等量关系建立模型并检验答案。",
+        "indicators": [
+          {
+            "indicator_code": "T02I1",
+            "indicator_name": "运用等式性质解一元一次方程",
+            "standard_ref": "CR02",
+            "standard_page": "63／56",
+            "textbook_page": "上册110—148；下册87—119"
+          },
+          {
+            "indicator_code": "T02I2",
+            "indicator_name": "用消元法解二元一次方程组",
+            "standard_ref": "CR02",
+            "standard_page": "63／56",
+            "textbook_page": "上册110—148；下册87—119"
+          },
+          {
+            "indicator_code": "T02I3",
+            "indicator_name": "列方程或方程组解决简单实际问题并检验",
+            "standard_ref": "CR02",
+            "standard_page": "63／56",
+            "textbook_page": "上册110—148；下册87—119"
+          }
+        ]
+      }
+    ],
+    "standard": {
+      "material_set_id": "set_790c195dad4d",
+      "material_name": "义务教育数学课程标准（2022年版）",
+      "version": 1,
+      "document_id": "doc_1183b95c_5dad4d",
+      "file_name": "课程标准_2022.pdf",
+      "directory": [
+        {
+          "section_id": "doc_1183b95c_5dad4d_p001_s001",
+          "title": "第 1 页",
+          "path": "第 1 页",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p002_s002",
+          "title": "前言",
+          "path": "前言",
+          "level": 1,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p002_s003",
+          "title": "一、 指导思想",
+          "path": "一、 指导思想",
+          "level": 1,
+          "page_start": 2,
+          "page_end": 3
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p003_s004",
+          "title": "二、 修订原则",
+          "path": "二、 修订原则",
+          "level": 1,
+          "page_start": 3,
+          "page_end": 3
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p003_s005",
+          "title": "（一） 坚持目标导向",
+          "path": "二、 修订原则 / （一） 坚持目标导向",
+          "level": 2,
+          "page_start": 3,
+          "page_end": 3
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p003_s006",
+          "title": "（二） 坚持问题导向",
+          "path": "二、 修订原则 / （二） 坚持问题导向",
+          "level": 2,
+          "page_start": 3,
+          "page_end": 3
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p003_s007",
+          "title": "（三） 坚持创新导向",
+          "path": "二、 修订原则 / （三） 坚持创新导向",
+          "level": 2,
+          "page_start": 3,
+          "page_end": 3
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p004_s008",
+          "title": "前言",
+          "path": "前言 [2]",
+          "level": 1,
+          "page_start": 4,
+          "page_end": 4
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p004_s009",
+          "title": "三、 主要变化",
+          "path": "三、 主要变化",
+          "level": 1,
+          "page_start": 4,
+          "page_end": 4
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p004_s010",
+          "title": "（一） 关于课程方案",
+          "path": "三、 主要变化 / （一） 关于课程方案",
+          "level": 2,
+          "page_start": 4,
+          "page_end": 4
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p004_s011",
+          "title": "（二） 关于课程标准",
+          "path": "三、 主要变化 / （二） 关于课程标准",
+          "level": 2,
+          "page_start": 4,
+          "page_end": 5
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p006_s012",
+          "title": "目录",
+          "path": "三、 主要变化 / 目录",
+          "level": 1,
+          "page_start": 6,
+          "page_end": 7
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p008_s013",
+          "title": "一、 课程性质",
+          "path": "一、 课程性质",
+          "level": 1,
+          "page_start": 8,
+          "page_end": 8
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p009_s014",
+          "title": "二、 课程理念",
+          "path": "二、 课程理念",
+          "level": 1,
+          "page_start": 9,
+          "page_end": 11
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p012_s015",
+          "title": "三、 课程目标",
+          "path": "三、 课程目标",
+          "level": 1,
+          "page_start": 12,
+          "page_end": 12
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p012_s016",
+          "title": "（一） 核心素养内涵",
+          "path": "三、 课程目标 / （一） 核心素养内涵",
+          "level": 2,
+          "page_start": 12,
+          "page_end": 18
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p018_s017",
+          "title": "（二） 总目标",
+          "path": "三、 课程目标 / （二） 总目标",
+          "level": 2,
+          "page_start": 18,
+          "page_end": 18
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p018_s018",
+          "title": "（三） 学段目标",
+          "path": "三、 课程目标 / （三） 学段目标",
+          "level": 2,
+          "page_start": 18,
+          "page_end": 22
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p023_s019",
+          "title": "四、 课程内容",
+          "path": "四、 课程内容",
+          "level": 1,
+          "page_start": 23,
+          "page_end": 24
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p024_s020",
+          "title": "（一） 数与代数",
+          "path": "四、 课程内容 / （一） 数与代数",
+          "level": 2,
+          "page_start": 24,
+          "page_end": 34
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p034_s021",
+          "title": "（二） 图形与几何",
+          "path": "四、 课程内容 / （二） 图形与几何",
+          "level": 2,
+          "page_start": 34,
+          "page_end": 43
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p043_s022",
+          "title": "（三） 统计与概率",
+          "path": "四、 课程内容 / （三） 统计与概率",
+          "level": 2,
+          "page_start": 43,
+          "page_end": 49
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p049_s023",
+          "title": "（四） 综合与实践",
+          "path": "四、 课程内容 / （四） 综合与实践",
+          "level": 2,
+          "page_start": 49,
+          "page_end": 60
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p060_s024",
+          "title": "（一） 数与代数",
+          "path": "四、 课程内容 / （一） 数与代数 [2]",
+          "level": 2,
+          "page_start": 60,
+          "page_end": 69
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p069_s025",
+          "title": "（二） 图形与几何",
+          "path": "四、 课程内容 / （二） 图形与几何 [2]",
+          "level": 2,
+          "page_start": 69,
+          "page_end": 80
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p080_s026",
+          "title": "（三） 统计与概率",
+          "path": "四、 课程内容 / （三） 统计与概率 [2]",
+          "level": 2,
+          "page_start": 80,
+          "page_end": 84
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p084_s027",
+          "title": "（四） 综合与实践",
+          "path": "四、 课程内容 / （四） 综合与实践 [2]",
+          "level": 2,
+          "page_start": 84,
+          "page_end": 86
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p087_s028",
+          "title": "五、 学业质量",
+          "path": "五、 学业质量",
+          "level": 1,
+          "page_start": 87,
+          "page_end": 87
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p087_s029",
+          "title": "（一） 学业质量内涵",
+          "path": "五、 学业质量 / （一） 学业质量内涵",
+          "level": 2,
+          "page_start": 87,
+          "page_end": 87
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p087_s030",
+          "title": "（二） 学业质量描述",
+          "path": "五、 学业质量 / （二） 学业质量描述",
+          "level": 2,
+          "page_start": 87,
+          "page_end": 90
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p091_s031",
+          "title": "六、 课程实施",
+          "path": "六、 课程实施",
+          "level": 1,
+          "page_start": 91,
+          "page_end": 91
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p091_s032",
+          "title": "（一） 教学建议",
+          "path": "六、 课程实施 / （一） 教学建议",
+          "level": 2,
+          "page_start": 91,
+          "page_end": 96
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p096_s033",
+          "title": "（二） 评价建议",
+          "path": "六、 课程实施 / （二） 评价建议",
+          "level": 2,
+          "page_start": 96,
+          "page_end": 99
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p099_s034",
+          "title": "（三） 教材编写建议",
+          "path": "六、 课程实施 / （三） 教材编写建议",
+          "level": 2,
+          "page_start": 99,
+          "page_end": 103
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p103_s035",
+          "title": "（四） 课程资源开发与利用",
+          "path": "六、 课程实施 / （四） 课程资源开发与利用",
+          "level": 2,
+          "page_start": 103,
+          "page_end": 103
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p104_s036",
+          "title": "（五） 教学研究与教师培训",
+          "path": "六、 课程实施 / （五） 教学研究与教师培训",
+          "level": 2,
+          "page_start": 104,
+          "page_end": 105
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p106_s037",
+          "title": "附录",
+          "path": "附录",
+          "level": 1,
+          "page_start": 106,
+          "page_end": 106
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p106_s038",
+          "title": "附录1 课程内容中的实例",
+          "path": "附录1 课程内容中的实例",
+          "level": 1,
+          "page_start": 106,
+          "page_end": 187
+        },
+        {
+          "section_id": "doc_1183b95c_5dad4d_p188_s039",
+          "title": "附录2 有关行为动词的分类",
+          "path": "附录2 有关行为动词的分类",
+          "level": 1,
+          "page_start": 188,
+          "page_end": 189
+        }
+      ],
+      "sections": [
+        {
+          "id": "doc_1183b95c_5dad4d_p060_s024",
+          "document_id": "doc_1183b95c_5dad4d",
+          "parent_id": "doc_1183b95c_5dad4d_p023_s019",
+          "path": "四、 课程内容 / （一） 数与代数 [2]",
+          "title": "（一） 数与代数",
+          "level": 2,
+          "order_index": 24,
+          "page_start": 60,
+          "page_end": 69,
+          "content": "【第 60 页】\n（一）数与代数\n数与代数是数学知识体系的基础之一，是学生认知数量关系、探\n索数学规律、建立数学模型的基石，可以帮助学生从数量的角度清晰\n准确地认识、理解和表达现实世界。\n在小学阶段，学生认识了正有理数，掌握了正有理数的四则运\n算，知道可以用字母表示数、数量关系及规律。在初中阶段，学生将\n认识负数、无理数，学习它们的四则运算，还将学习代数式、方程、\n53\n【第 61 页】\n义务教育数学课程标准（2022年版）\n不等式、函数等内容。这些内容构成了初中阶段数与代数领域“数与\n式”“方程与不等式”和“函数”三个主题。\n“数与式”是代数的基本语言，初中阶段关注用字母表述代数式，\n以及代数式的运算，字母可以像数一样进行运算和推理，通过字母运\n基本的数量关系（相等关系和不等关系），是一类应用广泛的数学工\n具；“函数”主要研究变量之间的关系，探索事物变化的规律；借助\n函数可以认识方程和不等式。\n数与代数领域的学习，有助于学生形成抽象能力、推理能力和模\n型观念，发展几何直观和运算能力。\n第四学段（7～9年级）\n【内容要求】\n1.数与式\n（1）有理数\n①理解负数的意义（例64)；理解有理数的意义，能用数轴上的\n点表示有理数，能比较有理数的大小。\n②借助数轴理解相反数和绝对值的意义，掌握求有理数的相反数\n和绝对值的方法。\n③理解乘方的意义。\n④掌握有理数的加、减、乘、除、乘方及简单的混合运算（以三\n步以内为主)；理解有理数的运算律，能运用运算律简化运算。\n③能运用有理数的运算解决简单问题。\n（2）实数\n①了解无理数和实数，知道实数由有理数和无理数组成，了解实\n数与数轴上的点一一对应。\n54\n【第 62 页】\n②能用数轴上的点表示实数，能比较实数的大小。\n③能借助数轴理解相反数和绝对值的意义，会求实数的相反数和\n绝对值。\n④了解平方根、算术平方根、立方根的概念，会用根号表示数的\n平方根、算术平方根、立方根。\n③了解乘方与开方互为逆运算，会用平方运算求百以内完全平方\n数的平方根，会用立方运算求千以内完全立方数（及对应的负整数）\n的立方根，会用计算器计算平方根和立方根。\n6能用有理数估计一个无理数的大致范围。\n①了解近似数，在解决实际问题中，能用计算器进行近似计算，\n会按问题的要求进行简单的近似计算（例65）。\n⑧了解二次根式、最简二次根式的概念，了解二次根式（根号下\n仅限于数）加、减、乘、除运算法则，会用它们进行简单的四则\n运算。\n（3）代数式\n①借助现实情境了解代数式，进一步理解用字母表示数的意义。\n②能分析具体问题中的简单数量关系，并用代数式表示；能根据\n特定的问题查阅资料，找到所需的公式。\n③会把具体数代入代数式进行计算。\n④了解整数指数幂的意义和基本性质；会用科学记数法表示\n数(包括在计算器上表示)。\n5理解整式的概念，掌握合并同类项和去括号的法则；能进行简\n单的整式加减运算，能进行简单的整式乘法运算（多项式乘法仅限于\n一次式之间和一次式与二次式的乘法）。\n6理解乘法公式（a十6)（a-b)=a²一b²，（a±6)²=a²±2ab+b²，\n了解公式的几何背景，能利用公式进行简单的计算和推理。\n②能用提公因式法、公式法（直接利用公式不超过二次）进行因\n式分解(指数为正整数)。\n55\n【第 63 页】\n义务教育数学课程标准（2022年版）\n⑧了解分式和最简分式的概念，能利用分式的基本性质进行约分\n和通分；能对简单的分式进行加、减、乘、除运算。\n9了解代数推理（例66）。\n2.方程与不等式\n（1）方程与方程组\n①能根据现实情境理解方程的意义，能针对具体问题列出方程；\n理解方程解的意义，经历估计方程解的过程。\n②掌握等式的基本性质；能解一元一次方程和可化为一元一次方\n程的分式方程。\n③掌握消元法，能解二元一次方程组。\n④*能解简单的三元一次方程组“。\n5理解配方法，能用配方法、公式法、因式分解法解数字系数的\n一元二次方程。\n6会用一元二次方程根的判别式判别方程是否有实根及两个实根\n是否相等。\n?了解一元二次方程的根与系数的关系（例67）。\n⑧能根据具体问题的实际意义，检验方程解的合理性。\n（2）不等式与不等式组\n①结合具体问题，了解不等式的意义，探索不等式的基本性质。\n②能解数字系数的一元一次不等式，并能在数轴上表示出解集；\n会用数轴确定两个一元一次不等式组成的不等式组的解集。\n③能根据具体问题中的数量关系，列出一元一次不等式，解决简\n单的问题。\n[1]标有*的内容为选学内容，不作为考试要求。\n56\n【第 64 页】\n3.函数\n（1）函数的概念\n①探索简单实例中的数量关系和变化规律，了解常量、变量的意\n义；了解函数的概念和表示法，能举出函数的实例。\n②能结合图象对简单实际问题中的函数关系进行分析（例68）。\n③能确定简单实际问题中函数自变量的取值范围，会求函数值。\n④能用适当的函数表示法刻画简单实际问题中变量之间的关系，\n理解函数值的意义（例69）。\n③结合对函数关系的分析，能对变量的变化情况进行初步讨论。\n（2）一次函数\n①结合具体情境体会一次函数的意义，能根据已知条件确定一次\n函数的表达式（例70）；会运用待定系数法确定一次函数的表达式。\n②能画一次函数的图象，根据图象和表达式y=kx十b（k≠0)\n探索并理解k>0和k<0时图象的变化情况；理解正比例函数。\n③体会一次函数与二元一次方程的关系。\n④能用一次函数解决简单实际问题。\n（3）二次函数\n①通过对实际问题的分析，体会二次函数的意义。\n②能画二次函数的图象，通过图象了解二次函数的性质，知道二\n次函数系数与图象形状和对称轴的关系。\n③会求二次函数的最大值或最小值，并能确定相应自变量的值，\n能解决相应的实际问题(例71)。\n④知道二次函数和一元二次方程之间的关系，会利用二次函数的\n图象求一元二次方程的近似解。\n（4）反比例函数\n①结合具体情境体会反比例函数的意义（例72），能根据已知条\n件确定反比例函数的表达式。\n57\n【第 65 页】\n义务教育数学课程标准（2022年版）\n②能画反比例函数的图象，根据图象和表达式y=（k≠0）探\nk\n索并理解k>0和k<0时图象的变化情况。\n③能用反比例函数解决简单实际问题。\n【学业要求】\n1.数与式\n（1）有理数\n理解负数的意义，会用正数和负数表示具体情境中具有相反意义\n的量；理解有理数的意义，能用数轴上的点表示有理数，能借助数轴\n体会相反数和绝对值的意义，初步体会数形结合的思想方法；能比较\n有理数的大小，能求有理数的相反数和绝对值；会运用乘方的意义准\n确进行有理数的乘方运算；能熟练地对有理数进行加、减、乘、除、\n乘方及简单的混合运算（以三步以内为主），理解有理数的运算律，\n能合理运用运算律简化运算，能运用有理数的运算解决简单问题。\n（2）实数\n了解无理数和实数，知道实数由有理数和无理数组成，感悟数的\n扩充；初步认识实数与数轴上的点具有一一对应关系，能用数轴上的\n点表示一些具体的实数，能比较实数的大小；能借助数轴理解相反数\n和绝对值的意义，会求实数的相反数、绝对值；知道平方根、算术平\n方根、立方根的概念，会用根号表示平方根、算术平方根、立方根；\n知道乘方与开方互为逆运算，会用乘方运算求百以内完全平方数的平\n方根和千以内完全立方数的立方根（及对应的负整数），会用计算器\n计算平方根和立方根；能用有理数估计一个无理数的大致范围；初步\n认识近似数，在解决实际问题中，能用计算器进行近似计算，会按问\n题的要求进行简单的近似计算，会对结果取近似值；会用二次根式\n（根号下仅限于数）的加、减、乘、除运算法则进行简单的四则运算。\n58\n【第 66 页】\n（3）代数式\n能运用代数式表示具体问题中简单的数量关系，体验用数学符号\n表达数量关系的过程，会选择适当的方法求代数式的值；会用文字和\n符号语言表述整数指数幂的基本性质，能根据整数指数幂的基本性质\n进行幂的运算；会用科学记数法表示数（包括在计算器上表示)；理\n解整式的概念，掌握合并同类项和去括号的法则，能进行简单的整式\n加法和减法运算；能进行简单的整式乘法运算（多项式乘法仅限于一\n次式之间和一次式与二次式的乘法)；知道平方差公式、完全平方公\n式的几何背景，并能运用公式进行简单计算和推理；能用提公因式\n法、公式法（对二次式直接利用平方差公式或完全平方公式）进行因\n式分解（指数为正整数)；知道分式的分母不能为零，能利用分式的\n基本性质进行约分、通分，并化简分式，能对简单的分式进行加、\n减、乘、除运算并将运算结果化为最简分式。\n2.方程与不等式\n（1）方程与方程组\n能根据具体问题中的数量关系列出方程，理解方程的意义；认识\n方程解的意义，经历估计方程解的过程；掌握等式的基本性质，能运\n用等式的基本性质进行等式的变形；能根据等式的基本性质解一元一\n次方程和可化为一元一次方程的分式方程；能根据二元一次方程组的\n特征，选择代入消元法或加减消元法解二元一次方程组；*能解简单\n的三元一次方程组；能根据一元二次方程的特征，选择配方法、公式\n法、因式分解法解数字系数的一元二次方程；会用一元二次方程根的\n判别式判别方程是否有实根及两个实根是否相等，会将一元二次方程\n根的情况与一元二次方程根的判别式相联系；知道利用一元二次方程\n的根与系数的关系可以解决一些简单的问题；能根据具体问题的实际\n意义，检验方程的解是否合理。建立模型观念。\n59\n【第 67 页】\n义务教育数学课程标准（2022年版）\n（2）不等式与不等式组\n结合具体问题，了解不等式的意义，探索不等式的基本性质；能\n用不等式的基本性质对不等式进行变形；能解数字系数的一元一次不\n等式，并能在数轴上表示出解集；会用数轴确定两个一元一次不等式\n组成的不等式组的解集；能根据具体问题中的数量关系，列出一元一\n次不等式，解决简单的实际问题。建立模型观念。\n3.函数\n（1）函数的概念\n能识别简单实际问题中的常量、变量及其意义，并能找出变量之\n间的数量关系及变化规律，形成初步的抽象能力；了解函数的概念和\n表示法，能举出函数的实例，初步形成模型观念；能用适当的函数表\n示法刻画简单实际问题中变量之间的关系，理解函数值的意义；能确\n定简单实际问题中函数自变量的取值范围，并会求函数值；能根据函\n数图象分析出实际问题中变量的信息，发现变量间的变化规律；能结\n合函数图象对简单实际问题中的函数关系进行分析，结合对函数关系\n的分析，能对变量的变化趋势进行初步推测。\n（2）一次函数\n能根据简单实际问题中的已知条件确定一次函数的表达式；会在\n不同问题情境中运用待定系数法确定一次函数的表达式；会画出一次\n函数的图象；会根据一次函数的表达式求其图象与坐标轴的交点坐\n标；会根据一次函数的图象和表达式y=kr十b（k≠0），探索并理解\nk值的变化对函数图象的影响。认识正比例函数中两个变量之间的对\n应规律，会结合实例说明正比例函数的意义及变量之间的对应规律。\n会根据一次函数的图象解释一次函数与二元一次方程的关系；能在实\n际问题中列出一次函数的表达式，并结合一次函数的图象与表达式的\n性质等解决简单的实际问题。\n60\n【第 68 页】\n（3）二次函数\n会通过分析实际问题的情境确定二次函数的表达式，体会二次函\n数的意义；会用描点法画出二次函数的图象，会利用一些特殊点画出\n二次函数的草图；通过图象了解二次函数的性质，知道二次函数的系\n数与图象形状和对称轴的关系。会根据二次函数的表达式求其图象与\n坐标轴的交点坐标；会用配方法将数字系数的二次函数的表达式化为\n=a（x一h）²十k的形式，能由此得出二次函数图象的顶点坐标，说\n出图象的开口方向，画出图象的对称轴，得出二次函数的最大值或最\n小值，并能确定相应自变量的值，解决简单的实际问题。知道二次函\n数和一元二次方程之间的关系，会利用二次函数的图象求一元二次方\n程的近似解。\n（4）反比例函数\n结合具体情境用实例体会反比例函数的意义，能根据已知条件确\n定反比例函数的表达式；会用描点法画出反比例函数的图象；知道当\nk\nk>0和k<0时反比例函数y=\n（k≠0）图象的整体特征；能用反\n比例函数解决简单的实际问题。\n【教学提示】\n数”三个主题，是学生理解数学符号，以及感悟用数学符号表达事物\n的性质、关系和规律的关键内容，是学生初步形成抽象能力和推理能\n力、感悟用数学的语言表达现实世界的重要载体。\n数与式的教学。教师应把握数与式的整体性，一方面，通过负\n数、有理数和实数的认识，帮助学生进一步感悟数是对数量的抽象，\n知道绝对值是对数量大小和线段长度的表达，进而体会实数与数轴上\n的点一一对应的数形结合的意义，会进行实数的运算；另一方面，通\n过代数式和代数式运算的教学，让学生进一步理解字母表示数的意\n61\n【第 69 页】\n义务教育数学课程标准（2022年版）\n义，通过基于符号的运算和推理，建立符号意识，感悟数学结论的一\n般性，理解运算方法与运算律的关系，提升运算能力。\n方程与不等式的教学。应当让学生经历对现实问题中量的分析，\n借助用字母表达的未知数，建立两个量之间关系的过程，知道方程或\n不等式是现实问题中含有未知数的等量关系或不等关系的数学表达；\n引导学生关注用字母表示一元二次方程的系数，感悟用字母表示的求\n根公式的意义，体会算术与代数的差异。\n函数的教学。要通过对现实问题中变量的分析，建立两个变量之\n间变化的依赖关系，让学生理解用函数表达变化关系的实际意义；要\n引导学生借助平面直角坐标系中的描点，理解函数图象与表达式的对\n应关系，理解函数与对应的方程、不等式的关系，增强几何直观；会\n用函数表达现实世界事物的简单规律，经历用数学的语言表达现实世\n界的过程，提升学习数学的兴趣，进一步发展应用意识。\n在教学过程中，要关注数学知识与实际的结合，让学生在实际背\n景中理解数量关系和变化规律，经历从实际问题中建立数学模型、求\n解模型、验证反思的过程，形成模型观念；要关注基于代数的逻辑推\n理，如代数运算规律的论证（例66）、韦达定理的论证（例67）、基\n于图象的函数想象（例68)；能在比较复杂的情境中，提升学生发现\n问题和提出问题、分析问题和解决问题的能力，以及有逻辑地表达与\n交流的能力。",
+          "split_method": "heading-rules",
+          "created_at": "2026-11-08T03:58:05+00:00",
+          "material_set_id": "set_790c195dad4d",
+          "material_name": "义务教育数学课程标准（2022年版）",
+          "file_name": "课程标准_2022.pdf"
+        }
+      ]
+    },
+    "textbook": {
+      "materials": [
+        {
+          "id": "set_d2790a62db59",
+          "name": "七年级数学课本切片（B02）",
+          "version": 1
+        }
+      ],
+      "directory": [
+        {
+          "section_id": "doc_3f5e0575_62db59_p001_s001",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "第三章 代数式",
+          "path": "第三章 代数式",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_3f5e0575_62db59_p002_s002",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "3.1 列代数式表示数量关系",
+          "path": "第三章 代数式 / 3.1 列代数式表示数量关系",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 11
+        },
+        {
+          "section_id": "doc_3f5e0575_62db59_p012_s003",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "3.2 代数式的值",
+          "path": "第三章 代数式 / 3.2 代数式的值",
+          "level": 2,
+          "page_start": 12,
+          "page_end": 18
+        },
+        {
+          "section_id": "doc_3f5e0575_62db59_p018_s004",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "第三章 代数式̽",
+          "path": "第三章 代数式̽",
+          "level": 1,
+          "page_start": 18,
+          "page_end": 19
+        },
+        {
+          "section_id": "doc_3f5e0575_62db59_p019_s005",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "第三章 代数式",
+          "path": "第三章 代数式 [2]",
+          "level": 1,
+          "page_start": 19,
+          "page_end": 20
+        },
+        {
+          "section_id": "doc_3f5e0575_62db59_p021_s006",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "第四章 整式的加减",
+          "path": "第四章 整式的加减",
+          "level": 1,
+          "page_start": 21,
+          "page_end": 21
+        },
+        {
+          "section_id": "doc_3f5e0575_62db59_p022_s007",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "4.1 整式",
+          "path": "第四章 整式的加减 / 4.1 整式",
+          "level": 2,
+          "page_start": 22,
+          "page_end": 27
+        },
+        {
+          "section_id": "doc_3f5e0575_62db59_p028_s008",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "4.2 整式的加法与减法",
+          "path": "第四章 整式的加减 / 4.2 整式的加法与减法",
+          "level": 2,
+          "page_start": 28,
+          "page_end": 33
+        },
+        {
+          "section_id": "doc_3f5e0575_62db59_p033_s009",
+          "document_id": "doc_3f5e0575_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B05_相关资料切片.pdf",
+          "title": "1.5 犪",
+          "path": "第四章 整式的加减 / 1.5 犪",
+          "level": 2,
+          "page_start": 33,
+          "page_end": 42
+        },
+        {
+          "section_id": "doc_ccde81c9_62db59_p001_s001",
+          "document_id": "doc_ccde81c9_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "不等式与不等式组",
+          "title": "第十章 二元一次方程组",
+          "path": "第十章 二元一次方程组",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_ccde81c9_62db59_p001_s002",
+          "document_id": "doc_ccde81c9_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "不等式与不等式组",
+          "title": "第十一章 不等式与不等式组",
+          "path": "第十一章 不等式与不等式组",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_ccde81c9_62db59_p002_s003",
+          "document_id": "doc_ccde81c9_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "不等式与不等式组",
+          "title": "11.1 不等式",
+          "path": "第十一章 不等式与不等式组 / 11.1 不等式",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_ccde81c9_62db59_p002_s004",
+          "document_id": "doc_ccde81c9_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "不等式与不等式组",
+          "title": "11.1.1 不等式及其解集",
+          "path": "第十一章 不等式与不等式组 / 11.1 不等式 / 11.1.1 不等式及其解集",
+          "level": 3,
+          "page_start": 2,
+          "page_end": 4
+        },
+        {
+          "section_id": "doc_ccde81c9_62db59_p004_s005",
+          "document_id": "doc_ccde81c9_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "不等式与不等式组",
+          "title": "11.1.2 不等式的性质",
+          "path": "第十一章 不等式与不等式组 / 11.1 不等式 / 11.1.2 不等式的性质",
+          "level": 3,
+          "page_start": 4,
+          "page_end": 11
+        },
+        {
+          "section_id": "doc_ccde81c9_62db59_p012_s006",
+          "document_id": "doc_ccde81c9_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "不等式与不等式组",
+          "title": "11.2 一元一次不等式",
+          "path": "第十一章 不等式与不等式组 / 11.2 一元一次不等式",
+          "level": 2,
+          "page_start": 12,
+          "page_end": 18
+        },
+        {
+          "section_id": "doc_ccde81c9_62db59_p019_s007",
+          "document_id": "doc_ccde81c9_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "不等式与不等式组",
+          "title": "11.3 一元一次不等式组",
+          "path": "第十一章 不等式与不等式组 / 11.3 一元一次不等式组",
+          "level": 2,
+          "page_start": 19,
+          "page_end": 26
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p001_s001",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "第十二章",
+          "path": "第十二章",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p002_s002",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "第十二章 数据的收集、整理与描述",
+          "path": "第十二章 数据的收集、整理与描述",
+          "level": 1,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p002_s003",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "12.1 统计调查",
+          "path": "第十二章 数据的收集、整理与描述 / 12.1 统计调查",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p002_s004",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "12.1.1 全面调查",
+          "path": "第十二章 数据的收集、整理与描述 / 12.1 统计调查 / 12.1.1 全面调查",
+          "level": 3,
+          "page_start": 2,
+          "page_end": 4
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p004_s005",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "12.1.2 抽样调查",
+          "path": "第十二章 数据的收集、整理与描述 / 12.1 统计调查 / 12.1.2 抽样调查",
+          "level": 3,
+          "page_start": 4,
+          "page_end": 4
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p005_s006",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "第十二章 数据的收集、整理与描述ͥ",
+          "path": "第十二章 数据的收集、整理与描述ͥ",
+          "level": 1,
+          "page_start": 5,
+          "page_end": 5
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p006_s007",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "第十二章 数据的收集、整理与描述",
+          "path": "第十二章 数据的收集、整理与描述 [2]",
+          "level": 1,
+          "page_start": 6,
+          "page_end": 10
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p011_s008",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "12.2 用统计图描述数据",
+          "path": "第十二章 数据的收集、整理与描述 / 12.2 用统计图描述数据",
+          "level": 2,
+          "page_start": 11,
+          "page_end": 11
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p011_s009",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "12.2.1 扇形图、条形图和折线图",
+          "path": "第十二章 数据的收集、整理与描述 / 12.2 用统计图描述数据 / 12.2.1 扇形图、条形图和折线图",
+          "level": 3,
+          "page_start": 11,
+          "page_end": 16
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p016_s010",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "12.2.2 直方图",
+          "path": "第十二章 数据的收集、整理与描述 / 12.2 用统计图描述数据 / 12.2.2 直方图",
+          "level": 3,
+          "page_start": 16,
+          "page_end": 21
+        },
+        {
+          "section_id": "doc_b1e5c192_62db59_p022_s011",
+          "document_id": "doc_b1e5c192_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "数据的收集、整理与描述",
+          "title": "12.2.3 趋势图",
+          "path": "第十二章 数据的收集、整理与描述 / 12.2 用统计图描述数据 / 12.2.3 趋势图",
+          "level": 3,
+          "page_start": 22,
+          "page_end": 38
+        },
+        {
+          "section_id": "doc_3c131d77_62db59_p001_s001",
+          "document_id": "doc_3c131d77_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "实数",
+          "title": "第七章 相交线与平行线",
+          "path": "第七章 相交线与平行线",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_3c131d77_62db59_p001_s002",
+          "document_id": "doc_3c131d77_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "实数",
+          "title": "第八章 实数",
+          "path": "第八章 实数",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "document_id": "doc_3c131d77_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "实数",
+          "title": "8.1 平方根",
+          "path": "第八章 实数 / 8.1 平方根",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 9
+        },
+        {
+          "section_id": "doc_3c131d77_62db59_p010_s004",
+          "document_id": "doc_3c131d77_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "实数",
+          "title": "8.2 立方根",
+          "path": "第八章 实数 / 8.2 立方根",
+          "level": 2,
+          "page_start": 10,
+          "page_end": 13
+        },
+        {
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "document_id": "doc_3c131d77_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "实数",
+          "title": "8.3 实数及其简单运算",
+          "path": "第八章 实数 / 8.3 实数及其简单运算",
+          "level": 2,
+          "page_start": 14,
+          "page_end": 24
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p001_s001",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "第七章 相交线与平行线",
+          "path": "第七章 相交线与平行线",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p002_s002",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.1 相交线",
+          "path": "第七章 相交线与平行线 / 7.1 相交线",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p002_s003",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.1.1 两条直线相交",
+          "path": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.1 两条直线相交",
+          "level": 3,
+          "page_start": 2,
+          "page_end": 3
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p003_s004",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.1.2 两条直线垂直",
+          "path": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.2 两条直线垂直",
+          "level": 3,
+          "page_start": 3,
+          "page_end": 6
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p007_s005",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.1.3 两条直线被第三条直线所截",
+          "path": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.3 两条直线被第三条直线所截",
+          "level": 3,
+          "page_start": 7,
+          "page_end": 10
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p011_s006",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.2 平行线",
+          "path": "第七章 相交线与平行线 / 7.2 平行线",
+          "level": 2,
+          "page_start": 11,
+          "page_end": 11
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p011_s007",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.2.1 平行线的概念",
+          "path": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.1 平行线的概念",
+          "level": 3,
+          "page_start": 11,
+          "page_end": 12
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p013_s008",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.2.2 平行线的判定",
+          "path": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.2 平行线的判定",
+          "level": 3,
+          "page_start": 13,
+          "page_end": 15
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p015_s009",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.2.3 平行线的性质",
+          "path": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.3 平行线的性质",
+          "level": 3,
+          "page_start": 15,
+          "page_end": 21
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p022_s010",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "目录",
+          "path": "第七章 相交线与平行线 / 7.2 平行线 / 目录",
+          "level": 1,
+          "page_start": 22,
+          "page_end": 25
+        },
+        {
+          "section_id": "doc_410bfc4f_62db59_p026_s011",
+          "document_id": "doc_410bfc4f_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "相交线与平行线",
+          "title": "7.4 平移",
+          "path": "第七章 相交线与平行线 / 7.4 平移",
+          "level": 2,
+          "page_start": 26,
+          "page_end": 38
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p001_s001",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "第一章 有理数",
+          "path": "第一章 有理数",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p001_s002",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "第二章 有理数的运算",
+          "path": "第二章 有理数的运算",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p002_s003",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.1 有理数的加法与减法",
+          "path": "第二章 有理数的运算 / 2.1 有理数的加法与减法",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p002_s004",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.1.1 有理数的加法",
+          "path": "第二章 有理数的运算 / 2.1 有理数的加法与减法 / 2.1.1 有理数的加法",
+          "level": 3,
+          "page_start": 2,
+          "page_end": 7
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p007_s005",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.1.2 有理数的减法",
+          "path": "第二章 有理数的运算 / 2.1 有理数的加法与减法 / 2.1.2 有理数的减法",
+          "level": 3,
+          "page_start": 7,
+          "page_end": 14
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p015_s006",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.2 有理数的乘法与除法",
+          "path": "第二章 有理数的运算 / 2.2 有理数的乘法与除法",
+          "level": 2,
+          "page_start": 15,
+          "page_end": 15
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p015_s007",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.2.1 有理数的乘法",
+          "path": "第二章 有理数的运算 / 2.2 有理数的乘法与除法 / 2.2.1 有理数的乘法",
+          "level": 3,
+          "page_start": 15,
+          "page_end": 20
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p020_s008",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.2.2 有理数的除法",
+          "path": "第二章 有理数的运算 / 2.2 有理数的乘法与除法 / 2.2.2 有理数的除法",
+          "level": 3,
+          "page_start": 20,
+          "page_end": 27
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p028_s009",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.3 有理数的乘方",
+          "path": "第二章 有理数的运算 / 2.3 有理数的乘方",
+          "level": 2,
+          "page_start": 28,
+          "page_end": 28
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p028_s010",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.3.1 乘方",
+          "path": "第二章 有理数的运算 / 2.3 有理数的乘方 / 2.3.1 乘方",
+          "level": 3,
+          "page_start": 28,
+          "page_end": 31
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p031_s011",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.3.2 科学记数法",
+          "path": "第二章 有理数的运算 / 2.3 有理数的乘方 / 2.3.2 科学记数法",
+          "level": 3,
+          "page_start": 31,
+          "page_end": 32
+        },
+        {
+          "section_id": "doc_be3630a7_62db59_p032_s012",
+          "document_id": "doc_be3630a7_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "有理数的运算",
+          "title": "2.3.3 近似数",
+          "path": "第二章 有理数的运算 / 2.3 有理数的乘方 / 2.3.3 近似数",
+          "level": 3,
+          "page_start": 32,
+          "page_end": 39
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p001_s001",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "第五章 一元一次方程",
+          "path": "第五章 一元一次方程",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p001_s002",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "第六章 几何图形初步",
+          "path": "第六章 几何图形初步",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p002_s003",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.1 几何图形",
+          "path": "第六章 几何图形初步 / 6.1 几何图形",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p003_s004",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.1.1 立体图形与平面图形",
+          "path": "第六章 几何图形初步 / 6.1 几何图形 / 6.1.1 立体图形与平面图形",
+          "level": 3,
+          "page_start": 3,
+          "page_end": 7
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p007_s005",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.1.2 点、线、面、体",
+          "path": "第六章 几何图形初步 / 6.1 几何图形 / 6.1.2 点、线、面、体",
+          "level": 3,
+          "page_start": 7,
+          "page_end": 13
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p014_s006",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.2 直线、射线、线段",
+          "path": "第六章 几何图形初步 / 6.2 直线、射线、线段",
+          "level": 2,
+          "page_start": 14,
+          "page_end": 14
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p014_s007",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.2.1 直线、射线、线段",
+          "path": "第六章 几何图形初步 / 6.2 直线、射线、线段 / 6.2.1 直线、射线、线段",
+          "level": 3,
+          "page_start": 14,
+          "page_end": 15
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p016_s008",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.2.2 线段的比较与运算",
+          "path": "第六章 几何图形初步 / 6.2 直线、射线、线段 / 6.2.2 线段的比较与运算",
+          "level": 3,
+          "page_start": 16,
+          "page_end": 21
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p022_s009",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.3 角",
+          "path": "第六章 几何图形初步 / 6.3 角",
+          "level": 2,
+          "page_start": 22,
+          "page_end": 22
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p022_s010",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.3.1 角的概念",
+          "path": "第六章 几何图形初步 / 6.3 角 / 6.3.1 角的概念",
+          "level": 3,
+          "page_start": 22,
+          "page_end": 24
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p025_s011",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.3.2 角的比较与运算",
+          "path": "第六章 几何图形初步 / 6.3 角 / 6.3.2 角的比较与运算",
+          "level": 3,
+          "page_start": 25,
+          "page_end": 28
+        },
+        {
+          "section_id": "doc_cb6d4e0a_62db59_p028_s012",
+          "document_id": "doc_cb6d4e0a_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B04_相关资料切片.pdf",
+          "title": "6.3.3 余角和补角",
+          "path": "第六章 几何图形初步 / 6.3 角 / 6.3.3 余角和补角",
+          "level": 3,
+          "page_start": 28,
+          "page_end": 40
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p001_s001",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "第四章 整式的加减ܸ",
+          "path": "第四章 整式的加减ܸ",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p001_s002",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "第五章 一元一次方程",
+          "path": "第五章 一元一次方程",
+          "level": 1,
+          "page_start": 1,
+          "page_end": 1
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p002_s003",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.1 方程",
+          "path": "第五章 一元一次方程 / 5.1 方程",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p002_s004",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.1.1 从算式到方程",
+          "path": "第五章 一元一次方程 / 5.1 方程 / 5.1.1 从算式到方程",
+          "level": 3,
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p002_s005",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "1.2 狓＋1＝0.8狓＋3.",
+          "path": "第五章 一元一次方程 / 1.2 狓＋1＝0.8狓＋3.",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 4
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p004_s006",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "0.52 狓－（1－0.52）狓＝80.",
+          "path": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80.",
+          "level": 2,
+          "page_start": 4,
+          "page_end": 6
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p006_s007",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.1.2 等式的性质",
+          "path": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+          "level": 3,
+          "page_start": 6,
+          "page_end": 10
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p011_s008",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.2 解一元一次方程",
+          "path": "第五章 一元一次方程 / 5.2 解一元一次方程",
+          "level": 2,
+          "page_start": 11,
+          "page_end": 23
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p024_s009",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.3 实际问题与一元一次方程",
+          "path": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+          "level": 2,
+          "page_start": 24,
+          "page_end": 39
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p040_s010",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "第九章 平面直角坐标系",
+          "path": "第九章 平面直角坐标系",
+          "level": 1,
+          "page_start": 40,
+          "page_end": 40
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p040_s011",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "第十章 二元一次方程组",
+          "path": "第十章 二元一次方程组",
+          "level": 1,
+          "page_start": 40,
+          "page_end": 40
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p041_s012",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.1 二元一次方程组的概念",
+          "path": "第十章 二元一次方程组 / 10.1 二元一次方程组的概念",
+          "level": 2,
+          "page_start": 41,
+          "page_end": 43
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p044_s013",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.2 消元———解二元一次方程组",
+          "path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组",
+          "level": 2,
+          "page_start": 44,
+          "page_end": 44
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p044_s014",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.2.1 代入消元法",
+          "path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.1 代入消元法",
+          "level": 3,
+          "page_start": 44,
+          "page_end": 48
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p048_s015",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.2.2 加减消元法",
+          "path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.2 加减消元法",
+          "level": 3,
+          "page_start": 48,
+          "page_end": 53
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p054_s016",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.3 实际问题与二元一次方程组",
+          "path": "第十章 二元一次方程组 / 10.3 实际问题与二元一次方程组",
+          "level": 2,
+          "page_start": 54,
+          "page_end": 71
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p071_s017",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "0.5 狓＋狔＝2.",
+          "path": "第十章 二元一次方程组 / 0.5 狓＋狔＝2.",
+          "level": 2,
+          "page_start": 71,
+          "page_end": 72
+        }
+      ],
+      "sections": [
+        {
+          "section_id": "doc_ccee907e_62db59_p002_s003",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.1 方程",
+          "path": "第五章 一元一次方程 / 5.1 方程",
+          "level": 2,
+          "page_start": 2,
+          "page_end": 2,
+          "content": "【第 2 页】\n５．１方程\n在小学，我们利用算术方法解决了很多实际问题．接下\n来，我们将引入方程解决一些实际问题．首先来认识一下什\n么是方程．"
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p002_s004",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.1.1 从算式到方程",
+          "path": "第五章 一元一次方程 / 5.1 方程 / 5.1.1 从算式到方程",
+          "level": 3,
+          "page_start": 2,
+          "page_end": 2,
+          "content": "【第 2 页】\n５１１　从算式到方程\n先来看本章引言中的问题．请你先试着用列算式的方法解决．\n下面，我们引入一种新的方法来解决这个问题．在这个问题中，甲、乙两\n队的行进速度是已知的，行进的时间和路程是未知\n想一想，甲队追上乙\n队时，他们距大本营的路\n程之间有什么关系？\n的．如果设两队行进的时间为狓ｈ，根据“路程＝\n速度×时间”，甲队和乙队的行进路程可以分别表示为\n１．２狓ｋｍ和０．８狓ｋｍ，从而甲、乙两队距大本营的路\n程可以分别表示为（１．２狓＋１）ｋｍ和（０．８狓＋３）ｋｍ．\n甲队追上乙队时，他们处于同一位置，此时\n甲队距大本营的路程＝乙队距大本营的路程，\n因此"
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p006_s007",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.1.2 等式的性质",
+          "path": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+          "level": 3,
+          "page_start": 6,
+          "page_end": 10,
+          "content": "【第 6 页】\n５１２　等式的性质\n像２狓＝３，狓＋１＝３这样的简单方程，我们可以直接看出方程的解，但是对\n于比较复杂的方程，仅靠观察来解方程是困难的．因此，还要研究怎样解方程．\n方程是含有未知数的等式，为了研究解方程，先来看看等式有什么性质．\n像犿＋狀＝狀＋犿，狓＋２狓＝３狓，３×３＋１＝５×２，３狓＋１＝５狔这样的式子，\n都是等式．我们可以用犪＝犫表示一般的等式．\n首先，给出关于等式的两个基本事实．\n等式两边可以交换．如果犪＝犫，那么犫＝犪．\n相等关系可以传递．如果犪＝犫，犫＝犮，那么犪＝犮．\nᏦ\n在小学，我们已经知道：等式两边同时加（或减）同一个数，同时乘\n同一个数，或同时除以同一个不为０的数，结果仍相等．引入负数后，这\n些性质还成立吗？你可以用一些具体的数试一试．\n５１１\n仅供个人学习使用，未经授权不得另做他用\n【第 7 页】\n一般地，等式有以下性质：\n等式的性质１　等式两边加（或减）同一个数（或式子），结果仍相等．\n如果犪＝犫，那么犪±犮＝犫±犮．\n等式的性质２　等式两边乘同一个数，或除以同一个不为０的数，结果仍相等．\n如果犪＝犫，那么犪犮＝犫犮；\n如果犪＝犫，犮≠０，那么犪犮＝犫犮．\n例３　根据等式的性质填空，并说明依据：\n（１）如果２狓＝５－狓，那么２狓＋\n＝５；\n（２）如果犿＋２狀＝５＋２狀，那么犿＝\n；\n（３）如果狓＝－４，那么\n·狓＝２８；\n（４）如果３犿＝４狀，那么３２犿＝\n·狀．\n解：（１）２狓＋狓＝５；根据等式的性质１，等式两边加狓，结果仍相等．\n（２）犿＝５；根据等式的性质１，等式两边减２狀，结果仍相等．\n（３）－７·狓＝２８；根据等式的性质２，等式两边乘－７，结果仍相等．\n（４）３２犿＝２·狀；根据等式的性质２，等式两边除以２，结果仍相等．\n利用等式的性质可以解方程．\n例４　利用等式的性质解下列方程：\n（１）狓＋７＝２６；　（２）－５狓＝２０；　（３）－１３狓－５＝４．\n分析：要使方程狓＋７＝２６转化为狓＝犿（常数）的形式，需要去掉方程\n左边的７，利用等式的性质１，方程两边减７就得出狓的值．类似地，利用等式\n的性质，可以将另外两个方程转化为狓＝犿的形式．\n解：（１）方程两边减７，得\n狓＋７－７＝２６－７．\n于是\n狓＝１９．\n６１１\n仅供个人学习使用，未经授权不得另做他用\n【第 8 页】\n（２）方程两边除以－５，得\n解以狓为未知数的\n方程，就是把方程逐步\n转化为狓＝犿（常数）\n的形式．等式的性质是\n转化的重要依据．\n－５狓\n－５＝２０－５．\n于是\n狓＝－４．\n（３）方程两边加５，得\n－１３狓－５＋５＝４＋５．\n化简，得\n－１３狓＝９．\n方程两边乘－３，得\n狓＝－２７．\n一般地，从方程解出未知数的值以后，通常需要代入原方程检验，看这个\n值能否使方程左、右两边的值相等．例如，将狓＝－２７代入方程－１３狓－５＝４\n的左边，得\n－１３×（－２７）－５＝４．\n方程左、右两边的值相等，所以狓＝－２７是方程－１３狓－５＝４的解．\nጷ˸\n１．根据等式的性质填空：\n（１）如果狓＝狔，那么狓＋１＝狔＋\n；\n（２）如果狓＋２＝狔＋２，那么\n＝狔；\n（３）如果狓＝狔，那么\n·狓＝５狔；\n（４）如果３狓＝６狔，那么狓＝\n·狔．\n２．利用等式的性质解下列方程，并检验：\n（１）狓－５＝６；　　　（２）０．３狓＝４５；\n（３）５狓＋４＝０；\n（４）２－１４狓＝３．\n７１１\n仅供个人学习使用，未经授权不得另做他用\n【第 9 页】\n\u0016\u000f\u0012\nܭ˸ ڍ\n第１题是把用文字\n表示的关系转化成用等\n式表示．\n１．列等式表示：\n（１）比犪大５的数等于８；\n（２）犫的三分之一等于９；\n（３）狓的２倍与１０的和等于１８；\n（４）狓的三分之一与狔的差等于６；\n（５）比犪的３倍大５的数等于犪的４倍；\n（６）比犫的一半小７的数等于犪与犫的和．\n２．根据下列图形中标出的量及其满足的关系，列出方程：\nև᫂\n\u0012\u0015\nx 2\nx 3\nx\nxc\nč3xĎc\nxc\nx\n᭧ሥ \u0017\nx  1\n（１）\n（２）\n（３）\n（第２题）\n３．狓＝３，狓＝０，狓＝－２分别是下列哪个方程的解？\n（１）５狓＋７＝７－２狓；　　　　　　　（２）６狓－８＝８狓－４；\n（３）３狓－２＝４＋狓；\n（４）２狓－３＝５狓－６．\n４．利用等式的性质解下列方程：\n（１）狓－４＝２９；\n（２）１２狓＋２＝６；\n（３）３狓＋１＝４；\n（４）４狓－２＝２．\n፬Ռᤂၹ\n列方程（第５～１０题）：\n５．某校七年级（１）班共有学生４８人，其中女生人数比男生人数的４５多３，这个\n班有男生多少人？\n６．把１００００元奖学金按照两种奖项奖给２０名学生，其中一等奖每人８００元，二\n等奖每人４００元．获得一等奖的学生有多少人？\n８１１\n仅供个人学习使用，未经授权不得另做他用\n【第 10 页】\n７．去年某镇居民人均可支配收入为３０４３８元，比前年增长了６．８％，前年这个\n镇居民人均可支配收入为多少元？\n８．一辆汽车已行驶了１２０００ｋｍ，计划每月再行驶８００ｋｍ，几个月后这辆汽车行驶\n的总路程为２０８００ｋｍ？\n９．一个圆柱形包装盒（厚度忽略不计）的高是１２ｃｍ，表面积是１０８．５πｃｍ２．这\n个包装盒的底面半径是多少厘米？\n１０．某校号召学生用零花钱为地震灾区捐款．七年级（１）班全体学生一共捐款\n４２８元，七年级（２）班平均每名学生捐款１０元，七年级（１）班的捐款数比\n七年级（２）班少２２元．七年级（２）班有多少名学生？\nጊ\n１１．一个两位数个位上的数字是１，十位上的数字是狓．把１与狓对调，新的两\n位数比原两位数小１８，狓的值是多少？请你用方程解决这个问题．\n９１１\n仅供个人学习使用，未经授权不得另做他用"
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p011_s008",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.2 解一元一次方程",
+          "path": "第五章 一元一次方程 / 5.2 解一元一次方程",
+          "level": 2,
+          "page_start": 11,
+          "page_end": 23,
+          "content": "【第 11 页】\n５．２解一元一次方程\n我们已经知道，直接利用等式的性质可以解简单的方程．\n本节我们将结合方程的具体特点，继续研究如何解一元一次\n方程．\n问题１　某校三年共购买计算机１４０台，去年购买的数量是前年的２倍，\n今年购买的数量又是去年的２倍．前年这所学校购买了多少台计算机？\n设前年购买计算机狓台，则去年购买计算机２狓台，今年购买计算机４狓\n台．根据“三年共购买计算机１４０台”，可以得到如下相等关系：\n“各部分量的和＝\n总量”是一个基本的相\n等关系．\n前年购买量＋去年购买量＋今年购买量＝１４０．\n列得方程\n狓＋２狓＋４狓＝１４０．\n把含有狓的项合并同类项，得\n７狓＝１４０．\n请你自己检验狓＝\n２０是方程狓＋２狓＋４狓＝\n１４０的解．\n系数化为１，得\n狓＝２０．\n因此，前年这所学校购买了２０台计算机．\nᏦ\n上面解方程中“合并同类项”起了什么作用？\n例１　解下列方程：\n根据等式的性质解\n一元一次方程时，得到\n的狓＝犿就是方程的解\n（想一想为什么）．今后，\n检验环节通常可以省略．\n（１）２狓－５２狓＝６－８；\n（２）７狓－２．５狓＋３狓－１．５狓＝－１５×４－６×３．\n解：（１）合并同类项，得\n－１２狓＝－２．\n系数化为１，得\n０２１\n仅供个人学习使用，未经授权不得另做他用\n【第 12 页】\n狓＝４．\n（２）合并同类项，得\n６狓＝－７８．\n系数化为１，得\n狓＝－１３．\n例２　有一列数－３，９，－２７，８１，－２４３，…，其中第狀个数是（－３）狀（狀是\n正整数），如果这列数中某三个相邻数的和是－１７０１，那么这三个数各是多少？\n分析：从符号和绝对值两方面观察，可以发现这列数的排列规律，后面的\n数是它前面的数与－３的乘积．\n解：设所求三个数中的第１个数是狓，则后两个数分别是－３狓，９狓．\n由三个数的和是－１７０１，得\n狓－３狓＋９狓＝－１７０１．\n合并同类项，得\n７狓＝－１７０１．\n系数化为１，得\n狓＝－２４３．\n所以\n－３狓＝７２９，\n９狓＝－２１８７．\n答：这三个数分别是－２４３，７２９，－２１８７．\nጷ˸\n１．解下列方程：\n（１）５狓－２狓＝９；　　　　　　（２）狓２＋３狓２＝７；\n（３）－３狓＋０．５狓＝１０；\n（４）７狓－４．５狓＝２．５×３－５．\n２．某工厂的产值连续增长，２０２２年是２０２１年的１．５倍，２０２３年是２０２２\n年的２倍，这三年的总产值为５５０万元．２０２１年的产值是多少万元？\n３．某洗衣机厂今年计划生产Ⅰ型、Ⅱ型、Ⅲ型洗衣机共２５５００台，其中\nⅠ型、Ⅱ型、Ⅲ型三种洗衣机的数量之比为１∶２∶１４．洗衣机厂计划生\n产这三种洗衣机各多少台？\n１２１\n仅供个人学习使用，未经授权不得另做他用\n【第 13 页】\n问题２　把一批图书分给某班学生阅读，若每人分３本，则剩余２０本；若\n这批书的总数有几种\n表示方法？它们之间有什\n么关系？\n每人分４本，则缺２５本．这个班有多少名学生？\n设这个班有狓名学生．\n每人分３本，共分出３狓本，加上剩余的２０\n本，这批书共（３狓＋２０）本．\n“表示同一个量的\n两个不同的式子相等”，\n是一个基本的相等关系．\n每人分４本，需要４狓本，减去缺的２５本，这\n批书共（４狓－２５）本．\n这批书的总数是一个定值，表示它的两个式子\n应相等，根据这一相等关系列得方程\n３狓＋２０＝４狓－２５．\nᏦ\n方程３狓＋２０＝４狓－２５的两边都有含狓的项（３狓与４狓）和不含字母\n的常数项（２０与－２５），怎样才能把它转化为狓＝犿（常数）的形式呢？\n为了使方程的右边没有含狓的项，等式两边减４狓，利用等式的性质１，得\n３狓＋２０－４狓＝－２５．\n为了使方程的左边没有常数项，等式两边减２０，利用等式的性质１，得\n３狓－４狓＝－２５－２０．\n把上面的方程与原方程作比较，这个变形相当于\n把某项从等式的一边\n移到另一边时，这项有什\n么变化？\nU\nU\nU\nU\nU\nU\nU\n即把原方程左边的２０变为－２０移到右边，把右边的４狓变为－４狓移到左边．\n像上面那样把等式一边的某项变号后移到另一边，叫作移项．\n下面，我们继续解这个方程．\n对方程３狓－４狓＝－２５－２０合并同类项，得\n－狓＝－４５．\n２２１\n仅供个人学习使用，未经授权不得另做他用\n【第 14 页】\n系数化为１，得\n狓＝４５．\n由上可知，这个班有４５名学生．\nᏦ\n上面解方程中“移项”起了什么作用？\n例３　解下列方程：\n（１）３狓＋７＝３２－２狓；　　　　　　　（２）狓－３＝３２狓＋１．\n解：（１）移项，得\n３狓＋２狓＝３２－７．\n合并同类项，得\n５狓＝２５．\n系数化为１，得\n狓＝５．\n（２）移项，得\n狓－３２狓＝１＋３．\n合并同类项，得\n－１２狓＝４．\n系数化为１，得\n狓＝－８．\n櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲\n例４　某制药厂制造一批药品，如用旧工艺，则废水排量要比环保限制的\n最大量还多２００ｔ；如用新工艺，则废水排量比环保限制的最大量少１００ｔ．新、\n旧工艺的废水排量之比为２∶５，采用两种工艺的废水排量各是多少吨？\n分析：因为采用新、旧工艺的废水排量之比为２∶５，所以可设它们分别为\n２狓ｔ和５狓ｔ，再根据它们与环保限制的最大量之间的关系列方程．\n解：设采用新、旧工艺的废水排量分别为２狓ｔ和５狓ｔ．\n等式两边代表哪个\n数量？\n根据废水排量与环保限制最大量之间的关系，得\n５狓－２００＝２狓＋１００．\n移项，得\n５狓－２狓＝１００＋２００．\n合并同类项，得\n３狓＝３００．\n系数化为１，得\n３２１\n仅供个人学习使用，未经授权不得另做他用\n【第 15 页】\n狓＝１００．\n所以\n２狓＝２００，５狓＝５００．\n答：采用新、旧工艺的废水排量分别为２００ｔ和５００ｔ．\n##\n约８２０年，阿拉伯数学家花拉子米著有《代数学》（又称《还原与对\n消计算概要》），其中，“还原”指的是“移项”，“对消”隐含着移项后合\n并同类项．我国古代数学著作《九章算术》的“方程”章，更早使用了\n“对消”和“还原”的方法．\nጷ˸\n１．解下列方程：\n（１）３狓＝４狓＋３；　　　　　　（２）６狓－８＝４狓；\n（３）６狔－７＝４狔－５；\n（４）１２狔－６＝３４狔．\n２．解根据本章引言中的问题列出的方程１．２狓＋１＝０．８狓＋３．\n３．李明出生时父亲２８岁，现在父亲的年龄是李明年龄的３倍．求现在李\n明的年龄．\n４．王芳和张华同时采摘樱桃，王芳平均每小时采摘８ｋｇ，张华平均每小\n时采摘７ｋｇ．采摘结束后王芳从她采摘的樱桃中取出０．２５ｋｇ给了张\n华，这时两人的樱桃一样多．她们采摘用了多长时间？\n问题３　某工厂采取节能措施，去年下半年与上半年相比，月平均用电量\n减少２０００ｋＷ·ｈ（千瓦时），全年的用电量是１５００００ｋＷ·ｈ．这个工厂去年\n一台功率为１ｋＷ\n的电器１ｈ的用电量是\n１ｋＷ·ｈ．\n上半年平均每月的用电量是多少？\n设去年上半年平均每月的用电量是狓ｋＷ·ｈ，\n则下半年平均每月的用电量是（狓－２０００）ｋＷ·ｈ；\n上半年的用电量是６狓ｋＷ·ｈ，下半年的用电量是\n６（狓－２０００）ｋＷ·ｈ．\n４２１\n仅供个人学习使用，未经授权不得另做他用\n【第 16 页】\n根据全年的用电量是１５００００ｋＷ·ｈ，列得方程\n当方程中有带括号\n的式子时，去括号是常\n用的化简步骤．\n６狓＋６（狓－２０００）＝１５００００．\n方程左边去括号，得\n６狓＋６狓－１２０００＝１５００００．\n移项，得\n６狓＋６狓＝１５００００＋１２０００．\n合并同类项，得\n１２狓＝１６２０００．\n系数化为１，得\n狓＝１３５００．\n由上可知，这个工厂去年上半年平均每月的用电量是１３５００ｋＷ·ｈ．\n例５　解下列方程：\n（１）２狓－（狓＋１０）＝５狓＋２（狓－１）；　　（２）３狓－７（狓－１）＝３－２（狓＋３）．\n解：（１）去括号，得\n２狓－狓－１０＝５狓＋２狓－２．\n移项，得\n２狓－狓－５狓－２狓＝－２＋１０．\n合并同类项，得\n－６狓＝８．\n系数化为１，得\n狓＝－４３．\n（２）去括号，得\n３狓－７狓＋７＝３－２狓－６．\n移项，得\n３狓－７狓＋２狓＝３－６－７．\n合并同类项，得\n－２狓＝－１０．\n系数化为１，得\n狓＝５．\n櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲櫲\n例６　一艘船从甲码头到乙码头顺水而行，用了２ｈ；从乙码头返回甲码头\n逆水而行，用了２．５ｈ．已知水流的速度是３ｋｍ／ｈ，求船在静水中的平均速度．\n分析：一般情况下，可以认为这艘船往返的路程相等．根据这个相等关\n系，可以列方程求出船在静水中的平均速度．\n解：设船在静水中的平均速度为狓ｋｍ／ｈ，则顺水速度为（狓＋３）ｋｍ／ｈ，\n逆水速度为（狓－３）ｋｍ／ｈ．\n根据往返路程相等，列得方程\n２（狓＋３）＝２．５（狓－３）．\n５２１\n仅供个人学习使用，未经授权不得另做他用\n【第 17 页】\n去括号，得\n２狓＋６＝２．５狓－７．５．\n移项及合并同类项，得\n－０．５狓＝－１３．５．\n系数化为１，得\n狓＝２７．\n答：船在静水中的平均速度为２７ｋｍ／ｈ．\nጷ˸\n１．解下列方程：\n（１）２（狓＋３）＝５狓；\n（２）４狓＋３（２狓－３）＝１２－（狓＋４）；\n（３）６（１２狓－４）＋２狓＝７－（１３狓－１）；\n（４）２－３（狓＋１）＝１－２（１＋０．５狓）．\n２．一个长方形的长减少２ｃｍ，宽增加２ｃｍ后，面积\n保持不变．已知这个长方形的长是６ｃｍ，求它\n的宽．\n３．编织大、小两种中国结共６个，总计用绳２０ｍ．已知\n编织１个大号中国结需用绳４ｍ，编织１个小号中\n国结需用绳３ｍ．问这两种中国结各编织了多少个．\n问题４　如图５．２１，翠湖在青山、绿水两地之间，距青山５０ｋｍ，距绿水\n７０ｋｍ．某天，一辆汽车匀速行驶，途经王家庄、青山、绿水三地的时间如表\n５．２１所示．王家庄距翠湖的路程有多远？\nx km\n50 km\n70 km\nဍ\n᭟\nᏙຬ\n፯\n图５．２１\n６２１\n仅供个人学习使用，未经授权不得另做他用\n【第 18 页】\n表５２１\n地名\n王家庄\n青山\n绿水\n时间\n１０：００\n１３：００\n１５：００\n你还能列得其他方\n程吗？\n设王家庄距翠湖的路程为狓ｋｍ，则王家庄距\n青山的路程为（狓－５０）ｋｍ，王家庄距绿水的路程\n为（狓＋７０）ｋｍ．由表５．２１可知，汽车从王家庄\n到青山的行驶时间为３ｈ，从王家庄到绿水的行驶\n时间为５ｈ．\n根据汽车在各段的行驶速度相等，列得方程\n狓－５０\n３＝狓＋７０\n５．\n这个方程中未知数的系数不是整数，如果能化去分母，把未知数的系数化成整\n数，就可以使解方程中的计算更简便些．\n我们知道，等式两边乘同一个数，结果仍相等．这个方程中各分母的最小\n公倍数是１５，方程两边都乘１５，得\n５（狓－５０）＝３（狓＋７０）．\n去括号，得\n５狓－２５０＝３狓＋２１０．\n移项，得\n５狓－３狓＝２１０＋２５０．\n合并同类项，得\n２狓＝４６０．\n系数化为１，得\n狓＝２３０．\n因此，王家庄距翠湖的路程为２３０ｋｍ．\n为了更全面地研究问题，我们再以方程３狓＋１\n２－２＝３狓－２\n１０－２狓＋３\n５为例，\n以框图的形式展示解这类一元一次方程的步骤．\n７２１\n仅供个人学习使用，未经授权不得另做他用\n【第 19 页】\n方程两边的每一项\n都要乘分母的最小公倍\n数１０．\n你能说出每个步骤\n的依据吗？\nՌ Տዝᮊ\nረᮊ\nԝ Ղ\nԝѬ\nጇ ӑ˞1\nᑿ3\n解一元一次方程的一般步骤包括：去分母、去括号、移项、合并同类\n项、系数化为１等．通过这些步骤，可以使以狓为未知数的一元一次方程\n逐步转化为狓＝犿的形式．这个过程主要依据等式的性质和运算律等．\n例７　解下列方程：\n（１）狓＋１\n２－１＝２＋２－狓４；　　　　（２）３狓＋狓－１\n２＝３－２狓－１\n３．\n解：（１）去分母（方程两边乘４），得\n对于２狓＋２－４＝\n８＋２－狓，也可以先合\n并同类项，再移项．\n２（狓＋１）－４＝８＋（２－狓）．\n去括号，得\n２狓＋２－４＝８＋２－狓．\n移项，得\n２狓＋狓＝８＋２－２＋４．\n合并同类项，得\n３狓＝１２．\n８２１\n仅供个人学习使用，未经授权不得另做他用\n【第 20 页】\n系数化为１，得\n狓＝４．\n（２）去分母（方程两边乘６），得\n１８狓＋３（狓－１）＝１８－２（２狓－１）．\n去括号，得\n１８狓＋３狓－３＝１８－４狓＋２．\n移项，得\n１８狓＋３狓＋４狓＝１８＋２＋３．\n合并同类项，得\n２５狓＝２３．\n系数化为１，得\n狓＝２３２５．\nጷ˸\n１．解下列方程：\n（１）１９\n１００狓＝２１\n１００（狓－２）；　　　　（２）狓＋１\n２－２＝狓４；\n（３）５狓－１\n４＝３狓＋１\n２－２－狓３；　（４）３狓＋２\n２－１＝２狓－１\n４－２狓＋１\n５．\n２．伦敦的不列颠博物馆保存着一件极其珍贵\n的文物———莱茵德纸草书．这是古埃及人\n用象形文字写在一种用纸莎草压制成的草\n片上的著作．书中记载了许多数学问题，\n其中有一道著名的问题：一个数，它的三\n分之二，它的一半，它的七分之一，它的\n全部，加起来总共是３３．这个数是多少？\n请你用方程解决这个问题．\n３．一辆客车和一辆卡车同时从Ａ地出发沿同\n一公路同方向匀速行驶，客车的行驶速度是７０ｋｍ／ｈ，卡车的行驶速度\n是６０ｋｍ／ｈ，客车比卡车早１ｈ经过Ｂ地．求Ａ，Ｂ两地相距的路程．\n９２１\n仅供个人学习使用，未经授权不得另做他用\n【第 21 页】\n\u0016\u000f\u0013\nܭ˸ ڍ\n１．解下列方程：\n（１）狓＋３狓＝－１６；　　　　　　　　（２）１６狔－２．５狔－７．５狔＝５；\n（３）３狓＋５＝４狓＋１；\n（４）９－３狔＝５狔＋５．\n２．解下列方程：\n（１）５犮＋（２－４犮）＝０；\n（２）２５犫－（犫－５）＝２９；\n（３）７狓＋２（３狓－３）＝２０；\n（４）８狔－３（３狔＋２）＝６．\n３．解下列方程：\n（１）３狓＋５\n２＝２狓－１\n３；\n（２）狓－３\n－５＝３狓＋４\n１５；\n（３）３狔－１\n４－１＝５狔－７\n６；\n（４）５狔＋４\n３＋狔－１\n４＝２－５狔－５\n１２．\n４．用方程解答下列问题：\n（１）狓的５倍与２的和等于狓的３倍与４的差，求狓；\n（２）狔与－５的积等于狔与５的和，求狔；\n（３）狓与４的和的１．２倍等于狓与１４的差的３．６倍，求狓；\n（４）狔的３倍与１．５的和的１２等于狔与１的差的１４，求狔．\n５．用一根６０ｍ长的绳子围出一个长方形，使它的长是宽的１．５倍．长方形的长\n和宽各应是多少米？\n６．几个人共同种一批树苗，如果每人种１０棵，则剩下６棵树苗未种；如果每人\n种１２棵，则缺６棵树苗．求参加种树的人数．\n７．买两种布料共６４ｍ，花了５５０元，其中蓝布料每米８元，黑布料每米９元．\n两种布料各买了多少米？\n፬Ռᤂၹ\n８．一个两位数的个位上数字的３倍加１是十位上的数字，个位上的数字与十位\n上数字的和等于９．这个两位数是多少？\n９．随着农业技术的现代化，节水型灌溉得到逐步\n推广．喷灌和滴灌是比漫灌节水的灌溉方式．\n灌溉三块同样大的田地，第一块用漫灌方式，\n第二块用喷灌方式，第三块用滴灌方式．后两\n种方式的用水量分别是漫灌的２５％和１５％．\n０３１\n仅供个人学习使用，未经授权不得另做他用\n【第 22 页】\n（１）设第一块田地用水狓ｔ，则另两块田地的用水量各如何表示？\n（２）如果三块田地共用水４２０ｔ，三块田地各用水多少吨？\n１０．某造纸厂为节约木材，大力扩大再生纸的生产．去年１０月该厂生产再生纸\n２０５０ｔ，比前年１０月再生纸产量的２倍还多１５０ｔ．前年１０月该造纸厂生产\n再生纸多少吨？\n１１．张华和李明登一座山．张华平均每分钟登高１０ｍ，并且先出发３０ｍｉｎ，李明\n平均每分钟登高１５ｍ，两人同时登上山顶．设张华登山用了狓ｍｉｎ．\n（１）如何用含狓的代数式表示李明登山所用时间？\n（２）试用方程求狓的值．由狓的值能求出山高吗？如果能，山高多少米？\n１２．两辆汽车从相距８４ｋｍ的两地同时出发相向而行，甲车的速度比乙车的速度\n快２０ｋｍ／ｈ，半小时后两车相遇．两车的速度各是多少？\n１３．在风速为２４ｋｍ／ｈ的条件下，一架飞机顺风从Ａ机场飞到Ｂ机场要用２．８ｈ，\n它逆风飞行同一航线要用３ｈ．求：\nʷ  ̄\nʼ  پ  ̋\nО\n（第１４题）\n（１）无风时这架飞机在这一航线的平均航速；\n（２）两机场之间的航程．\n１４．如图，在一张普通的月历中，相邻三行里同\n一列的三个日期数之和能否为３０？如果能，\n这三个日期数分别是多少？\nጊ\n１５．有一些相同的房间需要粉刷墙面．一天３名一级技工去粉刷８个房间，结果\n有５０ｍ２墙面没来得及粉刷；同样时间内５名二级技工除了粉刷了１０个房\n间，还多粉刷了另外的４０ｍ２墙面．每名一级技工比二级技工每天多粉刷\n１０ｍ２墙面，求每个房间需要粉刷的墙面面积．\n１６．李明骑自行车从Ａ地到Ｂ地，刘伟骑自行车从Ｂ地到Ａ地，两人沿同一公路\n匀速前进．已知两人在上午８时同时出发，到上午８时半，两人相距９ｋｍ，到\n上午９时，两人又相距９ｋｍ．求Ａ，Ｂ两地相距的路程．\n１７．一列火车匀速行驶，经过一条长３００ｍ的隧道需要２０ｓ的时间．隧道的顶上\n有一盏灯，垂直向下发光，灯光照在火车上的时间是１０ｓ．\n（１）设火车长狓ｍ，用含狓的代数式表示：从车头经过灯下到车尾经过灯\n下，火车行驶的路程和这段时间内火车的速度．\n１３１\n仅供个人学习使用，未经授权不得另做他用\n【第 23 页】\n（２）设火车长狓ｍ，用含狓的代数式表示：从车头进入隧道到车尾离开隧\n道，火车行驶的路程和这段时间内火车的速度．\n（３）求这列火车的长度．\nቃˁԧဘ\nቃˁԧဘ\nቃˁԧဘ\n无限循环小数化分数\n我们知道分数１３可以写成小数０．３\n，反过来，无限循环小数０．３\n可以\n写成分数１３．一般地，任何一个无限循环小数都可以写成分数狆狇（狆，狇是\n整数，狇≠０）的形式吗？如果可以，应怎样写呢？\n先以无限循环小数０．７\n为例进行讨论．\n设０．７\n＝狓，由０．７\n＝０．７７７…可知，１０狓＝７．７７７…，所以１０狓－狓＝７．\n解方程，得狓＝７９．于是，０．７\n＝７９．\n想一想：如何把像０．１\n，０．２\n，…，０．９\n这样的无限循环小数化为分数\n形式？动手试一试．\n再以无限循环小数０．７\n３\n为例，作进一步的讨论．\n无限循环小数０．７\n３\n＝０．７３７３７３…，它的循环节有两位，类比上面的\n做法，可以想到：\n设０．７\n３\n＝狓，由０．７\n３\n＝０．７３７３７３…可知，１００狓＝７３．７３７３…，所以\n１００狓－狓＝７３．解方程，得狓＝７３９９．于是０．７\n３\n＝７３９９．\n想一想：如何把像０．１\n０\n，０．１\n２\n，…，０．９\n８\n这样的无限循环小数化为\n分数形式？动手试一试．\n想一想：如何把无限循环小数０．７\n３５\n，０．８\n２３１\n化为分数形式？动手试\n一试，并总结把无限循环小数化为分数形式的一般方法．\n２３１\n仅供个人学习使用，未经授权不得另做他用"
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p024_s009",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "5.3 实际问题与一元一次方程",
+          "path": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+          "level": 2,
+          "page_start": 24,
+          "page_end": 39,
+          "content": "【第 24 页】\n５．３实际问题与一元一次方程\n从前面的学习可以看出，方程是分析和解决问题的一种\n很有用的数学工具．本节我们重点研究如何用一元一次方程\n解决实际问题．\n例１　某车间有２２名工人，每人每天可以生产１２００个螺栓或２０００个螺\n母．１个螺栓需要配２个螺母，为使每天生产的螺栓和螺母刚好配套，应安排\n生产螺栓和螺母的工人各多少名？\n分析：每天生产的螺母数量是螺栓数量的２倍时，它们刚好配套．\n如果设狓名工人生\n产螺母，怎样列方程？\n解：设应安排狓名工人生产螺栓，（２２－狓）名\n工人生产螺母．\n根据螺母数量应是螺栓数量的２倍，列得方程\n２０００（２２－狓）＝２×１２００狓．\n这类问题中配套的\n物品之间具有一定的数\n量关系，这可以作为列\n方程的依据．\n解方程，得\n狓＝１０．\n进而\n２２－狓＝１２．\n答：应安排１０名工人生产螺栓，１２名工人生\n产螺母．\n例２　整理一批图书，由１人整理需要４０ｈ完成．现计划由一部分人先整\n理４ｈ，然后增加２人与他们一起整理８ｈ，完成这项工作．假设这些人的工作\n效率相同，应先安排多少人进行整理？\n分析：如果把总工作量设为１，则人均效率（一个人１ｈ完成的工作量）\n为１４０，狓人先整理４ｈ完成的工作量为４狓４０，增加２人后再整理８ｈ完成的工作\n量为８（狓＋２）\n４０，这两个工作量之和应等于总工作量．\n解：设先安排狓人整理４ｈ．\n３３１\n仅供个人学习使用，未经授权不得另做他用\n【第 25 页】\n这类问题中常常把\n总工作量看作１，并利\n用“工作量＝人均效率×\n人数×时间”的关系考\n虑问题．\n根据先后两个时段的工作量之和等于总工作\n量，列得方程\n４狓４０＋８（狓＋２）\n４０＝１．\n解方程，得\n狓＝２．\n答：应先安排２人进行整理．\nᑿ3\n用一元一次方程解决实际问题的基本过程如下：\nᬅ᫈ᮥ\n\u0001\u0001\u0001\u0001ᰎ\n᝺ ᅼ Ὂѵ ሮ\nʷЋʷ  ሮ\nʷЋʷ  ሮᄊᝍ\nᬅ᫈ᮥ\nᄊን\nᝍ\nሮ\n这一过程一般包括设、列、解、检、答等步骤，即设未知数、列方\n程、解方程、检验所得结果、确定答案．正确分析问题中的相等关系是列\n方程的基础．\nጷ˸\n１．一条地下管线由甲工程队单独铺设需要１２天，由乙工程队单独铺设需要２４\n天．如果由这两支工程队从两端同时施工，需要多少天可以铺好这条管线？\n２．在一次劳动课上，有２７名同学在甲处劳动，有１９名同学在乙处劳动．\n现在从其他班级另调２０人去支援，使得在甲处的人数为在乙处人数的\n２倍，应调往甲、乙两处各多少人？\n３．一台仪器由１个Ａ部件和３个Ｂ部件构成．用１ｍ３钢材可以做４０个Ａ\n部件或２４０个Ｂ部件．现要用６ｍ３钢材制作这种仪器，应用多少立方\n米钢材做Ａ部件，多少立方米钢材做Ｂ部件，才能制作尽可能多的仪\n器？最多能制成多少台仪器？\n４３１\n仅供个人学习使用，未经授权不得另做他用\n【第 26 页】\n有些实际问题中的数量关系比较隐蔽，需要仔细分析才能列出方程．下面\n我们进一步探究几个这样的问题．\nᣏ/\u0001\u0012\n销售中的盈亏\n一商店以每件６０元的价格卖出两件衣服，\n其中一件盈利２５％，另一件亏损２５％，卖这两\n件衣服总的是盈利还是亏损，或是不盈不亏？\n可以先大体估计盈\n亏，再通过准确计算检\n验你的判断．\n分析：有同学可能认为，一件盈利２５％，另一\n件亏损２５％，合起来是不盈不亏；实际上，是盈是\n亏要看这家商店买进这两件衣服时共花了多少元．\n如果总售价大于总进价就盈利，总售价小于总进价\n就亏损，相等就不盈不亏．\n假设一件商品的进价是４０元，如果卖出后盈利２５％，那么商品利润是\n４０×２５％元；如果卖出后亏损２５％，那么商品利润是４０×（－２５％）元．\n在本问题中，设盈利２５％的那件衣服的进价是狓元，它的商品利润就是\n０．２５狓元．根据进价与利润的和等于售价，列得方程\n狓＋０．２５狓＝６０．\n解得\n狓＝４８．\n类似地，可以设另一件衣服的进价为狔元，它的商品利润是－０．２５狔元，\n列得方程\n狔－０．２５狔＝６０．\n解得\n狔＝８０．\n两件衣服的总进价是４８＋８０＝１２８（元），而两件衣服的总售价是６０＋６０＝\n１２０（元），总售价小于总进价，由此可知卖这两件衣服共亏损８元．\n列、解方程后得出的结论与你先前的估计一致吗？通过对本题的探究，你\n对方程在实际问题中的应用有什么新的认识？\n５３１\n仅供个人学习使用，未经授权不得另做他用\n【第 27 页】\nጷ˸\n１．某商店有两种书包．每个小书包比大书包的进价少１０元，而它们的售\n后利润额相同，其中，每个小书包的利润率为３０％，每个大书包的利\n润率为２０％．试求两种书包的进价．\n２．一件商品按成本价提高２０％后标价，再打八折销售，售价为１４４元．售\n出这件商品是盈利还是亏损？\nᣏ/\u0001\u0013\n球赛积分表问题\n表５３１　某次篮球联赛积分\n队名比赛场次\n胜场\n负场\n积分\n前进\n１４\n１０\n４\n２４\n东方\n１４\n１０\n４\n２４\n光明\n１４\n９\n５\n２３\n蓝天\n１４\n９\n５\n２３\n雄鹰\n１４\n７\n７\n２１\n远大\n１４\n７\n７\n２１\n卫星\n１４\n４\n１０\n１８\n钢铁\n１４\n０\n１４\n１４\n（１）胜一场和负一场各积多少分？\n（２）用代数式表示一支球队的总积分与胜、负场数之间的数量关系．\n（３）某队的胜场总积分能等于它的负场总积分吗？\n分析：（１）观察表５．３１，从最下面一行数据可以看出，负一场积１分．\n设胜一场积狓分，由表５．３１中其他任何一行可以列方程，求出狓的值．\n例如，由第一行得方程\n１０狓＋１×４＝２４．\n解得\n狓＝２．\n用表５．３１中其他行可以验证，得出结论：胜一场积２分，负一场积１分．\n６３１\n仅供个人学习使用，未经授权不得另做他用\n【第 28 页】\n（２）若一支球队胜犿场，则负（１４－犿）场，胜场积分为２犿，负场积分\n为１４－犿，总积分为\n２犿＋（１４－犿），\n即\n犿＋１４．\n（３）设一支球队胜了狔场，则负了（１４－狔）场．若这支球队的胜场总积\n分等于负场总积分，则得方程\n２狔＝１４－狔．\n解得\n狔＝１４３．\n这个问题说明：利\n用方程不仅能求具体数\n值，而且可以进行推理\n判断．\n想一想，狔表示什么量？它可以不取整数吗？\n由此你能得出什么结论？\n解决实际问题时，要考虑得到的结果是不是符\n合实际．因为狔（所胜的场数）的值必须是整数，\n所以狔＝１４３不符合实际，由此可以判定没有哪支球\n队的胜场总积分等于负场总积分．\n上面的问题说明，用方程解决实际问题时，不仅要注意解方程的过程是否\n正确，还要检验方程的解是否符合问题的实际意义．\nጷ˸\n１．在足球联赛中，胜一场得３分，平一场得１分，负一场得０分．某队９\n场比赛保持不败．\n（１）如果这支球队９场比赛得到的积分是２１分，你能算出这９场比赛\n中的胜场数和平场数吗？\n（２）这支球队９场比赛的胜场总积分能等于它的平场总积分吗？\n２．下表是某校七年级至九年级某月课外兴趣小组的活动时间统计表，其\n中各年级同一兴趣小组每次活动时间相同．\n７３１\n仅供个人学习使用，未经授权不得另做他用\n【第 29 页】\n年级\n课外小组活动\n总时间／ｈ\n文艺小组\n活动次数\n科技小组\n活动次数\n七年级\n１２．５\n４\n３\n八年级\n１０．５\n３\n３\n九年级\n７\n请将九年级课外兴趣小组的活动次数填入上表．\nᣏ/\u0001\u0014\n不同能效空调的综合费用比较\n\u0012\n\u0013\n\u0014\n\u0015\n\u0016\nᏲᑟͰ\nᏲᑟᰴ\n中国能效标识\n购买空调时，需要综合考虑空调的价格和耗电情况．某\n人打算从当年生产的两款空调中选购一台，表５．３２是这两\n款空调的部分基本信息．如果电价是０．５元／（ｋＷ·ｈ），请\n你分析他购买、使用哪款空调综合费用较低．\n表５３２　两款空调的部分基本信息\n匹数\n能效等级\n售价／元\n平均每年\n耗电量／（ｋＷ·ｈ）\n１．５\n１级\n３０００\n６４０\n１．５\n３级\n２６００\n８００\n分析：在这个问题中，\n综合费用＝空调的售价＋电费．\n选定一种空调后，售价是确定的，电费则与使用的时间有关．\n设空调的使用年数是狋，则１级能效空调的综合费用（单位：元）是\n３０００＋０．５×６４０狋，\n即\n３０００＋３２０狋．\n３级能效空调的综合费用（单位：元）是\n２６００＋０．５×８００狋，\n８３１\n仅供个人学习使用，未经授权不得另做他用\n【第 30 页】\n即\n２６００＋４００狋．\n先来看狋取什么值时，两款空调的综合费用相等．\n列方程\n３０００＋３２０狋＝２６００＋４００狋，\n解得\n狋＝５．\n为了比较两款空调的综合费用，我们把表示３级能效空调的综合费用的式\n子２６００＋４００狋变形为１级能效空调的综合费用与另外一个式子的和，即\n（３０００＋３２０狋）＋（８０狋－４００），\n也就是\n３０００＋３２０狋＋８０（狋－５）．\n这样，当狋＜５时，８０（狋－５）是负数，这表明３级能效空调的综合费用较低；当\n狋＞５时，８０（狋－５）是正数，这表明１级能效空调的综合费用较低．\n通常，１级能效空\n调既节能又省钱！\n由此可见，同样是１．５匹的空调，１级能效空\n调虽然售价高，但由于比较省电，使用年份长（超\n过５年）时综合费用反而低．根据相关行业标准，\n空调的安全使用年限是１０年（从生产日期计起），\n因此购买、使用１级能效空调更划算．\nጷ˸\n１．在甲复印店用Ａ４纸复印文件，复印页数不超过２０时，每页收费０．１２\n元；复印页数超过２０时，超过部分每页收费降为０．０９元．在乙复印店\n用Ａ４纸复印文件，不论复印多少页，每页都收费０．１元．复印页数为\n多少时，两店的收费相同？\n２．现有两种地铁机场线计次月票：第一种售价２００元，每月包含１０次；\n第二种售价３００元，每月包含２０次．两种月票超出每月包含次数后，\n都需要另外购票，票价为２５元／次．某人每月乘坐地铁机场线超过１０\n次，他购买哪种月票比较节省费用？\n９３１\n仅供个人学习使用，未经授权不得另做他用\n【第 31 页】\n\u0016\u000f\u0014\nܭ˸ ڍ\n１．结合本节内容体会例２后归纳的框图．\n２．制作一张桌子要用１个桌面和４条桌腿，１ｍ３木材可制作２０个桌面，或者制\n作４００条桌腿．现有１２ｍ３木材，应怎样计划用料才能制作尽可能多的桌子？\n３．某车间每天能制作５００个甲种零件，或２５０个乙种零件（同一天内不能同时\n制作这两种零件），甲、乙两种零件各１个配成１套产品．现要用３０天制作最\n多的成套产品，甲、乙两种零件各应制作多少天？\n４．某项工作由甲、乙两人单独做分别需要７．５ｈ和５ｈ．如果让甲、乙两人一起\n工作１ｈ，再由乙单独完成剩余部分，一共需要多长时间？\n５．整理一批数据，由１人整理需８０ｈ完成．现在计划先由一些人整理２ｈ，再增\n加５人整理８ｈ，完成这项工作的３４．怎样安排参与整理数据的具体人数？\n፬Ռᤂၹ\n６．用Ａ型和Ｂ型机器生产同样的产品，已知５台Ａ型机器一天生产的产品装满\n８箱后还剩４个，７台Ｂ型机器一天生产的产品装满１１箱后还剩１个，每台Ａ\n型机器比Ｂ型机器一天多生产１个产品．求每箱装多少个产品．\n７．下表中记录了一次实验中时间和温度的数据，假设温度的变化是均匀的．\n时间／ｍｉｎ\n０\n５\n１０\n１５\n２０\n２５\n温度／℃\n１０\n２５\n４０\n５５\n７０\n８５\n（１）实验进行２１ｍｉｎ时的温度是多少？\n（２）实验进行多长时间的温度是３４℃？\n８．某糕点厂中秋节前要制作一批盒装月饼，每盒中装２块大月饼和４块小月饼．\n制作１块大月饼要用０．０５ｋｇ面粉，制作１块小月饼要用０．０２ｋｇ面粉．现有\n面粉４５００ｋｇ，应各用多少千克面粉制作两种月饼，才能生产最多的盒装\n月饼？\n９．李明和刘伟分别从Ａ，Ｂ两地同时出发，李明骑自行车，刘伟步行，沿同一条\n道路相向匀速而行，出发２４ｍｉｎ后两人相遇．相遇时李明比刘伟多行进\n４．８ｋｍ，相遇后６ｍｉｎ李明到达Ｂ地．两人每小时分别行进多少千米？相遇\n后经过多长时间刘伟到达Ａ地？\n０４１\n仅供个人学习使用，未经授权不得另做他用\n【第 32 页】\n１０．商店对某商品降价２０％促销，为了使销售总金额不变，销售量要比按原价销\n售时增加百分之几？\n１１．甲组的４名工人３月份完成的总工作量比此月人均定额的４倍多２０件，乙组\n的５名工人３月份完成的总工作量比此月人均定额的６倍少２０件．\n（１）如果两组工人此月人均实际完成的工作量相等，那么此月人均定额是多少件？\n（２）如果甲组工人此月人均实际完成的工作量比乙组的多２件，那么此月人\n均定额是多少件？\n（３）如果甲组工人此月人均实际完成的工作量比乙组的少２件，那么此月人\n均定额是多少件？\nጊ\n１２．将探究２的积分表换为你们学校某次足球联赛（或其他联赛）积分表，请你\n根据积分表提出一些数学问题并加以解决．\n１３．希腊数学家丢番图的墓碑上记载着：\n“他生命的六分之一是幸福的童年；\n再活了他生命的十二分之一，两颊长起了细细的胡须；\n丢番图（Ｄｉｏｐｈａｎｔｕｓ，\n活动于２５０年前后）\n又度过了一生的七分之一，他结了婚；\n再过五年，他有了儿子，感到很幸福；\n可是儿子只活了他父亲全部年龄的一半；\n儿子死后，他在极度悲痛中度过了四年，也与世长\n辞了．”\n根据以上信息，请你算出：\n（１）丢番图的寿命；\n（２）丢番图开始当爸爸时的年龄．\n请你试着提出其他问题并加以解决．\n１４．下面是某购物平台的两种图书促销方式．\n方式一：满１００元减５０元．\n方式二：单件打六折．\n考虑下列问题：\n（１）设某本书的原价为狋元，列表说明当狋在不同范围内取值时，按两种方\n式购买分别需要支付的金额．\n（２）观察你的列表，你能从中发现如何根据图书的原价选择省钱的购买方式\n吗？通过计算验证你的想法．\n１４１\n仅供个人学习使用，未经授权不得另做他用\n【第 33 页】\n᫞឴\nˁ Ꮶ\n᫞឴\nˁ Ꮶ\n᫞឴\nˁ Ꮶ\n初步认识数学模型\n什么是模型呢？模型可以是按照一定比例缩小的实物，如建筑模型（图１）、\n船舶模型；模型也可以是从实际问题抽象出的数学式子或计算机程序．模型有\n物理模型、数学模型、生物模型（图２）、计算机仿真模型（图３）等．建立模\n型通常是为了用简单的方法去描述现实，即通过研究简化了的模型，来把握现\n实世界的本质或规律．具体到数学模型，就是要抽象出现实世界中的事物或因\n素之间的关系，然后用数学表达式（数字、字母和数学符号构成的等式和不等\n式等）、表格、图象、框图或计算机程序等来表示．\n图１\n图２　　　　　　　　图３\n方程就是一类常见的重要数学模型．从初等数学中简单的代数方程（如一\n元一次方程），到高等数学中复杂的微分方程、积分方程等，无论方程的类型如\n何变化，方程模型本质上表示的都是一种相等关系，即方程两边的式子表达的\n是对同一个事物从不同角度或不同方面的刻画．因此，利用方程模型解决现实\n问题时，关键是要分析并找到现实问题中蕴含的相等关系．\n我们已经知道如何利用一元一次方程解决实际问题．这个过程实际上也反\n映了建立数学模型解决实际问题的基本过程：首先构造数学模型，这需要对实\n际问题进行分析，明确其中蕴含的关系或规律，可能还要作一些合理的假设，\n将实际问题抽象成数学问题（数学模型）；然后求解数学模型，即解决数学问题\nᬅ᫈ᮥ\nߦ ی\n὆ ߦ᫈ᮥ\n὇\nᝍ ߦ ی\n὆ ߦ᫈ᮥ\nᄊᝍ὇\nᬅ᫈ᮥ\nᄊᝍ\n本身；最后用数学结论解释并解决实\n际问题，这时需要结合实际问题的意\n义，来检验数学模型的解，有时候还\n需要适当改进数学模型，最终得到实\n际问题的答案．\n２４１\n仅供个人学习使用，未经授权不得另做他用\n【第 34 页】\nߦำү\n\"ߕ\u0012\u0001 *\"͚\n+Kᷜ\n@ФKM\n\"ߕ\u0013\u0001 ᱕ᱳᠯF'KM\n居民生活用水通常按户计费．下表是某城市居民生活用水的收费标准\n（户内人口不超过４人），称这样的收费方式为阶梯计价．\n收费方式\n年用水量／ｍ３\n费用／（元／ｍ３）\n第一阶梯\n０～１８０\n４．５\n第二阶梯\n１８１～２４０\n６\n第三阶梯\n２４０以上\n８\n考虑如下问题：\n（１）设某户居民的年用水量为狋ｍ３（狋是正整数）．请你列表说明，\n当狋在不同范围内取值时，如何计费．\n（２）已知某户居民一年的水费为９３０元，这户居民的年用水量是多\n少立方米？\n（３）查阅资料，了解自己所在地区的城市居民生活用水收费标准．据\n此你能提出一些数学问题并加以解决吗？\n（４）查阅资料，了解生活中还有哪些阶梯计价问题（如电费、停车\n场收费、出租车收费等），根据相应的收费标准，自己提出可以利用一元\n一次方程解决的问题，并正确地表述问题及其解决过程．\n用一根质地均匀的木杆和一些等重的小物体，做下列实验：\n（１）在木杆中间处拴绳，将木杆吊起并使其左右平衡，吊绳处为木\n杆的支点；\n（２）在木杆两端各悬挂一重物，看看左右是否保持平衡；\n（３）在木杆左端小物体下加挂一重物，然后把这两个重物一起向右\n移动，直至左右平衡，记录此时支点与木杆左右两边挂重物处的距离；\n（４）在木杆左端两小物体下再加挂一重物，然后把这三个重物一起向\n右移动，直至左右平衡，记录此时支点与木杆左右两边挂重物处的距离；\n３４１\n仅供个人学习使用，未经授权不得另做他用\n【第 35 页】\n（５）在木杆左边继续加挂重物，并重复以上操作和记录．\n根据记录你能发现什么规律？\n如图１，在木杆右端挂一重物，支点左边挂狀个重物，并使左右平\n衡．设木杆长为犾ｃｍ，支点在木杆中点处，支点与木杆左边挂重物处的\n距离为狓ｃｍ，把狀，犾作为已知数，列出关于狓的一元一次方程．\nx\nl\n图１\n４４１\n仅供个人学习使用，未经授权不得另做他用\n【第 36 页】\nፇ\nʷǌ ቦᅼគፇ ڏ̄\nǌڀᮏˁ Ꮶ\nᬅ᫈ᮥ\n៶˞ ߦ ی\nڀ ̆\nᬅ᫈ᮥ\n᝺ ᅼ Ὂ\nᄱ኎Тጇѵ ሮ\nᰎ\nᬅ᫈ᮥ\nᄊን\nʷЋʷ  ሮ\nʷᓊ ᰡ὘\nԝѬ\nԝ Ղ\nረᮊ\nՌ Տዝᮊ\nጇ ӑ˞\u0012\nʷЋʷ  ሮ\nᄊᝍ὆         ὇\nᝍ\nሮ\n方程是一种描述现实世界的重要的数学模型．在本章，我们结合一些\n实际问题，学习了方程的有关概念，并重点研究了最基本的方程———\n一元一次方程，为进一步学习方程打下基础．\n方程是含有未知数的等式，解方程就是求出方程中的未知数的值．解\n以狓为未知数的方程，就是把方程逐步转化为狓＝犿（常数）的形式．\n一元一次方程是只含有一个未知数，且含有未知数的式子都是整式，未\n知数的次数都是１的方程．一元一次方程都可以化为标准形式犪狓＋犫＝０\n（其中狓是未知数，犪，犫是已知数，并且犪≠０）．解一元一次方程是使方\n程形式逐步化简，最终得出未知数的值．在此过程中，化归的思想起了重\n要作用，而等式的性质及运算律是化归的根据．\n利用方程解决实际问题，应认真分析其中的数量关系，关键是要找\n出相等关系，由此设未知数、列方程，从而把实际问题转化为数学问题；\n然后通过解方程获得数学结论；最后用数学结论解释实际问题．这是一个\n“实际问题—数学问题—实际问题”的过程．今后，我们还将不断经历这\n５４１\n仅供个人学习使用，未经授权不得另做他用\n【第 37 页】\n一过程，提高用数学解决实际问题的能力．\n请你带着下面的问题，复习一下全章的内容吧．\n１．举例说明方程与等式之间的关系以及一元一次方程的特征．\n２．回顾等式的性质，说明解方程和等式的性质之间有什么关系．\n３．回顾解一元一次方程的一般步骤，结合例子体会：解关于狓的一\n元一次方程，就是运用等式性质和运算律，根据方程的具体特点，通过\n灵活变形将方程逐步化简，最后变为狓＝犿（常数）的形式而得解．\n４．你能举例说明用字母表示数、列代数式和列方程的区别和联系吗？\n５．在用方程解决实际问题的过程中，要特别关注从实际问题中分析出\n相等关系，进而把实际问题转化为方程问题．你能举例对此加以说明吗？\n６．请收集一些重要问题（如气候、节能环保、经济等）的有关数据，\n经过分析后提出可以利用一元一次方程解决的问题，并正确地表述问题\n及其解决过程．\nܭ˸ᮥ\n\u0016\nܭ˸ ڍ\n１．列方程表示下列语句中的相等关系：\n（１）某地２０２３年９月１０日的温差是４℃，这天最高气温是狋℃，最低气温是\n５６狋℃；\n（２）某校七年级学生人数为狀，其中男生占４５％，女生有１１０人；\n（３）一种商品每件进价为犪元，售价为进价的１．１倍，现每件的售价又降低１０\n元，现售价为每件２１０元；\n（４）在５天中，第一小组共植树６０棵，第二小组共植树狓（狓＜６０）棵，平均每\n天第一小组比第二小组多植２棵树．\n２．指出狓＝１，狓＝２，狓＝３各是下列哪个方程的解：\n（１）３狓－３＝２狓；　　　　　　　　　（２）０．３狓－３０＝－９．７－２０狓；\n（３）３２狓－３＝２狓－４．\n６４１\n仅供个人学习使用，未经授权不得另做他用\n【第 38 页】\n３．解下列方程：\n（１）４３－８狓＝３－１１２狓；\n（２）０．５狓－０．７＝６．５－１．３狓；\n（３）１６（３狓－６）＝２５狓－３；\n（４）１－２狓\n３＝３狓＋１\n７－３．\n４．当狓为何值时，下列各组中两个式子的值相等？\n（１）狓－狓－１\n３和７－狓＋３\n５；\n（２）２５狓＋狓－１\n２和３（狓－１）\n２－８５狓．\n５．在梯形面积公式犛＝１２（犪＋犫）犺中，\n（１）已知犛＝３０，犪＝６，犺＝４，求犫；\n（２）已知犛＝６０，犫＝４，犺＝１２，求犪；\n（３）已知犛＝５０，犪＝６，犫＝５３犪，求犺．\n６．李明在超市买了４瓶矿泉水和２条毛巾，共花了２２元．已知１瓶矿泉水的售价\n是１．５元，１条毛巾的售价是多少元？\n፬Ռᤂၹ\n７．在北京２０２２年冬奥会上，中国代表团共获得１５枚奖牌，其中金牌数比银牌数多\n５枚，银牌数比铜牌数多２枚．中国代表团一共获得多少枚金牌？\n８．（我国古代问题）? 跑得快的马每天走２４０里，跑得慢的马每天走１５０里．慢马\n先走１２天，快马几天可以追上慢马？\n９．某人年初购买了Ａ，Ｂ两只基金共２００００元，年底卖出后发现两只基金的实际\n收益恰好相等，且实际收益率分别为４．４％和３．６％．Ａ，Ｂ两只基金各购买了多\n少元？\n７４１\n? 这道题选自我国元代数学家朱世杰所著的《算学启蒙》（１２９９年）．原题是：\n“今有良马日行二百四十里，驽马日行一百五十里．驽马先行一十二日，问良马几何日\n追及之．”题中的“里”是我国古代长度单位．\n仅供个人学习使用，未经授权不得另做他用\n【第 39 页】\n１０．李明和刘伟在６００ｍ环形跑道上跑步．李明平均每分钟跑１９０ｍ，刘伟平均每\n分钟跑２１０ｍ．两人从同一处同时反向出发，经过多长时间首次相遇？又经过\n多长时间再次相遇？\n１１．有一群鸽子和一些鸽笼，如果每个鸽笼住６只鸽子，则剩余３只鸽子无鸽笼可\n住；如果再飞来５只鸽子，连同原来的鸽子，每个鸽笼刚好住８只鸽子．原来\n有多少只鸽子和多少个鸽笼？\n１２．父亲和女儿现在的年龄之和是９１，当父亲的年龄是女儿现在年龄的２倍时，女\n儿的年龄是父亲现在年龄的１３．求女儿现在的年龄．\nጊ\n１３．学校组织知识竞赛，共设２０道选择题，各题分值相同，每题必答．下表记录了\n５名参赛同学的得分情况．\n参赛者答对题数答错题数得分\nＡ\n２０\n０\n１００\nＢ\n１９\n１\n９４\nＣ\n１８\n２\n８８\nＤ\n１４\n６\n６４\nＥ\n１０\n１０\n４０\n（１）同学Ｆ得７６分，他答对了几道题？\n（２）同学Ｇ说他得了８０分，你认为可能吗？为什么？\n１４．一家游泳馆每年６月—８月出售夏季会员证．每张会员证１２０元，只限本人使\n用，凭会员证购入场券每张１５元，不凭会员证购入场券每张２０元．讨论并回\n答下列问题：\n（１）在什么情况下，使用会员证与不使用会员证付一样的钱？\n（２）在什么情况下，使用会员证比不使用会员证更合算？\n（３）在什么情况下，不使用会员证比使用会员证更合算？\n１５．“丰收１号”油菜籽平均每公顷的产量为２４００ｋｇ，含油率为４０％．“丰收２号”\n油菜籽比“丰收１号”平均每公顷的产量提高了３００ｋｇ，含油率提高了１０个\n百分点．某村去年种植“丰收１号”油菜，今年改种“丰收２号”油菜，虽然\n种植面积比去年减少了３ｈｍ２，但是所产油菜籽的总产油量比去年提高了\n３７５０ｋｇ．这个村去年和今年油菜的种植面积各是多少公顷？\n８４１\n仅供个人学习使用，未经授权不得另做他用"
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p041_s012",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.1 二元一次方程组的概念",
+          "path": "第十章 二元一次方程组 / 10.1 二元一次方程组的概念",
+          "level": 2,
+          "page_start": 41,
+          "page_end": 43,
+          "content": "【第 41 页】\n１０．１二元一次方程组的概念\n我们来看本章引言中的问题．\nᏦ\n列方程要先找到相等关系．本章引言中的问题包含了哪些必须同时满\n足的相等关系？若设这个种棉大户租用了狓台大型采棉机，狔台小型采棉\n机，你能用方程把这些相等关系表示出来吗？\n容易发现，问题包含两个必须同时满足的相等关系：\n大型采棉机台数＋小型采棉机台数＝总台数，\n大型采棉机１ｈ采摘面积＋小型采棉机１ｈ采摘面积＝１ｈ采摘总面积．\n这两个相等关系可以分别用方程狓＋狔＝６和２狓＋狔＝８表示．\n上面的两个方程有什么特点？它们与一元一次方程有什么不同？\n可以看出，在上面两个方程中，每个方程都含有两个未知数（狓和狔），且\n含有未知数的式子都是整式，含有未知数的项的次数都是１，像这样的方程叫\n作二元一次方程（ｌｉｎｅａｒｅｑｕａｔｉｏｎｗｉｔｈｔｗｏｕｎｋｎｏｗｎｓ）．\n上面的问题中包含两个必须同时满足的相等关系，也就是未知数狓，狔必\n须同时满足方程\n狓＋狔＝６\n①\n和\n２狓＋狔＝８．\n②\n把这两个方程合在一起，写成\n狓＋狔＝６，\n２狓＋狔＝８，\n烅烄\n烆\n就组成了一个方程组．这个方程组中含有两个未知数，且含有未知数的式子都\n是整式，含有未知数的项的次数都是１，一共有两个方程，像这样的方程组叫\n作二元一次方程组（ｓｙｓｔｅｍｏｆｌｉｎｅａｒｅｑｕａｔｉｏｎｓｗｉｔｈｔｗｏｕｎｋｎｏｗｎｓ）．\n８８\n仅供个人学习使用，未经授权不得另做他用\n【第 42 页】\nᣏ/\u0001\n满足方程①，且符合问题的实际意义的狓，狔的值有哪些？把它们填\n入表中．\n狓\n狔\n上表中哪对狓，狔的值还满足方程②？\n显然，狓＝１，狔＝５；狓＝２，狔＝４；…；狓＝５，狔＝１满足方程①，也就是\n使方程狓＋狔＝６两边的值相等，它们都是方程狓＋狔＝６的解．如果不考虑方\n程狓＋狔＝６与上面实际问题的联系，那么狓＝－１，狔＝７；狓＝０．１，狔＝５．９；…\n也都是这个方程的解．\n一般地，使二元一次方程两边的值相等的两个未知数的值，叫作二元一次\n方程的解．\n我们还发现，狓＝２，狔＝４既满足方程①，又满足方程②．也就是说，\n狓＝２，狔＝４是方程①与方程②的公共解．我们把狓＝２，狔＝４叫作二元一次方\n程组狓＋狔＝６，\n２狓＋狔＝８\n烅烄\n烆\n的解，这个解通常记作狓＝２，\n狔＝４．\n烅烄\n烆\n联系前面的问题可知，这个种棉大户租用了２台大型采棉机，４台小型采\n棉机．一般地，二元一次方程组的两个方程的公共解，叫作二元一次方程组\n的解．\nጷ˸\n对下面的问题，列出二元一次方程组，并根据问题的实际意义，找出问题\n的解．\n１．某村乡村振兴项目计划把２８ｔ黄桃加工成罐头，刚开始每天加工２ｔ，\n后在技术顾问的指导下改进加工方法，每天加工４ｔ，前后共用８天完\n成全部加工任务．这个项目改进加工方法前、后各用了多少天？\n２．在篮球联赛中，每场比赛都要分出胜负，每队胜１场得２分，负１场得\n１分．某队在１０场比赛中得到１６分，这个队的胜、负场数分别是多少？\n９８\n仅供个人学习使用，未经授权不得另做他用\n【第 43 页】\n\u0012\u0011\u000f\u0012\nܭ˸ ڍ\n１．填表，使上下每对狓，狔的值是方程３狓＋狔＝５的解．\n狓\n－２\n０\n０．４\n５３\n狔\n－１\n－２－２．５－３\n２．方程组狓＋６狔＝４，\n３狓－狔＝２．５\n烅烄\n烆\n的解是（　　）．\n（Ａ）狓＝２，\n狔＝－０．２５\n烅烄\n烆\n（Ｂ）狓＝－５．５，\n狔＝４\n烅烄\n烆\n（Ｃ）狓＝１，\n狔＝０．５\n烅烄\n烆\n（Ｄ）狓＝－１，\n狔＝－０．５\n烅烄\n烆\n፬Ռᤂၹ\n３．如果三角形的三个内角分别是狓°，狔°，狔°，求：\n（１）狓，狔满足的关系式；\n（２）当狓＝９０时，狔的值；\n（３）当狔＝６０时，狓的值．\n４．我国古代数学著作《孙子算经》（成书于公元４００年前后）中有“鸡兔同笼”\n问题：今有鸡兔同笼，上有三十五头，下有九十四足．问鸡兔各几何．你能用\n二元一次方程组表示问题中的数量关系吗？试找出问题的解．\nጊ\n５．把一根长７ｍ的钢管截成２ｍ长和１ｍ长两种规格的钢管，为了不造成浪费，\n应截成２ｍ长和１ｍ长的钢管各多少根？你能用二元一次方程来解决这个问\n题吗？\n０９\n仅供个人学习使用，未经授权不得另做他用"
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p044_s014",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.2.1 代入消元法",
+          "path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.1 代入消元法",
+          "level": 3,
+          "page_start": 44,
+          "page_end": 48,
+          "content": "【第 44 页】\n１０２１　代入消元法\n在上一节中，我们已经看到，直接设两个未知数：租用了狓台大型采棉\n机，狔台小型采棉机，可以列方程组\n狓＋狔＝６，\n２狓＋狔＝８\n烅烄\n烆\n表示本章引言中问题包含的相等关系．如果只设一个未知数：租用了狓台大型\n采棉机，那么这个问题也可以用一元一次方程\n２狓＋（６－狓）＝８\n来解决．\nᏦ\n对于本章引言中的问题，采用不同的设未知数的方法，由问题中的相\n等关系，可以分别列出二元一次方程组和一元一次方程．你能由所列出的\n二元一次方程组得到所列的一元一次方程吗？\n我们发现，二元一次方程组中第一个方程狓＋狔＝６可以写为狔＝６－狓．由于两\n个方程中的狔都表示租用小型采棉机的台数，所以可以通过等量代换，把第二个方\n程２狓＋狔＝８中的狔换为６－狓，这个方程就化为一元一次方程２狓＋（６－狓）＝８．解\n这个一元一次方程，得狓＝２．把狓＝２代入狔＝６－狓，得狔＝４，从而得到这个方程\n组的解．\n二元一次方程组中有两个未知数，如果消去其中一个未知数，那么就可以\n把二元一次方程组转化为我们熟悉的一元一次方程．我们可以先求出一个未知\n数，然后再求另一个未知数．这种将未知数的个数由多化少、逐一解决的思\n想，叫作消元思想．\n１９\n仅供个人学习使用，未经授权不得另做他用\n【第 45 页】\n上面的解法，是把二元一次方程组中一个方程的一个未知数用含另一个未\n知数的式子表示出来，再代入另一个方程，实现消元，进而求得这个二元一次\n方程组的解．这种解二元一次方程组的方法叫作代入消元法，简称代入法．\n例１　用代入法解方程组\n狓－狔＝３，\n３狓－８狔＝１４．\n烅烄\n烆\n①\n②\n分析：方程①中狓的系数是１，用含狔的式子表示狓，再代入方程②，比较简便．\n解：由①，得\n狓＝狔＋３．\n③\n把③代入①可以吗？\n试试看．\n把③代入②，得\n３（狔＋３）－８狔＝１４．\n解这个方程，得\n狔＝－１．\n把狔＝－１代入①或\n②可以吗？\n把狔＝－１代入③，得\n狓＝２．\n所以这个方程组的解是\n狓＝２，\n狔＝－１．\n烅烄\n烆\n例２　用代入法解方程组\n３狓－５狔＝３，\n２狓－狔＝１６．\n烅烄\n烆\n①\n②\n分析：方程②中狔的系数是－１，用含狓的式子表示狔，再代入方程①，\n比较简便．\n解：由②，得\n狔＝２狓－１６．\n③\n把③代入①，得\n３狓－５（２狓－１６）＝３．\n解这个方程，得\n狓＝１１．\n２９\n仅供个人学习使用，未经授权不得另做他用\n【第 46 页】\n把狓＝１１代入③，得\n狔＝６．\n所以这个方程组的解是\n狓＝１１，\n狔＝６．\n烅烄\n烆\nጷ˸\n１．把下列方程改写成用含狓的式子表示狔的形式：\n（１）３狓＋狔－１＝０；　　　　　（２）２狓－狔＝３．\n２．用代入法解下列方程组：\n（１）２狓－狔＝５，\n３狓＋４狔＝２；\n烅烄\n烆\n（２）３狓－２狔＝５，\n２狓＋狔＝８；\n烅烄\n烆\n（３）４犪－３犫＝５，\n２犪＋犫＝５；\n烅烄\n烆\n（４）狊－３狋＝－２，\n狊＋５狋＝６．\n烅烄\n烆\n上面要解的二元一次方程组的两个方程中有一个未知数的系数为１或－１，\n下面再来看另外一些例子．\n例３　用代入法解方程组\n２狓－５狔＝－１１，\n９狓＋７狔＝３９．\n烅烄\n烆\n①\n②\n分析：方程①中狓的系数的绝对值较小，可以考虑在方程①中用含狔的式\n子表示狓，再代入方程②．\n解：由①，得\n狓＝５２狔－１１２．\n③\n解这个方程组时，可\n以先消去狔吗？试试看．\n把③代入②，得\n９（５２狔－１１２）＋７狔＝３９．\n解这个方程，得\n狔＝３．\n３９\n仅供个人学习使用，未经授权不得另做他用\n【第 47 页】\n把狔＝３代入③，得\n狓＝２．\n所以这个方程组的解是\n狓＝２，\n狔＝３．\n烅烄\n烆\n例４　快递员把货物送到客户手中称为送件，帮客户寄出货物称为揽件．某快\n递员星期一的送件数和揽件数分别为１２０件和４５件，报酬为２７０元；他星期二的送\n件数和揽件数分别为９０件和２５件，报酬为１８５元．如果这名快递员每送一件的报\n酬都相同，每揽一件的报酬也都相同，他每送一件和每揽一件的报酬各是多少元？\n分析：由题意可知，\n送１２０件的报酬＋揽４５件的报酬＝２７０，\n送９０件的报酬＋揽２５件的报酬＝１８５．\n由此可以列出方程组，通过解方程组解决问题．\n解：设这名快递员每送一件的报酬是狓元，每揽一件的报酬是狔元．\n根据这名快递员星期一和星期二取得的报酬满足的相等关系，列得方程组\n１２０狓＋４５狔＝２７０，\n９０狓＋２５狔＝１８５．\n烅烄\n烆\n①\n②\n由①，得\n狓＝９４－３８狔．\n③\n把③代入②，得\n９０（９４－３８狔）＋２５狔＝１８５．\n解这个方程，得\n狔＝２．\n把狔＝２代入③，得\n狓＝１．５．\n所以这个方程组的解是\n狓＝１．５，\n狔＝２．\n烅烄\n烆\n答：这名快递员每送一件的报酬是１．５元，每揽一件的报酬是２元．\n４９\n仅供个人学习使用，未经授权不得另做他用\n【第 48 页】\nጷ˸\n１．用代入法解下列方程组：\n（１）４狓－３狔＝－２，\n５狓＋４狔＝１３；\n烅烄\n烆\n（２）３犿＋２狀＝１７，\n２犿－３狀＋６＝０．\n烅烄\n烆\n２．一种商品分装在大、小两种包装盒内，３大盒、４小盒共装１０８瓶，２大\n盒、３小盒共装７６瓶．大、小包装盒每盒各装多少瓶？"
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p048_s015",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.2.2 加减消元法",
+          "path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.2 加减消元法",
+          "level": 3,
+          "page_start": 48,
+          "page_end": 53,
+          "content": "【第 48 页】\n１０２２　加减消元法\nᏦ\n前面我们用代入法求出了方程组\n狓＋狔＝６，\n２狓＋狔＝８\n烅烄\n烆\n①\n②\n的解．这个方程组的两个方程中，狔的系数有什么关系？利用这种关系，\n你能发现新的消元方法吗？\n②－①就是用方程\n②的左边减去方程①的\n左边，方程②的右边减\n去方程①的右边．\n这两个方程中未知数狔的系数相等，②－①可\n以消去未知数狔，得\n狓＝２．\n把狓＝２代入①，得\n狔＝４．\n所以这个方程组的解是\n狓＝２，\n狔＝４．\n烅烄\n烆\nᏦ\n联系上面的解法，想一想怎样解方程组３狓＋１０狔＝２．８，\n１５狓－１０狔＝８．\n烅烄\n烆\n从上面两个方程组的解法可以看出，当二元一次方程组的两个方程中某个\n未知数的系数互为相反数或相等时，把这两个方程的两边分别相加或相减，就\n能消去这个未知数，得到一个一元一次方程，进而求得二元一次方程组的解．\n５９\n仅供个人学习使用，未经授权不得另做他用\n【第 49 页】\n这种解二元一次方程组的方法叫作加减消元法，简称加减法．\n例５　用加减法解方程组\n３狓＋狔２＝０，\n２狓－狔２＝１５．\n烅\n烄\n烆\n①\n②\n解：①＋②，得\n５狓＝１５，\n狓＝３．\n把狓＝３代入②，\n可以解得狔吗？\n把狓＝３代入①，得\n３×３＋狔２＝０，\n狔＝－１８．\n所以这个方程组的解是\n狓＝３，\n狔＝－１８．\n烅烄\n烆\nጷ˸\n用加减法解下列方程组：\n（１）狓＋２狔＝９，\n３狓－２狔＝－１；\n烅烄\n烆\n（２）２犪－３犫＝－９，\n７犪－３犫＝６；\n烅烄\n烆\n（３）５狓＋２狔＝２７，\n５狓－４狔＝２１；\n烅烄\n烆\n（４）狓３－５狔＝１３，\n狓＋５狔＝－４１．\n烅\n烄\n烆\n当二元一次方程组的两个方程中同一个未知数的系数既不相等也不互为相\n反数时，能用加减法解方程组吗？看下面的例子．\n例６　用加减法解方程组\n３狓－２狔＝４，\n７狓＋４狔＝１８．\n烅烄\n烆\n①\n②\n６９\n仅供个人学习使用，未经授权不得另做他用\n【第 50 页】\n分析：这两个方程中同一个未知数的系数既不相等也不互为相反数，直接\n把这两个方程进行加减不能消元．观察这两个方程中未知数狔的系数之间的关\n系，将①×２可以使两个方程中狔的系数互为相反数，就可以用加减法求解了．\n解：①×２，得\n６狓－４狔＝８．\n③\n②＋③，得\n１３狓＝２６，\n狓＝２．\n把狓＝２代入①，得\n３×２－２狔＝４，\n狔＝１．\n所以这个方程组的解是\n狓＝２，\n狔＝１．\n烅烄\n烆\n例７　我国古代数学著作《九章算术》中记载了这样一道题：\n今有牛五、羊二，直金十两；牛二、羊五，直金八两．问牛、羊各直金几何？\n意思是：假设５头牛、２只羊，共值金１０两；２头牛、５只羊，共值金８\n两．那么每头牛、每只羊分别值金多少两？你能解答这个问题吗？\n分析：由于每头牛和每只羊的价格分别相等，所以根据“５头牛、２只羊，\n共值金１０两；２头牛、５只羊，共值金８两”可列得方程组．\n利用等式的性质对\n方程适当变形，使得两个\n方程中某个未知数的系数\n互为相反数或相等，就可\n以用加减法求解了．\n解：设每头牛和每只羊分别值金狓两和狔两．\n根据问题中的相等关系，列得方程组\n５狓＋２狔＝１０，\n２狓＋５狔＝８．\n烅烄\n烆\n①\n②\n①×２，得\n１０狓＋４狔＝２０．\n③\n②×５，得\n１０狓＋２５狔＝４０．\n④\n④－③，得\n２１狔＝２０，\n７９\n仅供个人学习使用，未经授权不得另做他用\n【第 51 页】\n狔＝２０２１．\n如果用加减法消去\n狔，应该怎样解？解得的\n结果一样吗？\n把狔＝２０２１代入①，得\n狓＝３４２１．\n所以这个方程组的解是\n狓＝３４２１，\n狔＝２０２１．\n烅\n烄\n烆\n答：每头牛和每只羊分别值金３４２１两和２０２１两．\n解方程组的基本思想是消元．代入消元法和加减消元法是二元一次方程组\n的两种解法，它们都是通过消元使方程组转化为一元一次方程，只是消元的方\n法不同．应根据方程组的具体情况，选择适合它的解法．\nᏦ\n（１）怎样解下面的方程组？\n２狓＋狔＝１．５，\n０．８狓＋０．６狔＝１．３；\n烅烄\n烆\n狓＋２狔＝３，\n３狓－２狔＝５．\n烅烄\n烆\n（２）选择你认为简便的方法解习题１０．１的第４题（“鸡兔同笼”问题）．\nጷ˸\n１．用加减法解下列方程组：\n（１）３狓＋４狔＝１６，\n５狓－６狔＝３３；\n烅烄\n烆\n（２）２狓＋３狔＝－２０９，\n３狓＋２狔＝－５３．\n烅\n烄\n烆\n２．周末，王芳到菜市场帮妈妈买鲈鱼和茄子．已知鲈鱼每千克３５元，茄\n子每千克６元，王芳买的茄子比鲈鱼多０．５ｋｇ，共花费４４元．她买了\n鲈鱼和茄子各多少千克？\n８９\n仅供个人学习使用，未经授权不得另做他用\n【第 52 页】\n\u0012\u0011\u000f\u0013\nܭ˸ ڍ\n１．把下列方程改写成用含狓的式子表示狔的形式：\n（１）３２狓＋２狔＝１；　　　　　　　（２）１４狓＋７４狔＝２；\n（３）５狓－３狔＝狓＋２狔；　　　　　（４）２（３狔－３）＝６狓＋４．\n２．用代入法解下列方程组：\n（１）狔＝狓＋３，\n７狓＋５狔＝９；\n烅烄\n烆\n（２）３狊－狋＝５，\n５狊＋２狋＝１５；\n烅烄\n烆\n（３）２狓＋３狔＝－５，\n３狓－４狔＝１８；\n烅烄\n烆\n（４）狓＋狔\n３＋狓－狔\n２＝６，\n３（狓＋狔）－２（狓－狔）＝２８．\n烅烄\n烆\n３．用加减法解下列方程组：\n（１）３狌＋２狋＝７，\n６狌－２狋＝１１；\n烅烄\n烆\n（２）２犪＋犫＝３，\n３犪＋犫＝４；\n烅烄\n烆\n（３）２狓－５狔＝７，\n４狓－３狔＝７；\n烅烄\n烆\n（４）１３狓－３２狔＝－３，\n５狓＋狔＝２．\n烅烄\n烆\n４．某旅行社组织２００人到花果岭和云水洞旅游．经统计，到花果岭旅游的人数比\n到云水洞的人数的２倍少１．到这两地旅游的人数各是多少？\n５．一条船顺流航行，每小时行驶２０ｋｍ；逆流航行，每小时行驶１６ｋｍ．船在静\n水中的速度与水流速度分别是多少？\n６．七年级（１）班的同学去参加科技体验活动，第一组有２人选择“九天揽月”\n活动，３人选择“深海探幽”活动，共花费１３０元；第二组有４人选择“九天\n揽月”活动，２人选择“深海探幽”活动，共花费１４０元．每张“九天揽月”\n和“深海探幽”活动的票价各为多少元？\n፬Ռᤂၹ\n７．解下列方程组：\n（１）３（狓－１）＝狔＋５，\n３（狓＋５）＝５（狔－１）；\n烅烄\n烆\n（２）\n２狌３＋３狏４＝１２，\n４狌５＋５狏６＝７１５．\n烅\n烄\n烆\n９９\n仅供个人学习使用，未经授权不得另做他用\n【第 53 页】\n８．《孙子算经》中有这样一道题：今有木，不知长短，引绳度之，余绳四尺五\n寸，屈绳量之，不足一尺，问几何．意思是：用一根绳子去量一根木头，绳\n子剩余４．５尺，将绳子对折再量木头，木头剩余１尺，问木头长多少尺．请\n你解决这个问题．\n９．某市出租车起步价所包含的行驶里程不超过３ｋｍ，超过３ｋｍ的部分按一定\n标准另外收取里程费．张华乘坐出租车出行，她第一次乘车行驶的路程为\n７ｋｍ，起步价和里程费共计１７．２元；第二次乘车行驶的路程为１３ｋｍ，起步\n价和里程费共计２８元．你能由此计算出出租车的起步价和超过３ｋｍ后的里程\n费收费标准吗？\n１０．为举办“我和我的祖国”文艺会演，学校为七年级（１）班表演诗朗诵的５名\n男生和３名女生租用演出服的总费用是１９０元；为七年级（２）班表演小合唱\n的１１名男生和１２名女生租用演出服的总费用是５８０元．如果每套男、女生\n演出服的租用费分别相同，每套男、女生演出服的租用费各是多少钱？\n１１．２台大型收割机和５台小型收割机同时工作２ｈ共收割小麦３．６ｈｍ２，３台大\n型收割机和２台小型收割机同时工作５ｈ共收割小麦８ｈｍ２．１台大型收割机\n和１台小型收割机每小时各收割小麦多少公顷？\nጊ\n１２．我国明代数学家程大位（１５３３—１６０６）所著《算法统宗》中记载了“二果问\n价”问题：\n九百九十九文钱，甜果苦果买一千．\n甜果九个十一文，苦果七个四文钱．\n试问甜苦果几个，又问各该几个钱．\n意思是：九百九十九文钱买了甜果和苦果共一千个，已知十一文钱可以买九\n个甜果，四文钱可以买七个苦果，那么甜果、苦果各买了多少个？买甜果、\n苦果分别花了多少文钱？请你解决这个问题．\n００１\n仅供个人学习使用，未经授权不得另做他用"
+        },
+        {
+          "section_id": "doc_ccee907e_62db59_p054_s016",
+          "document_id": "doc_ccee907e_62db59",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "file_name": "B06_相关资料切片.pdf",
+          "title": "10.3 实际问题与二元一次方程组",
+          "path": "第十章 二元一次方程组 / 10.3 实际问题与二元一次方程组",
+          "level": 2,
+          "page_start": 54,
+          "page_end": 71,
+          "content": "【第 54 页】\n１０．３实际问题与二元一次方程组\n前面我们讨论了二元一次方程组的解法，并用二元一次\n方程组解决了一些简单的实际问题．本节我们继续探究如何\n用二元一次方程组解决实际问题．\nᣏ/\u0001\u0012\n养牛场原有３０头大牛和１５头小牛，１天约用饲料６７５ｋｇ；一周后又\n购进１２头大牛和５头小牛，这时１天约用饲料９４０ｋｇ．饲养员李大叔估\n计每头大牛１天需饲料１８～２０ｋｇ，每头小牛１天需饲料７～８ｋｇ．你能通\n过计算检验他的估计吗？\n分析：设每头大牛和每头小牛１天各约用饲料狓ｋｇ和狔ｋｇ．\n根据两种情况的饲料用量，找出相等关系，列得方程组\n可以先独立分析问\n题中的数量关系，列出\n方程组，得出问题的解\n答，再与同学交流．\n，\n．\n烅烄\n烆\n解这个方程组，得\n狓＝　　　，\n狔＝　　　．\n烅烄\n烆\n这就是说，每头大牛１天约需饲料　　　ｋｇ，\n每头小牛１天约需饲料　　　ｋｇ．因此，饲养员李\n大叔对大牛食量的估计　　　　，对小牛食量的估\n计　　　　．\nጷ˸\n１．为了节能减排，一家工厂将照明灯换成了节能灯．Ａ车间购买了３盏甲\n型节能灯和５盏乙型节能灯，共花费５０元；Ｂ车间购买了１２盏甲型节\n能灯和４盏乙型节能灯，共花费８８元．１盏甲型节能灯和１盏乙型节能\n灯的售价各是多少元？\n１０１\n仅供个人学习使用，未经授权不得另做他用\n【第 55 页】\n２．学校图书馆分两次购买了相同版本的《西游记》和《水浒传》供学生\n借阅．第一次买了２套《西游记》和３套《水浒传》，共花费１５１元；\n第二次买了４套《西游记》和２套《水浒传》，共花费１７８元．每套\n《西游记》和《水浒传》的价格分别是多少元？\n３．某公司前两年产生的餐厨垃圾、建筑垃圾的质量都基本没变，但支付\n的餐厨垃圾处理费和建筑垃圾清运费的总和由７０２０元上升为８５２０元，\n原因是餐厨垃圾处理费的收费标准由２４０元／ｔ上调为３００元／ｔ，建筑垃\n圾清运费的收费标准由１５０元／ｔ上调为１８０元／ｔ．这家公司去年的餐厨\n垃圾和建筑垃圾各有多少吨？\nᣏ/\u0001\u0013\n据统计资料，甲、乙两种作物的单位面积产量的比是１∶２．现要把\n一块长２００ｍ、宽１００ｍ的长方形土地划分为两块小长方形土地，分别种\n植这两种作物．怎样划分这块土地，才能使甲、乙两种作物的总产量的比\n是３∶４？\nA\nD\nF\nC\nB\nE\ny m\nx m\n图１０．３１\n分析：如图１０．３１，一种划分方案为：甲、乙两\n种作物的种植区域分别为长方形犃犈犉犇和长方形\n犈犅犆犉．\n此时设犃犈＝狓ｍ，犈犅＝狔ｍ，根据问题中涉\n及长度、产量的相等关系，列得方程组\n，\n．\n烅烄\n烆\n解这个方程组，得\n狓＝　　　，\n狔＝　　　．\n烅烄\n烆\n过长方形土地的长边上离一端　　　　处，作这条边的垂线，把这块土地\n分为两块长方形土地．较大一块土地种植　　　种作物，较小一块土地种植\n种作物．\n２０１\n仅供个人学习使用，未经授权不得另做他用\n【第 56 页】\nጷ˸\n１．对于探究２中的问题，如果按照如图的方式划分土地，分别在长方形\n犇犕犖犆和犕犃犅犖土地中种植甲、乙两种作物，那么犃犕的长度是多少？\nA\nB\nC\nD\nN\nM\n２狓\n３\n２\n狓＋２狔－３\n４狔\n（第１题）　　　　　　　　　　　（第２题）\n２．如图，３×３的格子内填写了一些数和代数式．为了使格子的各行、各\n列及对角线上的三个数之和均相等，狓，狔各应取什么值？\n３．某地为打造运河风光带，雇用Ａ，Ｂ两个工程队共同完成一段长为\n１８０ｍ的河道的清理任务．已知Ａ工程队每天清理１２ｍ，Ｂ工程队每天\n清理８ｍ，两个工程队工作天数之和为２０天，Ａ，Ｂ工程队分别清理了\n多长的河道？\nᣏ/\u0001\u0014\nA\nB\nН᡹10 km\nᨡ᡹110 km\nН᡹20 km\nᨡ᡹120 km\nˍ᡹ጰጻԈ\n图１０．３２\n如图１０．３２，丝路纺织\n厂与Ａ，Ｂ两地由公路、铁\n路相连．这家纺织厂从Ａ地\n购进一批长绒棉运回工厂，\n制成纺织面料运往Ｂ地．已知\n长绒棉的进价为３．０８万元／ｔ，\n纺织面料的出厂价为４．２５万元／ｔ，公路运价为０．５元／（ｔ·ｋｍ），铁路\n运价为０．２元／（ｔ·ｋｍ），且这两次运输共支出公路运费５２００元，铁路\n运费１６６４０元．那么这批纺织面料的销售额比原料费（原料费只计长绒\n棉的价格）与运输费的和多多少元？\n分析：销售额与产品数量有关，原料费与原料数量有关．设购买狓ｔ长绒棉，\n制成狔ｔ纺织面料．根据题中数量关系填写表１０．３１．\n３０１\n仅供个人学习使用，未经授权不得另做他用\n【第 57 页】\n表１０３１\n狓ｔ长绒棉\n狔ｔ纺织面料\n合计\n公路运费／元\n铁路运费／元\n价值／元\n题目所求的是　　　　　　　　　　　，为此需先解出　　与　　．\n由表１０．３１，列得方程组\n，\n．\n烅烄\n烆\n解这个方程组，得\n狓＝　　　　，\n狔＝　　　　．\n烅烄\n烆\n因此，这批纺织面料的销售额比原料费与运输费的和多　　　　　　元．\n从以上探究可以看出，方程组是解决含有多个未知数问题的重要工具．用\n方程组解决问题时，要根据问题中的数量关系列出方程组，求出方程组的解\n后，应进一步考虑它是否符合问题的实际意义．\nጷ˸\n１．某运输公司有大小两种型号的货车，２辆大货车与３辆小货车一次可以\n运货１５．５ｔ，５辆大货车与６辆小货车一次可以运货３５ｔ．３辆大货车与\n５辆小货车一次可以运货多少吨？\n票种\n票价／元\n往返\n８０\n单程\n４５\n２．七年级的地质兴趣小组到一座山顶进\n行田野调查．上山之前，２０名成员各\n买了一张缆车票，共花费１１８０元．缆\n车票价如右表所示，他们购买了往返\n票和单程票各多少张？\n３．甲地到乙地由一段上坡路与一段平路组成，一位自行车越野赛运动员\n在两地之间进行骑行训练．如果他保持上坡的速度为３０ｋｍ／ｈ，平路的\n速度为４０ｋｍ／ｈ，下坡的速度为５０ｋｍ／ｈ，那么他从甲地骑到乙地需\n５４ｍｉｎ，从乙地骑到甲地需４２ｍｉｎ．甲地到乙地全程是多少千米？\n４０１\n仅供个人学习使用，未经授权不得另做他用\n【第 58 页】\n\u0012\u0011\u000f\u0014\nܭ˸ ڍ\n１．解下列方程组：\n（１）３狓－狔＝５，\n５狔－１＝３狓＋５；\n烅烄\n烆\n（２）\n２狓３＋３狔４＝１７１２，\n狓６－狔２＝－１３．\n烅\n烄\n烆\n２．一个户外运动俱乐部的成员完成了两天的徒步运动．两天的徒步时间分别为\n８ｈ和１０ｈ，共走了９８ｋｍ，且第一天比第二天少走２ｋｍ，这个俱乐部的成员\n两天徒步的平均速度各是多少？\n３．《算法统宗》里有这样一道题：我问开店李三公，众客都来到店中．一房七客\n多七客，一房九客一房空．李三公家的店有多少间客房，来了多少房客？\n４．某港口码头使用Ａ，Ｂ两种型号的机器人搬运货物．在２４ｈ内，３台Ａ型机器\n人和２台Ｂ型机器人共搬运货物４５０ｔ，且每台Ａ型机器人比Ｂ型机器人多搬\n运货物２５ｔ，每台Ａ型机器人和每台Ｂ型机器人２４ｈ的搬运量分别是多少？\n፬Ռᤂၹ\nA\nB\nC\nD\nM\nN\n（第５题）\n５．如图，学校规划在一块长１８ｍ、宽１３ｍ的长方形场\n地犃犅犆犇上，分别设计与犃犇，犃犅平行的横向和纵\n向通道，其余部分铺上草皮．如果通道的宽度相等，\n六块草坪的形状、大小相同，其中一块草坪的两边\n犃犕∶犃犖＝８∶９，那么通道的宽是多少？\n６．一家广告公司为某学校制作文艺活动的展板、宣传册\n和横幅，其中宣传册的数量是展板的５倍．广告公司\n制作每件产品所需时间和所获利润如下表所示．\n产品\n展板\n宣传册\n横幅\n时间／ｈ\n１\n０．２\n０．５\n利润／元\n６０\n３．５\n２０\n若制作三种产品共需２５ｈ，所获利润为９７５元，求这三种产品的总件数．\n７．七年级书法兴趣小组到文具店购买Ａ，Ｂ两种型号的毛笔，文具店的销售方\n式是：\n５０１\n仅供个人学习使用，未经授权不得另做他用\n【第 59 页】\n（１）一次性购买Ａ型毛笔不超过２０支时，按零售价销售；超过２０支时，超\n过部分每支的价格比零售价低０．４元．\n（２）一次性购买Ｂ型毛笔不超过１５支时，按零售价销售；超过１５支时，超\n过部分每支的价格比零售价低０．６元．\n这个小组共有２０名同学，若每人买１支Ａ型毛笔和２支Ｂ型毛笔，共需支付\n３２５元；若每人买２支Ａ型毛笔和１支Ｂ型毛笔，共需支付３０９元．这家文具\n店Ａ，Ｂ型毛笔的零售价分别是多少？\nጊ\n８．一家超市的账目记录显示，某天卖出３９支牙刷和２１盒牙膏，收入３９６元；另\n一天，以同样的价格卖出同样的牙刷５２支和牙膏２８盒，收入５１８元．这个记\n录是否有误？如果有误，请说明理由．\n９．编一道符合实际意义的应用题，使其中的未知数满足方程组\n２狓＋３狔＝２１，\n３狓＋４狔＝２９．\n烅烄\n烆\n与同学交流一下，并解决这个问题．\n６０１\n仅供个人学习使用，未经授权不得另做他用\n【第 60 页】\n１０．４三元一次方程组的解法\n前面我们通过列二元一次方程组解决了一些问题．实际\n上，有不少问题含有更多的未知数，类比二元一次方程组的\n研究方法，我们来解决这样的问题．\n看下面的问题．\n问题　在一次足球联赛中，一支球队共参加了２２场比赛，积４７分，且胜\n的场数比负的场数的４倍多２．按照足球联赛的积分规则，胜一场得３分，平\n一场得１分，负一场得０分，那么这支球队胜、平、负各多少场？\n解决这个问题的一个自然的想法是，设这个球队胜、平、负的场数分别为\n狓，狔，狕，根据题意，可以得到下面三个方程：\n狓＋狔＋狕＝２２，\n３狓＋狔＝４７，\n狓＝４狕＋２．\n这个问题的解必须同时满足上面三个条件，因此，我们把这三个方程合在\n一起，写成\n狓＋狔＋狕＝２２，\n３狓＋狔＝４７，\n狓＝４狕＋２．\n烅\n烄\n烆\n这个方程组含有三个未知数，且含有未知数的式子都是整式，含有未知数\n的项的次数都是１，一共有三个方程，像这样的方程组叫作三元一次方程组．\n怎样解三元一次方程组呢？我们知道，二元一次方程组可以利用代入法或\n加减法消去一个未知数，化成一元一次方程求解．那么，能不能按照同样的思\n路，用代入法或加减法消去三元一次方程组的一个未知数，把它化成二元一次\n方程组呢？\n７０１\n本节内容为选学内容．\n仅供个人学习使用，未经授权不得另做他用\n【第 61 页】\n让我们看前面列出的三元一次方程组\n狓＋狔＋狕＝２２，\n３狓＋狔＝４７，\n狓＝４狕＋２．\n烅\n烄\n烆\n①\n②\n③\n仿照前面学过的代入法，可以把③分别代入①②并化简，得到两个只含\n狔，狕的方程狔＋５狕＝２０和狔＋１２狕＝４１，它们组成方程组\n你还能用其他方法解\n这个三元一次方程组吗？\n狔＋５狕＝２０，\n狔＋１２狕＝４１．\n烅烄\n烆\n解这个二元一次方程组，可以求出狔和狕，进而可\n以求出狓．\n从上面的分析可以看出，解三元一次方程组的基本思路是：通过“代入”\n或“加减”进行消元，把“三元”化为“二元”，使解三元一次方程组转化为\n解二元一次方程组，进而再转化为解一元一次方程．这与解二元一次方程组的\n思路是一样的．\n三元一次方程组\n→\n消元二元一次方程组\n→\n消元\n一元一次方程\n例１　解三元一次方程组\n３狓＋４狕＝７，\n２狓＋３狔＋狕＝９，\n５狓－９狔＋７狕＝８．\n烅\n烄\n烆\n①\n②\n③\n分析：方程①只含狓，狕，因此，可以由②③消去狔，得到一个只含狓，狕\n的方程，与方程①组成一个二元一次方程组．\n解：②×３＋③，得\n１１狓＋１０狕＝３５．\n④\n①与④组成方程组\n３狓＋４狕＝７，\n１１狓＋１０狕＝３５．\n烅烄\n烆\n解这个方程组，得\n狓＝５，\n狕＝－２．\n烅烄\n烆\n８０１\n仅供个人学习使用，未经授权不得另做他用\n【第 62 页】\n把狓＝５，狕＝－２代入②，得\n你还有其他解法吗？\n试一试，并与这种解法进\n行比较．\n２×５＋３狔－２＝９，\n狔＝１３．\n因此，这个三元一次方程组的解为\n狓＝５，\n狔＝１３，\n狕＝－２．\n烅\n烄\n烆\nጷ˸\n解下列三元一次方程组：\n（１）狓－２狔＝－９，\n狔－狕＝３，\n２狕＋狓＝４７；\n烅\n烄\n烆\n（２）４狓－９狕＝１７，\n３狓＋狔＋１５狕＝１８，\n狓＋２狔＋３狕＝２；\n烅\n烄\n烆\n（３）狓＋狔＝３，\n狔＋狕＝４，\n狕＋狓＝５；\n烅\n烄\n烆\n（４）３狓－狔＋狕＝４，\n２狓＋３狔－狕＝１２，\n狓＋狔＋狕＝６．\n烅\n烄\n烆\n在解决一些含有三个未知数的问题时，可以考虑列三元一次方程组，通过\n解方程组获得问题的答案．\n例２　在等式狔＝犪狓２＋犫狓＋犮中，当狓＝－１时，狔＝０；当狓＝２时，狔＝３；\n当狓＝５时，狔＝６０．求犪，犫，犮的值．\n分析：把犪，犫，犮看作三个未知数，分别把已知的狓，狔值代入原等式，\n就可以得到一个三元一次方程组．\n解：根据题意，列得三元一次方程组\n犪－犫＋犮＝０，\n４犪＋２犫＋犮＝３，\n２５犪＋５犫＋犮＝６０．\n烅\n烄\n烆\n①\n②\n③\n９０１\n仅供个人学习使用，未经授权不得另做他用\n【第 63 页】\n②－①，得\n犪＋犫＝１．\n④\n③－①，得\n４犪＋犫＝１０．\n⑤\n④与⑤组成二元一次方程组\n犪＋犫＝１，\n４犪＋犫＝１０．\n烅烄\n烆\n解这个方程组，得\n犪＝３，\n犫＝－２．\n烅烄\n烆\n把犪＝３，犫＝－２代入①，得\n犮＝－５．\n因此犪，犫，犮的值分别为３，－２，－５．\n例３　一个三位数，各数位上的数的和为１４，百位上的数的２倍减去十位\n上的数的差是个位上的数的１３．如果把这个三位数个位上的数与百位上的数交\n换位置，那么所得的新数比原数小９９．求这个三位数．\n分析：把这个三位数各位上的数看成三个未知数，则根据题目中的三个相\n等关系，可以列三元一次方程组．\n解：设这个三位数百位上的数为狓，十位上的数为狔，个位上的数为狕．\n根据题意，列得三元一次方程组\n狓＋狔＋狕＝１４，\n２狓－狔＝１３狕，\n１００狕＋１０狔＋狓＋９９＝１００狓＋１０狔＋狕．\n烅\n烄\n烆\n①\n②\n③\n解这个方程组，得\n狓＝４，\n狔＝７，\n狕＝３．\n烅\n烄\n烆\n因此这个三位数是４７３．\n０１１\n仅供个人学习使用，未经授权不得另做他用\n【第 64 页】\nጷ˸\n１．甲、乙、丙三个数的和是３５，甲数的２倍比乙数大５，乙数的１３等于丙\n数的１２．求这三个数．\n２．在等式狕＝犪狓＋犫狔＋犮中，当狓＝１，狔＝２时，狕＝８；当狓＝２，狔＝１\n时，狕＝５；当狓＝－１，狔＝－１时，狕＝４．求犪，犫，犮的值．\n\u0012\u0011\u000f\u0015\nܭ˸ ڍ\n１．解下列三元一次方程组：\n（１）狔＝２狓－７，\n５狓＋３狔＋２狕＝２，\n３狓－４狕＝４；\n烅\n烄\n烆\n（２）\n４狓＋９狔＝１２，\n３狔－２狕＝１，\n７狓＋５狕＝１９４．\n烅\n烄\n烆\n２．解下列三元一次方程组：\n（１）狓２＝狔３＝狕４，\n２狓－狔＋２狕＝２７；\n烅烄\n烆\n（２）２狓＋４狔＋３狕＝９，\n３狓－２狔＋５狕＝１１，\n５狓－６狔＋７狕＝１３．\n烅\n烄\n烆\n፬Ռᤂၹ\n３．在等式狔＝犪狓２＋犫狓＋犮中，当狓＝１时，狔＝－２；当狓＝－１时，狔＝２０；当\n狓＝３２与狓＝１３时，狔的值相等．求犪，犫，犮的值．\n４．一个三位数，十位上的数等于百位上的数的２倍，百位上的数的３倍减去个位\n上的数等于十位上的数的１４，且各数位上的数的和为１１．求这个三位数．\nጊ\n５．甲地到乙地全程是３．３ｋｍ，由一段上坡路、一段平路、一段下坡路组成．如\n果保持上坡每小时走３ｋｍ，平路每小时走４ｋｍ，下坡每小时走５ｋｍ，那么\n从甲地到乙地需５１ｍｉｎ，从乙地到甲地需５３．４ｍｉｎ．从甲地到乙地时，上坡、\n平路、下坡的路程各是多少？\n１１１\n仅供个人学习使用，未经授权不得另做他用\n【第 65 页】\n我国古代很早就开始对多元一次方程组进行研究，古代数学著\n作《九章算术》中专门设“方程”章讨论多元一次方程组．多元一\n次方程组的解法是我国在世界上领先的重大数学成就之一．我国古\n代解多元一次方程组的方法主要有直除法和互乘相消法．\n３狓＋２狔＋狕＝３９，①\n２狓＋３狔＋狕＝３４，②\n狓＋２狔＋３狕＝２６，③\n烅\n烄\n烆\n②×３－①－①\n③×３－①\n３狓＋２狔＋狕＝３９，\n５狔＋狕＝２４，\n４狔＋８狕＝３９．\n烅\n烄\n烆\n继续使用此法，将一行消到只剩下一个未知数，即可求解．\n《九章算术》中的“直除法”具有普遍性，相当于现代高等\n代数的矩阵解法．《九章算术》是世界上最早记录这种解法的著作．\n刘徽给出了直除法的理论\n基础———举率以相减，不害余\n数之课也，即两个方程对应相\n减，方程组的解不变．刘徽还\n创造了“互乘相消法”．\n贾宪根据题目特点灵活地\n选择直除法和互乘相消法，并\n且不再借助具体问题阐述如何\n解多元一次方程组，他将中国\n传统数学的抽象化推进到了一\n个新阶段．\n２１１\n仅供个人学习使用，未经授权不得另做他用\n【第 66 页】\n解多元一次方程组的方法反映了中国古代数学程序化的特点．宋元时\n期，中国数学家朱世杰又发展了多元高次方程组的求解方法．我国著名数学\n家吴文俊先生就借鉴中国古代数学的思想和方法，古为今用，创立了数学机\n械化理论，在国际上产生了巨大的影响．\n５狓＋２狔＝１０，①\n２狓＋５狔＝８，②\n烅烄\n烆\n①×２\n②×５　１０狓＋４狔＝２０，\n１０狓＋２５狔＝４０．\n烅烄\n烆\n然后用第二行减去第一行，消去狓，可以得到狔的值．\n互乘相消法不但起到事半功倍的作用，而且可以推广，正\n如刘徽所说：“以小推大，虽四、五行不异也．”\n杨辉率先以接近现代的\n形式列、解多元一次方程\n组，并对如何解多元一次方\n程组进行了系统的论述．\n梅文鼎系统整理和总结了\n中国传统数学中多元一次方程\n组的解法．\n３１１\n仅供个人学习使用，未经授权不得另做他用\n【第 67 页】\n᫞឴\nˁ Ꮶ\n᫞឴\nˁ Ꮶ\n᫞឴\nˁ Ꮶ\n中国古代著名的一次不定方程组问题\n《九章算术》的“方程”章中记载了一道有趣的\n“五家共井问题”：今有五家共井，甲二绠不足，如乙\n一绠；乙三绠不足，如丙一绠；丙四绠不足，如丁一\n绠；丁五绠不足，如戊一绠；戊六绠不足，如甲一绠．\n各得所不足一绠，皆逮．问井深、绠长各几何．\n这个问题的意思是：今有五家人共用一口水井，\n每家都备有打水绳，但各家的绳长可能不同．如果把\n２条甲家的绳子和１条乙家的绳子接起来，刚好能够\n着井里的水面；把３条乙家的绳子和１条丙家的绳子\n接起来，刚好能够着井里的水面；……那么这五家的\n打水绳各有多长？井深是多少？\n显然，问题中包含了多个未知数．若设甲、乙、丙、丁、戊各家绳长分别\n为狓，狔，狕，狌，狏，井深为犺，则可列得方程组\n２狓＋狔＝犺，\n３狔＋狕＝犺，\n４狕＋狌＝犺，\n５狌＋狏＝犺，\n６狏＋狓＝犺．\n烅\n烄\n烆\n（）\n与二元、三元一次方程组不同的是，上述一次方程组有６个未知数，５个方\n程．任意给定犺的一个值，就可求出狓，狔，狕，狌，狏的值，也就是说，（）\n有无穷多个解．像（）这样的方程组被称为不定方程组．\n“五家共井问题”可能是中国古代数学中最早出现\n的不定方程组问题．到了５世纪，《张丘建算经》中记\n载的“百鸡问题”引起了后世中外数学家的广泛兴趣，\n成了中国古代数学中流传更广的不定方程组问题．\n“百鸡问题”的意思是：如果１只公鸡值５个钱，\n１只母鸡值３个钱，３只小鸡值１个钱．现用１００个钱，\n买了１００只鸡，问公鸡、母鸡、小鸡各多少只．\n４１１\n仅供个人学习使用，未经授权不得另做他用\n【第 68 页】\n如果设公鸡、母鸡、小鸡的只数分别为狓，狔，狕，那么可列得一次不定方\n程组\n５狓＋３狔＋１３狕＝１００，\n狓＋狔＋狕＝１００．\n烅烄\n烆\n这个方程组的解必须是正整数，你能找出其中一个正整数解吗？\n事实上，数学家研究的不定方程组常常把解限定在正整数、整数、有理数\n等范围内．“百鸡问题”属于典型的一次不定方程组问题．在张丘建之后，我国\n数学家又编制了许多其他一次不定方程组问题，但都没有给出这类方程组的一\n般解法．直到１９世纪，清代数学家利用南宋数学家秦九韶（约１２０２—约１２６１）\n发现的“大衍求一术”，终于使一次不定方程组问题的求解获得了新的突破．\nߦำү\n\"ߕ\u0012\u0001 ιٰ̭\n᫦/+Ą Aą\n（１）在平面直角坐标系中，你能把二元一次方程狓－狔＝０的一个解\n用一个点表示出来吗？标出一些以方程狓－狔＝０的解为坐标的点，过这\n些点中的任意两点作直线，你有什么发现？在这条直线上任取一点，这\n个点的坐标是方程狓－狔＝０的解吗？\n一般地，以一个二元一次方程的解为坐标的点的全体叫作这个方程\n的图象．想一想，二元一次方程的图象是什么几何图形？\n（２）根据（１）的结论，在同一平面直角坐标系中画出二元一次方\n程组\n２狓＋狔＝４，\n狓－狔＝－１\n烅烄\n烆\n中的两个二元一次方程的图象．由这两个二元一次方程的图象，你能得出\n这个二元一次方程组的解吗？\n５１１\n仅供个人学习使用，未经授权不得另做他用\n【第 69 页】\n\"ߕ\u0013\u0001 D5ᢏѺKM\n为了让轮胎均匀磨损并延\n长轮胎的使用寿命，我们建议\n每行驶１００００ｋｍ进行一次轮\n胎换位．\n随着人们生活水平的提高，很多家庭\n都购置了小汽车．大多数小汽车是前轮驱\n动和转向的，所以前轮的磨损程度比后轮\n严重．如果前轮报废，换上新轮胎，而后\n轮继续使用原来的轮胎，那么汽车行驶的\n安全性和乘坐的舒适性都将大打折扣；如\n果同时更换前后轮的轮胎，用车成本又会\n提高．为了解决这个问题，一般的汽车使\n用手册上都有定期给前后轮的轮胎换位的\n建议．\n资料显示：汽车前轮轮胎一般应在汽车行驶达到６００００ｋｍ时报废，\n而后轮轮胎应在汽车行驶达到８００００ｋｍ时报废．如果在轮胎的使用寿命\n内只交换一次前、后轮轮胎，那么应在汽车行驶里程达到多少时，交换\n前、后轮轮胎，能使汽车的两对轮胎同时报废？并求出轮胎报废时汽车\n的行驶里程．\n６１１\n仅供个人学习使用，未经授权不得另做他用\n【第 70 页】\nፇ\nʷǌ ቦᅼគፇ ڏ̄\nǌڀᮏˁ Ꮶ\nᬅ᫈ᮥ\nᬅ᫈ᮥ\nᄊን\nߦ᫈ᮥ\nᄊᝍ\n὆̄\nЋ ʼЋʷ  ሮጸᄊᝍ὇\nߦ᫈ᮥ\n὆̄\nЋ ʼЋʷ  ሮጸ὇\n᝺ ᅼ Ὂѵ ሮጸ̽\nКข὆๗Ћ὇\nҫѓข\nᰎ\nᝍ\nሮ\nጸ\n本章我们通过实际问题引入了二元一次方程（组），学习了二元一次\n方程组的解法———代入消元法和加减消元法，运用二元一次方程组解决\n了一些实际问题．在此基础上，学习了简单的三元一次方程组及其解法．\n消元是解二（三）元一次方程组的基本思想．根据方程组的具体情\n况，利用代入消元法或加减消元法，把“三元”转化为“二元”，把“二\n元”转化为“一元”，这一过程体现了化归思想．通过解二（三）元一次\n方程组，你的运算能力也得到了提升．\n二（三）元一次方程组是刻画实际问题的重要数学模型，在现实中\n具有广泛的应用．用它解决实际问题时，要注意分析问题中的各种数量关\n系，找出其中的相等关系，引进适当的未知数，列出相应的方程组，解\n方程组并检验解的意义，这一过程有助于培养你的模型观念和应用意识．\n请你带着下面的问题，复习一下全章内容吧．\n１．什么是二元一次方程？什么是二元一次方程的解？什么是二（三）\n元一次方程组？什么是二（三）元一次方程组的解？\n２．举例说明怎样用代入法和加减法解二元一次方程组．“代入”与“加\n７１１\n仅供个人学习使用，未经授权不得另做他用\n【第 71 页】\n减”的目的是什么？\n３．解三元一次方程组与解二元一次方程组有什么联系与区别？你能\n说一说“消元”的思想方法在解三元一次方程组中的体现吗？\n４．提出一个实际问题，并用二元或三元一次方程组解决它．你能说\n一说用方程组解决实际问题的基本思路吗？\nܭ˸ᮥ\n\u0012\u0011\nܭ˸ ڍ\n１．用代入法解下列方程组：\n（１）犪＝２犫＋３，\n犪＝３犫＋２０；\n烅烄\n烆\n（２）狓－狔＝１３，\n狓＝６狔－７；\n烅烄\n烆\n（３）狓－狔＝４，\n４狓＋２狔＝－１；\n烅烄\n烆\n（４）５狓－狔＝１１０，\n９狔－狓＝１１０．\n烅烄\n烆\n２．用加减法解下列方程组：\n（１）３犿＋犫＝１１，\n－４犿－犫＝１１；\n烅烄\n烆\n（２）０．６狓－０．４狔＝１．１，\n０．２狓－０．４狔＝２．３；\n烅烄\n烆\n（３）４犳＋犵＝１５，\n３犵－４犳＝－３；\n烅烄\n烆\n（４）０．５狓＋３狔＝－６，"
+        }
+      ],
+      "material_set_id": "set_d2790a62db59",
+      "material_name": "七年级数学课本切片（B02）"
+    },
+    "boundary": {
+      "statement": "主题模式；课程标准《义务教育数学课程标准（2022年版）》第 1 版；课本 1 本、目录项 84 个；学情数据集“公开模拟学情数据”；主题 T02 方程与方程组"
+    },
+    "created_at": "2026-11-11T13:32:32+00:00",
+    "selection": {
+      "standard_section_ids": [
+        "doc_1183b95c_5dad4d_p060_s024"
+      ],
+      "textbook_section_ids": [
+        "doc_ccee907e_62db59_p002_s003",
+        "doc_ccee907e_62db59_p002_s004",
+        "doc_ccee907e_62db59_p006_s007",
+        "doc_ccee907e_62db59_p011_s008",
+        "doc_ccee907e_62db59_p024_s009",
+        "doc_ccee907e_62db59_p041_s012",
+        "doc_ccee907e_62db59_p044_s014",
+        "doc_ccee907e_62db59_p048_s015",
+        "doc_ccee907e_62db59_p054_s016"
+      ],
+      "reasons": [
+        "课程标准中“数与代数”第二段覆盖方程与方程组的内容要求，与主题标准页码对应。",
+        "课本5.1、5.1.1、5.1.2、5.2对应一元一次方程概念、等式性质与解法。",
+        "课本5.3对应列一元一次方程解决实际问题并检验。",
+        "课本10.1、10.2.1、10.2.2对应二元一次方程组概念及代入、加减消元法。",
+        "课本10.3对应列二元一次方程组解决实际问题并检验。"
+      ],
+      "warnings": []
+    },
+    "specific_requirements": "",
+    "workflow": [
+      {
+        "stage": "范围准备与目录提交",
+        "detail": "主题模式；课程标准《义务教育数学课程标准（2022年版）》第 1 版；课本 1 本、目录项 84 个；学情数据集“公开模拟学情数据”；主题 T02 方程与方程组"
+      },
+      {
+        "stage": "目录检索阶段",
+        "detail": "选定课程标准目录 1 项、课本目录 9 项"
+      },
+      {
+        "stage": "内容提取阶段",
+        "detail": "已从本地读取目录检索阶段选中的具体内容"
+      },
+      {
+        "stage": "结构化生成阶段",
+        "detail": "已生成学习内容、要求、来源和联系"
+      },
+      {
+        "stage": "结果校验与保存",
+        "detail": "已保存 3 条学习内容"
+      }
+    ]
+  },
+  "boundary_note": "主题模式；课程标准《义务教育数学课程标准（2022年版）》第 1 版；课本 1 本、目录项 84 个；学情数据集“公开模拟学情数据”；主题 T02 方程与方程组",
+  "items": [
+    {
+      "id": "run_14a643f3cb83_T02I1",
+      "run_id": "run_14a643f3cb83",
+      "item_key": "T02I1",
+      "ordinal": 1,
+      "theme_code": "T02",
+      "theme_name": "方程与方程组",
+      "item_type": "knowledge_point",
+      "content": "运用等式的基本性质解一元一次方程",
+      "key_points": [
+        "等式的基本性质",
+        "利用等式性质进行等式变形",
+        "将一元一次方程逐步转化为x=m的形式",
+        "解方程后代入原方程检验"
+      ],
+      "indicator_codes": [
+        "T02I1"
+      ],
+      "requirements": [
+        {
+          "clause": "②",
+          "verb": "",
+          "level": "掌握",
+          "text": "掌握等式的基本性质，能解一元一次方程。",
+          "evidence": {
+            "kind": "standard",
+            "material_set_id": "set_790c195dad4d",
+            "material_name": "义务教育数学课程标准（2022年版）",
+            "document_id": "doc_1183b95c_5dad4d",
+            "file_name": "课程标准_2022.pdf",
+            "section_id": "",
+            "section_path": "",
+            "page": 63,
+            "page_end": null,
+            "printed_page": null,
+            "quote": "掌握等式的基本性质；能解一元一次方程和可化为一元一次方程的分式方程。",
+            "unit_id": null,
+            "verified": true,
+            "verification_note": "引文已回查课标该页文本"
+          },
+          "verified": true,
+          "note": ""
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p006_s007",
+          "section_path": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+          "page": 7,
+          "page_end": 10,
+          "printed_page": null,
+          "quote": "等式的性质１　等式两边加（或减）同一个数（或式子），结果仍相等．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p006_s007",
+          "section_path": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+          "page": 7,
+          "page_end": 10,
+          "printed_page": null,
+          "quote": "利用等式的性质可以解方程．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p011_s008",
+          "section_path": "第五章 一元一次方程 / 5.2 解一元一次方程",
+          "page": 19,
+          "page_end": 23,
+          "printed_page": null,
+          "quote": "解一元一次方程的一般步骤包括：去分母、去括号、移项、合并同类项、系数化为１等．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p006_s007",
+          "section_path": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+          "page": 8,
+          "page_end": 10,
+          "printed_page": null,
+          "quote": "一般地，从方程解出未知数的值以后，通常需要代入原方程检验，看这个值能否使方程左、右两边的值相等．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        }
+      ],
+      "notes": "由 AI 依据所选范围起草，需逐条核对出处。",
+      "review_warnings": [],
+      "status": "draft",
+      "current_version": 1
+    },
+    {
+      "id": "run_14a643f3cb83_T02I2",
+      "run_id": "run_14a643f3cb83",
+      "item_key": "T02I2",
+      "ordinal": 2,
+      "theme_code": "T02",
+      "theme_name": "方程与方程组",
+      "item_type": "knowledge_point",
+      "content": "用消元法解二元一次方程组",
+      "key_points": [
+        "消元思想",
+        "代入消元法",
+        "加减消元法",
+        "根据方程组的具体情况选择适合的解法"
+      ],
+      "indicator_codes": [
+        "T02I2"
+      ],
+      "requirements": [
+        {
+          "clause": "③",
+          "verb": "",
+          "level": "掌握",
+          "text": "掌握消元法，能解二元一次方程组。",
+          "evidence": {
+            "kind": "standard",
+            "material_set_id": "set_790c195dad4d",
+            "material_name": "义务教育数学课程标准（2022年版）",
+            "document_id": "doc_1183b95c_5dad4d",
+            "file_name": "课程标准_2022.pdf",
+            "section_id": "",
+            "section_path": "",
+            "page": 63,
+            "page_end": null,
+            "printed_page": null,
+            "quote": "掌握消元法，能解二元一次方程组。",
+            "unit_id": null,
+            "verified": true,
+            "verification_note": "引文已回查课标该页文本"
+          },
+          "verified": true,
+          "note": ""
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p044_s014",
+          "section_path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.1 代入消元法",
+          "page": 44,
+          "page_end": 48,
+          "printed_page": null,
+          "quote": "这种将未知数的个数由多化少、逐一解决的思想，叫作消元思想．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p044_s014",
+          "section_path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.1 代入消元法",
+          "page": 45,
+          "page_end": 48,
+          "printed_page": null,
+          "quote": "这种解二元一次方程组的方法叫作代入消元法，简称代入法．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p048_s015",
+          "section_path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.2 加减消元法",
+          "page": 49,
+          "page_end": 53,
+          "printed_page": null,
+          "quote": "这种解二元一次方程组的方法叫作加减消元法，简称加减法．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p048_s015",
+          "section_path": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.2 加减消元法",
+          "page": 51,
+          "page_end": 53,
+          "printed_page": null,
+          "quote": "解方程组的基本思想是消元．代入消元法和加减消元法是二元一次方程组的两种解法，它们都是通过消元使方程组转化为一元一次方程，只是消元的方法不同．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        }
+      ],
+      "notes": "由 AI 依据所选范围起草，需逐条核对出处。",
+      "review_warnings": [],
+      "status": "draft",
+      "current_version": 1
+    },
+    {
+      "id": "run_14a643f3cb83_T02I3",
+      "run_id": "run_14a643f3cb83",
+      "item_key": "T02I3",
+      "ordinal": 3,
+      "theme_code": "T02",
+      "theme_name": "方程与方程组",
+      "item_type": "application",
+      "content": "列方程或方程组解决简单实际问题并检验",
+      "key_points": [
+        "分析问题中的数量关系并找出相等关系",
+        "设未知数、列方程或方程组",
+        "解方程或方程组",
+        "检验所得结果是否符合实际意义",
+        "设、列、解、检、答"
+      ],
+      "indicator_codes": [
+        "T02I3"
+      ],
+      "requirements": [
+        {
+          "clause": "①",
+          "verb": "",
+          "level": "理解",
+          "text": "能根据现实情境理解方程的意义，能针对具体问题列出方程；理解方程解的意义，经历估计方程解的过程。",
+          "evidence": {
+            "kind": "standard",
+            "material_set_id": "set_790c195dad4d",
+            "material_name": "义务教育数学课程标准（2022年版）",
+            "document_id": "doc_1183b95c_5dad4d",
+            "file_name": "课程标准_2022.pdf",
+            "section_id": "",
+            "section_path": "",
+            "page": 63,
+            "page_end": null,
+            "printed_page": null,
+            "quote": "能根据现实情境理解方程的意义，能针对具体问题列出方程；理解方程解的意义，经历估计方程解的过程。",
+            "unit_id": null,
+            "verified": true,
+            "verification_note": "引文已回查课标该页文本"
+          },
+          "verified": true,
+          "note": ""
+        },
+        {
+          "clause": "⑧",
+          "verb": "",
+          "level": "能",
+          "text": "能根据具体问题的实际意义，检验方程解的合理性。",
+          "evidence": {
+            "kind": "standard",
+            "material_set_id": "set_790c195dad4d",
+            "material_name": "义务教育数学课程标准（2022年版）",
+            "document_id": "doc_1183b95c_5dad4d",
+            "file_name": "课程标准_2022.pdf",
+            "section_id": "",
+            "section_path": "",
+            "page": 63,
+            "page_end": null,
+            "printed_page": null,
+            "quote": "能根据具体问题的实际意义，检验方程解的合理性。",
+            "unit_id": null,
+            "verified": true,
+            "verification_note": "引文已回查课标该页文本"
+          },
+          "verified": true,
+          "note": ""
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p024_s009",
+          "section_path": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+          "page": 25,
+          "page_end": 39,
+          "printed_page": null,
+          "quote": "这一过程一般包括设、列、解、检、答等步骤，即设未知数、列方程、解方程、检验所得结果、确定答案．正确分析问题中的相等关系是列方程的基础．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p024_s009",
+          "section_path": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+          "page": 28,
+          "page_end": 39,
+          "printed_page": null,
+          "quote": "用方程解决实际问题时，不仅要注意解方程的过程是否正确，还要检验方程的解是否符合问题的实际意义．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p041_s012",
+          "section_path": "第十章 二元一次方程组 / 10.1 二元一次方程组的概念",
+          "page": 41,
+          "page_end": 43,
+          "printed_page": null,
+          "quote": "列方程要先找到相等关系．",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "material_name": "七年级数学课本切片（B02）",
+          "document_id": "doc_ccee907e_62db59",
+          "file_name": "B06_相关资料切片.pdf",
+          "section_id": "doc_ccee907e_62db59_p054_s016",
+          "section_path": "第十章 二元一次方程组 / 10.3 实际问题与二元一次方程组",
+          "page": 57,
+          "page_end": 71,
+          "printed_page": null,
+          "quote": "用方程组解决问题时，要根据问题中的数量关系列出方程组，求出方程组的解后，应进一步考虑它是否符合问题的实际意义。",
+          "unit_id": null,
+          "verified": true,
+          "verification_note": "引文已回查教材该页文本"
+        }
+      ],
+      "notes": "由 AI 依据所选范围起草，需逐条核对出处。",
+      "review_warnings": [],
+      "status": "draft",
+      "current_version": 1
+    }
+  ],
+  "relations": [
+    {
+      "id": "rel_0f2dd9bac53d",
+      "run_id": "run_14a643f3cb83",
+      "source_item_id": "run_14a643f3cb83_T02I1",
+      "source_item_key": "T02I1",
+      "target_item_id": "run_14a643f3cb83_T02I2",
+      "target_item_key": "T02I2",
+      "relation_type": "prerequisite",
+      "note": "先掌握等式性质和一元一次方程求解，才能理解二元一次方程组消元后转化为一元一次方程求解。",
+      "basis": "课标第63页要求掌握等式的基本性质并解一元一次方程，也要求掌握消元法解二元一次方程组。",
+      "evidence": [],
+      "origin": "ai",
+      "status": "needs_review",
+      "created_at": "2026-11-11T13:33:59+00:00"
+    },
+    {
+      "id": "rel_1f7fc9481c76",
+      "run_id": "run_14a643f3cb83",
+      "source_item_id": "run_14a643f3cb83_T02I1",
+      "source_item_key": "T02I1",
+      "target_item_id": "run_14a643f3cb83_T02I3",
+      "target_item_key": "T02I3",
+      "relation_type": "prerequisite",
+      "note": "列一元一次方程解决实际问题后，需要运用等式性质和一元一次方程解法求解并检验。",
+      "basis": "课本5.3实际问题与一元一次方程位于5.2解一元一次方程之后；5.3第25页列出设、列、解、检、答的步骤。",
+      "evidence": [],
+      "origin": "ai",
+      "status": "needs_review",
+      "created_at": "2026-11-11T13:33:59+00:00"
+    },
+    {
+      "id": "rel_c308de4705e1",
+      "run_id": "run_14a643f3cb83",
+      "source_item_id": "run_14a643f3cb83_T02I2",
+      "source_item_key": "T02I2",
+      "target_item_id": "run_14a643f3cb83_T02I3",
+      "target_item_key": "T02I3",
+      "relation_type": "prerequisite",
+      "note": "列二元一次方程组解决实际问题后，需要运用代入消元法或加减消元法求解，并检验解是否符合实际意义。",
+      "basis": "课标第63页③要求掌握消元法解二元一次方程组，⑧要求检验方程解的合理性；课本10.3位于10.2消元法之后，第57页提出求出方程组解后应检验实际意义。",
+      "evidence": [],
+      "origin": "ai",
+      "status": "needs_review",
+      "created_at": "2026-11-11T13:33:59+00:00"
+    }
+  ],
+  "references": [
+    {
+      "ref_id": "R001",
+      "kind": "课程标准",
+      "material": "义务教育数学课程标准（2022年版）",
+      "file": "课程标准_2022.pdf",
+      "section": "",
+      "page": 63,
+      "printed_page": null,
+      "quote": "掌握等式的基本性质；能解一元一次方程和可化为一元一次方程的分式方程。",
+      "verified": true,
+      "verification_note": "引文已回查课标该页文本",
+      "used_by": [
+        "T02I1"
+      ]
+    },
+    {
+      "ref_id": "R002",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+      "page": 7,
+      "printed_page": null,
+      "quote": "等式的性质１　等式两边加（或减）同一个数（或式子），结果仍相等．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I1"
+      ]
+    },
+    {
+      "ref_id": "R003",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+      "page": 7,
+      "printed_page": null,
+      "quote": "利用等式的性质可以解方程．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I1"
+      ]
+    },
+    {
+      "ref_id": "R004",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第五章 一元一次方程 / 5.2 解一元一次方程",
+      "page": 19,
+      "printed_page": null,
+      "quote": "解一元一次方程的一般步骤包括：去分母、去括号、移项、合并同类项、系数化为１等．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I1"
+      ]
+    },
+    {
+      "ref_id": "R005",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+      "page": 8,
+      "printed_page": null,
+      "quote": "一般地，从方程解出未知数的值以后，通常需要代入原方程检验，看这个值能否使方程左、右两边的值相等．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I1"
+      ]
+    },
+    {
+      "ref_id": "R006",
+      "kind": "课程标准",
+      "material": "义务教育数学课程标准（2022年版）",
+      "file": "课程标准_2022.pdf",
+      "section": "",
+      "page": 63,
+      "printed_page": null,
+      "quote": "掌握消元法，能解二元一次方程组。",
+      "verified": true,
+      "verification_note": "引文已回查课标该页文本",
+      "used_by": [
+        "T02I2"
+      ]
+    },
+    {
+      "ref_id": "R007",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.1 代入消元法",
+      "page": 44,
+      "printed_page": null,
+      "quote": "这种将未知数的个数由多化少、逐一解决的思想，叫作消元思想．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I2"
+      ]
+    },
+    {
+      "ref_id": "R008",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.1 代入消元法",
+      "page": 45,
+      "printed_page": null,
+      "quote": "这种解二元一次方程组的方法叫作代入消元法，简称代入法．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I2"
+      ]
+    },
+    {
+      "ref_id": "R009",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.2 加减消元法",
+      "page": 49,
+      "printed_page": null,
+      "quote": "这种解二元一次方程组的方法叫作加减消元法，简称加减法．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I2"
+      ]
+    },
+    {
+      "ref_id": "R010",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.2 加减消元法",
+      "page": 51,
+      "printed_page": null,
+      "quote": "解方程组的基本思想是消元．代入消元法和加减消元法是二元一次方程组的两种解法，它们都是通过消元使方程组转化为一元一次方程，只是消元的方法不同．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I2"
+      ]
+    },
+    {
+      "ref_id": "R011",
+      "kind": "课程标准",
+      "material": "义务教育数学课程标准（2022年版）",
+      "file": "课程标准_2022.pdf",
+      "section": "",
+      "page": 63,
+      "printed_page": null,
+      "quote": "能根据现实情境理解方程的意义，能针对具体问题列出方程；理解方程解的意义，经历估计方程解的过程。",
+      "verified": true,
+      "verification_note": "引文已回查课标该页文本",
+      "used_by": [
+        "T02I3"
+      ]
+    },
+    {
+      "ref_id": "R012",
+      "kind": "课程标准",
+      "material": "义务教育数学课程标准（2022年版）",
+      "file": "课程标准_2022.pdf",
+      "section": "",
+      "page": 63,
+      "printed_page": null,
+      "quote": "能根据具体问题的实际意义，检验方程解的合理性。",
+      "verified": true,
+      "verification_note": "引文已回查课标该页文本",
+      "used_by": [
+        "T02I3"
+      ]
+    },
+    {
+      "ref_id": "R013",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+      "page": 25,
+      "printed_page": null,
+      "quote": "这一过程一般包括设、列、解、检、答等步骤，即设未知数、列方程、解方程、检验所得结果、确定答案．正确分析问题中的相等关系是列方程的基础．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I3"
+      ]
+    },
+    {
+      "ref_id": "R014",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+      "page": 28,
+      "printed_page": null,
+      "quote": "用方程解决实际问题时，不仅要注意解方程的过程是否正确，还要检验方程的解是否符合问题的实际意义．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I3"
+      ]
+    },
+    {
+      "ref_id": "R015",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第十章 二元一次方程组 / 10.1 二元一次方程组的概念",
+      "page": 41,
+      "printed_page": null,
+      "quote": "列方程要先找到相等关系．",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I3"
+      ]
+    },
+    {
+      "ref_id": "R016",
+      "kind": "教材",
+      "material": "七年级数学课本切片（B02）",
+      "file": "B06_相关资料切片.pdf",
+      "section": "第十章 二元一次方程组 / 10.3 实际问题与二元一次方程组",
+      "page": 57,
+      "printed_page": null,
+      "quote": "用方程组解决问题时，要根据问题中的数量关系列出方程组，求出方程组的解后，应进一步考虑它是否符合问题的实际意义。",
+      "verified": true,
+      "verification_note": "引文已回查教材该页文本",
+      "used_by": [
+        "T02I3"
+      ]
+    }
+  ],
+  "field_definitions": [
+    {
+      "数据表": "outline_runs",
+      "字段": "id",
+      "类型": "字符串",
+      "含义": "一次梳理运行的唯一编号",
+      "取值或格式": "run_ + 12 位十六进制",
+      "示例": "run_1a2b3c4d5e6f",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "outline_runs",
+      "字段": "method",
+      "类型": "枚举",
+      "含义": "清单生成方式",
+      "取值或格式": "rule=规则梳理；ai=AI 梳理",
+      "示例": "rule",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "outline_runs",
+      "字段": "boundary_note",
+      "类型": "长文本",
+      "含义": "本次梳理的范围边界说明",
+      "取值或格式": "自由文本，需写明已纳入与未纳入内容",
+      "示例": "已确定主题范围，其余内容未纳入本次梳理",
+      "为空时": "表示范围边界尚未说明"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "item_key",
+      "类型": "字符串",
+      "含义": "学习内容在本清单中的稳定编号",
+      "取值或格式": "优先沿用课程要求指标编号，人工新增用 KP01 形式",
+      "示例": "T03I1",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "theme_code",
+      "类型": "字符串",
+      "含义": "所属主题编号",
+      "取值或格式": "与课程要求“主题编号”一致",
+      "示例": "T03",
+      "为空时": "表示未归入主题，需复核"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "content",
+      "类型": "文本",
+      "含义": "学习内容名称",
+      "取值或格式": "简洁名词性表述，避免与要求混写",
+      "示例": "不等式的性质与一元一次不等式的解法",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "key_points",
+      "类型": "字符串数组",
+      "含义": "支撑该学习内容的关键知识点、性质或方法",
+      "取值或格式": "JSON 数组；每项须能追溯到教材小节或单元",
+      "示例": "[\"不等式的性质1\", \"不等式的性质2\"]",
+      "为空时": "表示尚未整理要点"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "indicator_codes",
+      "类型": "字符串数组",
+      "含义": "对应的课程要求观测指标编号",
+      "取值或格式": "JSON 数组；取值须来自所选数据集",
+      "示例": "[\"T03I1\"]",
+      "为空时": "表示与课程要求尚未建立对应"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "requirements",
+      "类型": "对象数组",
+      "含义": "对应课程标准要求，含层级、原文与页码",
+      "取值或格式": "对象含 text/clause/level/evidence",
+      "示例": "{\"level\": \"掌握\", \"text\": \"能解数字系数的一元一次不等式\"}",
+      "为空时": "表示未匹配到课标条目，需人工确认"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "sources",
+      "类型": "对象数组",
+      "含义": "教材材料出处，含文件、小节、页码与原文",
+      "取值或格式": "对象含 document_id/section_id/page/quote",
+      "示例": "{\"page\": 4, \"quote\": \"不等式的性质1……\"}",
+      "为空时": "表示缺少教材出处"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "status",
+      "类型": "枚举",
+      "含义": "教师核对状态",
+      "取值或格式": "draft=草稿；needs_review=待复核；verified=已确认",
+      "示例": "needs_review",
+      "为空时": "默认草稿"
+    },
+    {
+      "数据表": "outline_items",
+      "字段": "review_warnings",
+      "类型": "字符串数组",
+      "含义": "自动核对发现的问题，供教师处理",
+      "取值或格式": "JSON 数组；问题描述",
+      "示例": "[\"教材第 4 页出处引文未通过核对\"]",
+      "为空时": "表示自动核对未发现问题"
+    },
+    {
+      "数据表": "outline_relations",
+      "字段": "source_item_key",
+      "类型": "字符串",
+      "含义": "联系的起点学习内容",
+      "取值或格式": "须存在于同一 run 的 item_key",
+      "示例": "T03I1",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "outline_relations",
+      "字段": "target_item_key",
+      "类型": "字符串",
+      "含义": "联系的终点学习内容",
+      "取值或格式": "须存在于同一 run 的 item_key，且不能与起点相同",
+      "示例": "T03I2",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "outline_relations",
+      "字段": "relation_type",
+      "类型": "枚举",
+      "含义": "联系类型",
+      "取值或格式": "prerequisite=先备；application=应用；parallel=并列；contrast=对比；other=其他",
+      "示例": "prerequisite",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "outline_relations",
+      "字段": "note",
+      "类型": "文本",
+      "含义": "联系的具体说明",
+      "取值或格式": "应写明前后内容及为什么有联系",
+      "示例": "教材先安排 11.1，后安排 11.2；解法以性质为基础",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "outline_relations",
+      "字段": "basis",
+      "类型": "文本",
+      "含义": "建立联系的依据",
+      "取值或格式": "课标条目、教材章节或推断说明",
+      "示例": "依据教材章节先后顺序",
+      "为空时": "表示依据未说明"
+    },
+    {
+      "数据表": "outline_relations",
+      "字段": "origin",
+      "类型": "枚举",
+      "含义": "联系生成方式",
+      "取值或格式": "rule=规则；ai=AI；manual=人工",
+      "示例": "rule",
+      "为空时": "默认 rule"
+    },
+    {
+      "数据表": "references",
+      "字段": "ref_id",
+      "类型": "字符串",
+      "含义": "出处编号",
+      "取值或格式": "R + 3 位序号",
+      "示例": "R001",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "references",
+      "字段": "kind",
+      "类型": "枚举",
+      "含义": "出处类型",
+      "取值或格式": "standard=课程标准；textbook=教材；requirement=课程要求",
+      "示例": "standard",
+      "为空时": "不允许为空"
+    },
+    {
+      "数据表": "references",
+      "字段": "page",
+      "类型": "整数",
+      "含义": "PDF 文件页号",
+      "取值或格式": "从 1 开始",
+      "示例": "63",
+      "为空时": "表示页码未确认"
+    },
+    {
+      "数据表": "references",
+      "字段": "printed_page",
+      "类型": "字符串",
+      "含义": "页脚印刷页码（正文页）",
+      "取值或格式": "数字字符串",
+      "示例": "56",
+      "为空时": "表示该页未识别到印刷页码"
+    },
+    {
+      "数据表": "references",
+      "字段": "quote",
+      "类型": "文本",
+      "含义": "用于核对的原文引文",
+      "取值或格式": "逐字摘录，不概括改写",
+      "示例": "②能解数字系数的一元一次不等式，并能在数轴上表示出解集；",
+      "为空时": "表示尚未提供引文"
+    },
+    {
+      "数据表": "references",
+      "字段": "verified",
+      "类型": "布尔",
+      "含义": "引文是否在所指页面逐字匹配",
+      "取值或格式": "true=通过；false=未通过",
+      "示例": "true",
+      "为空时": "默认 false，需人工核对"
+    }
+  ],
+  "generated_at": "2026-11-11T13:39:56+00:00"
+}

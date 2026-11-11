@@ -1,0 +1,677 @@
+[
+  {
+    "ref_id": "R001",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "①理解对顶角、余角、补角等概念，探索并掌握对顶角相等、同角（或等角）的余角相等、同角（或等角）的补角相等的性质。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R002",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.1 两条直线相交",
+    "page": 2,
+    "printed_page": null,
+    "quote": "具有这种位置关系的两个角，互为邻补角．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R003",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.1 两条直线相交",
+    "page": 2,
+    "printed_page": null,
+    "quote": "具有这种位置关系的两个角，互为对顶角．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R004",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.1 两条直线相交",
+    "page": 2,
+    "printed_page": null,
+    "quote": "对顶角相等．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R005",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "②理解垂线、垂线段等概念，能用三角板或量角器过一点画已知直线的垂线。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R006",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "④掌握基本事实：同一平面内，过一点有且只有一条直线与已知直线垂直。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R007",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "5理解点到直线的距离的意义，能度量点到直线的距离。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R008",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.2 两条直线垂直",
+    "page": 4,
+    "printed_page": null,
+    "quote": "两条直线互相垂直，其中的一条直线叫作另一条直线的垂线，它们的交点叫作垂足．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R009",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.2 两条直线垂直",
+    "page": 5,
+    "printed_page": null,
+    "quote": "在同一平面内，过一点有且只有一条直线与已知直线垂直．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R010",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.2 两条直线垂直",
+    "page": 6,
+    "printed_page": null,
+    "quote": "连接直线外一点与直线上各点的所有线段中，垂线段最短．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R011",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.2 两条直线垂直",
+    "page": 6,
+    "printed_page": null,
+    "quote": "直线外一点到这条直线的垂线段的长度，叫作点到直线的距离．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R012",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "6识别同位角、内错角、同旁内角。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R013",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.3 两条直线被第三条直线所截",
+    "page": 7,
+    "printed_page": null,
+    "quote": "具有这种位置关系的一对角叫作同位角．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R014",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.3 两条直线被第三条直线所截",
+    "page": 7,
+    "printed_page": null,
+    "quote": "具有这种位置关系的一对角叫作内错角．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R015",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.1 相交线 / 7.1.3 两条直线被第三条直线所截",
+    "page": 7,
+    "printed_page": null,
+    "quote": "具有这种位置关系的一对角叫作同旁内角．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R016",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "?理解平行线的概念。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R017",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "⑧掌握平行线基本事实I：过直线外一点有且只有一条直线与这条直线平行。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R018",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 72,
+    "printed_page": null,
+    "quote": "了解平行于同一条直线的两条直线平行。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R019",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.1 平行线的概念",
+    "page": 11,
+    "printed_page": null,
+    "quote": "在同一平面内，当直线犪，犫不相交时，我们说直线犪与犫互相平行（ｐａｒａｌｌｅｌ），记作“犪∥犫”．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R020",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.1 平行线的概念",
+    "page": 11,
+    "printed_page": null,
+    "quote": "在同一平面内，不重合的两条直线只有两种位置关系：相交与平行．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R021",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.1 平行线的概念",
+    "page": 12,
+    "printed_page": null,
+    "quote": "过直线外一点有且只有一条直线与这条直线平行．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R022",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.1 平行线的概念",
+    "page": 12,
+    "printed_page": null,
+    "quote": "如果两条直线都与第三条直线平行，那么这两条直线也互相平行．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R023",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "9掌握平行线基本事实Ⅱ：两条直线被第三条直线所截，如果同位角相等，那么这两条直线平行。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R024",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "0探索并证明平行线的判定定理：两条直线被第三条直线所截，如果内错角相等（或同旁内角互补），那么这两条直线平行。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R025",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.2 平行线的判定",
+    "page": 13,
+    "printed_page": null,
+    "quote": "两条直线被第三条直线所截，如果同位角相等，那么这两条直线平行．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R026",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.2 平行线的判定",
+    "page": 14,
+    "printed_page": null,
+    "quote": "两条直线被第三条直线所截，如果内错角相等，那么这两条直线平行．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R027",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.2 平行线的判定",
+    "page": 14,
+    "printed_page": null,
+    "quote": "两条直线被第三条直线所截，如果同旁内角互补，那么这两条直线平行．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R028",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "①掌握平行线的性质定理I：两条平行直线被第三条直线所截，同位角相等。*了解定理的证明（例74）。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R029",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 71,
+    "printed_page": null,
+    "quote": "探索并证明平行线的性质定理Ⅱ：两条平行直线被第三条直线所截，内错角相等（或同旁内角互补）。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R030",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.3 平行线的性质",
+    "page": 16,
+    "printed_page": null,
+    "quote": "两条平行直线被第三条直线所截，同位角相等．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R031",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.3 平行线的性质",
+    "page": 16,
+    "printed_page": null,
+    "quote": "两条平行直线被第三条直线所截，内错角相等．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R032",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.3 平行线的性质",
+    "page": 16,
+    "printed_page": null,
+    "quote": "两条平行直线被第三条直线所截，同旁内角互补．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R033",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.2 平行线 / 7.2.3 平行线的性质",
+    "page": 17,
+    "printed_page": null,
+    "quote": "前面我们学习了平行线的判定和性质，在解决问题时，经常需要把它们结合起来使用．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R034",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 75,
+    "printed_page": null,
+    "quote": "①通过具体实例认识平移，探索它的基本性质：一个图形和它经过平移所得的图形中，两组对应点的连线平行（或在同一条直线上）且相等。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I7"
+    ]
+  },
+  {
+    "ref_id": "R035",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 75,
+    "printed_page": null,
+    "quote": "②认识并欣赏平移在自然界和现实生活中的应用。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I7"
+    ]
+  },
+  {
+    "ref_id": "R036",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 75,
+    "printed_page": null,
+    "quote": "③运用图形的轴对称、旋转、平移进行图案设计。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I7"
+    ]
+  },
+  {
+    "ref_id": "R037",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.4 平移",
+    "page": 26,
+    "printed_page": null,
+    "quote": "一般地，在平面内，将一个图形按某一方向移动一定的距离，这样的图形运动叫作平移（ｔｒａｎｓｌａｔｉｏｎ）．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I7"
+    ]
+  },
+  {
+    "ref_id": "R038",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.4 平移",
+    "page": 27,
+    "printed_page": null,
+    "quote": "新图形与原图形的形状和大小完全相同．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I7"
+    ]
+  },
+  {
+    "ref_id": "R039",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.4 平移",
+    "page": 27,
+    "printed_page": null,
+    "quote": "连接各组对应点的线段平行（或在同一条直线上）且相等．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I7"
+    ]
+  },
+  {
+    "ref_id": "R040",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.4 平移",
+    "page": 28,
+    "printed_page": null,
+    "quote": "利用平移，人们可以设计出美丽的图案，许多装饰图案就是利用平移设计的（图７．４６）．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I7"
+    ]
+  },
+  {
+    "ref_id": "R041",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 74,
+    "printed_page": null,
+    "quote": "②结合具体实例，会区分命题的条件和结论",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I8"
+    ]
+  },
+  {
+    "ref_id": "R042",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 74,
+    "printed_page": null,
+    "quote": "④了解反例的作用",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I8"
+    ]
+  },
+  {
+    "ref_id": "R043",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线",
+    "page": 1,
+    "printed_page": null,
+    "quote": "在本章中，我们还将学习通过简单的推理得出数学结论的方法，逐步养成言之有据的思考习惯．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I8"
+    ]
+  },
+  {
+    "ref_id": "R044",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.4 平移",
+    "page": 35,
+    "printed_page": null,
+    "quote": "什么是命题？如何判断一个命题是正确的还是错误的？请结合具体例子说明．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I8"
+    ]
+  },
+  {
+    "ref_id": "R045",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第七章 相交线与平行线 / 7.4 平移",
+    "page": 38,
+    "printed_page": null,
+    "quote": "指出下列命题的题设和结论，并判断它们是正确的还是错误的．如果是错误的，举出一个反例．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I8"
+    ]
+  }
+]

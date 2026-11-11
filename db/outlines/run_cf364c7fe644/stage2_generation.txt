@@ -1,0 +1,546 @@
+{
+  "scope_note": "本结果仅梳理输入课本中实际出现的实数与不等式内容；课标“图形与几何”部分在输入课本切片中无对应小节，故不纳入条目。输入未提供指标编号，各条 indicator_codes 为空。主题编码：T01 数与式—实数；T02 方程与不等式—不等式。",
+  "items": [
+    {
+      "item_key": "T01I1",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "平方根与算术平方根",
+      "key_points": [
+        "平方根定义：若一个数x的平方等于a，则x叫作a的平方根或二次方根，求平方根的运算叫开平方",
+        "平方与开平方互为逆运算",
+        "正数有两个平方根且互为相反数，0的平方根是0，负数没有平方根",
+        "正数a的正的平方根叫作算术平方根，0的算术平方根是0",
+        "会用计算器求算术平方根，能用有理数估计√2等无理数的大致范围"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "了解平方根、算术平方根、立方根的概念，会用根号表示数的平方根、算术平方根、立方根。",
+          "clause": "④",
+          "level": "了解、会",
+          "standard_page": 62,
+          "quote": "④了解平方根、算术平方根、立方根的概念，会用根号表示数的\n平方根、算术平方根、立方根。"
+        },
+        {
+          "text": "了解乘方与开方互为逆运算，会用平方运算求百以内完全平方数的平方根，会用计算器计算平方根。",
+          "clause": "③",
+          "level": "了解、会",
+          "standard_page": 62,
+          "quote": "③了解乘方与开方互为逆运算，会用平方运算求百以内完全平方\n数的平方根，会用立方运算求千以内完全立方数（及对应的负整数）\n的立方根，会用计算器计算平方根和立方根。"
+        },
+        {
+          "text": "能用有理数估计一个无理数的大致范围。",
+          "clause": "6",
+          "level": "能",
+          "standard_page": 62,
+          "quote": "6能用有理数估计一个无理数的大致范围。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 2,
+          "quote": "平方根（ｓｑｕａｒｅｒｏｏｔ）或二次方根．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 4,
+          "quote": "正数犪有两个平方根"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p002_s003",
+          "page": 5,
+          "quote": "事实上，槡２＝１．４１４２１３５６２３７３…，它是一个无限不循环小数．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I2",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "立方根与开立方",
+      "key_points": [
+        "立方根定义：若一个数x的立方等于a，则x叫作a的立方根或三次方根，求立方根的运算叫开立方",
+        "开立方与立方互为逆运算",
+        "正数的立方根是正数，负数的立方根是负数，0的立方根是0",
+        "会用三次根号表示立方根，根指数3不能省略",
+        "会用计算器求立方根或近似值，并估计立方根所在范围"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "了解立方根的概念，会用根号表示数的立方根。",
+          "clause": "④",
+          "level": "了解、会",
+          "standard_page": 62,
+          "quote": "④了解平方根、算术平方根、立方根的概念，会用根号表示数的\n平方根、算术平方根、立方根。"
+        },
+        {
+          "text": "了解乘方与开方互为逆运算，会用立方运算求千以内完全立方数（及对应的负整数）的立方根，会用计算器计算立方根。",
+          "clause": "③",
+          "level": "了解、会",
+          "standard_page": 62,
+          "quote": "③了解乘方与开方互为逆运算，会用平方运算求百以内完全平方\n数的平方根，会用立方运算求千以内完全立方数（及对应的负整数）\n的立方根，会用计算器计算平方根和立方根。"
+        },
+        {
+          "text": "能用有理数估计一个无理数的大致范围。",
+          "clause": "6",
+          "level": "能",
+          "standard_page": 62,
+          "quote": "6能用有理数估计一个无理数的大致范围。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p010_s004",
+          "page": 10,
+          "quote": "立方根（ｃｕｂｅｒｏｏｔ）或三次方根．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p010_s004",
+          "page": 10,
+          "quote": "正数的立方根是正数，"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p010_s004",
+          "page": 12,
+          "quote": "很多有理数的立方根（如３槡２，３槡３，３槡４等）是无限不循环小数"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T01I3",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "无理数、实数及其简单运算",
+      "key_points": [
+        "有理数可写成有限小数或无限循环小数，无限不循环小数叫作无理数",
+        "有理数和无理数统称实数，实数可按有理数/无理数或正实数/0/负实数分类",
+        "实数与数轴上的点一一对应，可用数轴表示实数并比较大小",
+        "实数的相反数、绝对值意义与有理数一致",
+        "实数可进行加减乘除乘方运算，正数及0可开平方，任意实数可开立方，有理数运算律适用",
+        "实数近似计算中可先用近似有限小数代替无理数，最后按要求四舍五入"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "了解无理数和实数，知道实数由有理数和无理数组成，了解实数与数轴上的点一一对应。",
+          "clause": "①",
+          "level": "了解",
+          "standard_page": 61,
+          "quote": "①了解无理数和实数，知道实数由有理数和无理数组成，了解实\n数与数轴上的点一一对应。"
+        },
+        {
+          "text": "能用数轴上的点表示实数，能比较实数的大小。",
+          "clause": "②",
+          "level": "能",
+          "standard_page": 62,
+          "quote": "②能用数轴上的点表示实数，能比较实数的大小。"
+        },
+        {
+          "text": "能借助数轴理解相反数和绝对值的意义，会求实数的相反数和绝对值。",
+          "clause": "③",
+          "level": "理解、会",
+          "standard_page": 62,
+          "quote": "③能借助数轴理解相反数和绝对值的意义，会求实数的相反数和\n绝对值。"
+        },
+        {
+          "text": "了解近似数，在解决实际问题中，能用计算器进行近似计算，会按问题的要求进行简单的近似计算（例65）。",
+          "clause": "⑦",
+          "level": "了解、会",
+          "standard_page": 62,
+          "quote": "⑦了解近似数，在解决实际问题中，能用计算器进行近似计算，\n会按问题的要求进行简单的近似计算（例65）。"
+        },
+        {
+          "text": "会用二次根式（根号下仅限于数）的加、减、乘、除运算法则进行简单的四则运算。",
+          "clause": "⑧",
+          "level": "会",
+          "standard_page": 62,
+          "quote": "⑧了解二次根式、最简二次根式的概念，了解二次根式（根号下\n仅限于数）加、减、乘、除运算法则，会用它们进行简单的四则\n运算。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 14,
+          "quote": "无限不循环小数又叫作无理数（ｉｒｒａｔｉｏｎａｌｎｕｍｂｅｒ）．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 15,
+          "quote": "有理数和无理数统称实数（ｒｅａｌｎｕｍｂｅｒ）．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 16,
+          "quote": "数轴上的每一个点都表示一个实数"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 17,
+          "quote": "有理数关于相反数和绝对值的意义同样适用于实数．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_3c131d77_62db59",
+          "section_id": "doc_3c131d77_62db59_p014_s005",
+          "page": 18,
+          "quote": "一般先用近似有限小数"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T02I1",
+      "theme_code": "T02",
+      "item_type": "knowledge_point",
+      "content": "不等式及其解集",
+      "key_points": [
+        "用符号“＜”“＞”或“≠”表示不等关系的式子叫作不等式",
+        "能根据具体问题中的数量关系列出不等式",
+        "使不等式成立的未知数的值叫作不等式的解",
+        "一个含有未知数的不等式的所有解组成这个不等式的解集",
+        "求不等式解集的过程叫作解不等式，解集可在数轴上表示"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "结合具体问题，了解不等式的意义。",
+          "clause": "①",
+          "level": "了解",
+          "standard_page": 63,
+          "quote": "①结合具体问题，了解不等式的意义，探索不等式的基本性质。"
+        },
+        {
+          "text": "能根据具体问题中的数量关系，列出一元一次不等式，解决简单的问题。",
+          "clause": "③",
+          "level": "能",
+          "standard_page": 63,
+          "quote": "③能根据具体问题中的数量关系，列出一元一次不等式，解决简\n单的问题。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p002_s004",
+          "page": 2,
+          "quote": "像①②这样用符号“＜”或“＞”表示不等关系的式子，叫作不等式"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p002_s004",
+          "page": 3,
+          "quote": "我们把使不等式成立的未知数的值叫作不等式的解．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p002_s004",
+          "page": 3,
+          "quote": "组成这个不等式的解集．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p002_s004",
+          "page": 3,
+          "quote": "求不等式的解集的过程叫作解不等式．"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T02I2",
+      "theme_code": "T02",
+      "item_type": "knowledge_point",
+      "content": "不等式的性质",
+      "key_points": [
+        "基本事实：交换不等式两边，不等号方向改变；不等关系可以传递",
+        "不等式性质1：两边加或减同一个数或式子，不等号方向不变",
+        "不等式性质2：两边乘或除以同一个正数，不等号方向不变",
+        "不等式性质3：两边乘或除以同一个负数，不等号方向改变",
+        "能利用不等式性质进行变形并解简单不等式，解集可在数轴上表示"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "探索不等式的基本性质。",
+          "clause": "①",
+          "level": "探索",
+          "standard_page": 63,
+          "quote": "①结合具体问题，了解不等式的意义，探索不等式的基本性质。"
+        },
+        {
+          "text": "能用不等式的基本性质对不等式进行变形。",
+          "clause": "学业要求",
+          "level": "能",
+          "standard_page": 67,
+          "quote": "能用不等式的基本性质对不等式进行变形；"
+        },
+        {
+          "text": "能解数字系数的一元一次不等式，并能在数轴上表示出解集。",
+          "clause": "②",
+          "level": "能",
+          "standard_page": 63,
+          "quote": "②能解数字系数的一元一次不等式，并能在数轴上表示出解集；\n会用数轴确定两个一元一次不等式组成的不等式组的解集。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p004_s005",
+          "page": 5,
+          "quote": "不等式的性质１　不等式两边加（或减）同一\n个数（或式子），不等号的方向不变．"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p004_s005",
+          "page": 6,
+          "quote": "不等式的性质２　不等式两边乘（或除以）同一个正数"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p004_s005",
+          "page": 6,
+          "quote": "不等式的性质３　不等式两边乘（或除以）同一个负数"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p004_s005",
+          "page": 7,
+          "quote": "与解方程类似，解不等式要借助不等式的性质，将不等式逐步化为狓＞犿"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T02I3",
+      "theme_code": "T02",
+      "item_type": "knowledge_point",
+      "content": "一元一次不等式的解法及应用",
+      "key_points": [
+        "一元一次不等式：只含有一个未知数，含有未知数的式子都是整式，未知数的次数是1",
+        "解一元一次不等式的步骤与解一元一次方程类似，依据是不等式的性质",
+        "解不等式要将不等式逐步化为x＜m、x≤m、x＞m或x≥m的形式",
+        "解集可在数轴上表示，系数化为1时注意乘除负数改变不等号方向",
+        "能用一元一次不等式解决简单实际问题，经历找出不等关系、列不等式、求解、检验的过程"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "能解数字系数的一元一次不等式，并能在数轴上表示出解集。",
+          "clause": "②",
+          "level": "能",
+          "standard_page": 63,
+          "quote": "②能解数字系数的一元一次不等式，并能在数轴上表示出解集；\n会用数轴确定两个一元一次不等式组成的不等式组的解集。"
+        },
+        {
+          "text": "能根据具体问题中的数量关系，列出一元一次不等式，解决简单的问题。",
+          "clause": "③",
+          "level": "能",
+          "standard_page": 63,
+          "quote": "③能根据具体问题中的数量关系，列出一元一次不等式，解决简\n单的问题。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p012_s006",
+          "page": 12,
+          "quote": "未知数的次数是１的不等式，叫作一元一次不等式"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p012_s006",
+          "page": 12,
+          "quote": "一般地，利用不等式的性质，采取与解一元一次方程类似的步骤，就可以"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p012_s006",
+          "page": 13,
+          "quote": "解一元一次不等式，则要依据不等式的性质，将不等式逐步化为狓＜犿"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p012_s006",
+          "page": 14,
+          "quote": "可以把实际问题转化为数学问题"
+        }
+      ],
+      "review_notes": []
+    },
+    {
+      "item_key": "T02I4",
+      "theme_code": "T02",
+      "item_type": "knowledge_point",
+      "content": "一元一次不等式组及其解集",
+      "key_points": [
+        "几个含有同一个未知数的一元一次不等式合起来组成一元一次不等式组",
+        "不等式组中各不等式解集的公共部分叫作不等式组的解集",
+        "解不等式组就是求各不等式解集的公共部分，利用数轴可直观确定",
+        "不等式组可能无解；可求满足不等式组的整数解",
+        "能用一元一次不等式组解决简单实际问题"
+      ],
+      "indicator_codes": [],
+      "requirements": [
+        {
+          "text": "会用数轴确定两个一元一次不等式组成的不等式组的解集。",
+          "clause": "②",
+          "level": "会",
+          "standard_page": 63,
+          "quote": "②能解数字系数的一元一次不等式，并能在数轴上表示出解集；\n会用数轴确定两个一元一次不等式组成的不等式组的解集。"
+        },
+        {
+          "text": "能根据具体问题中的数量关系，列出一元一次不等式，解决简单的问题。",
+          "clause": "③",
+          "level": "能",
+          "standard_page": 63,
+          "quote": "③能根据具体问题中的数量关系，列出一元一次不等式，解决简\n单的问题。"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p019_s007",
+          "page": 19,
+          "quote": "一元一次不等式组（ｓｙｓｔｅｍｏｆｌｉｎｅａｒｉｎｅｑｕａｌｉｔｉｅｓｗｉｔｈｏｎｅｕｎｋｎｏｗｎ）"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p019_s007",
+          "page": 20,
+          "quote": "一般地，几个不等式的解集的公共部分，叫作由它们所组成的不等式组的"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p019_s007",
+          "page": 20,
+          "quote": "利用数轴可以直观"
+        },
+        {
+          "kind": "textbook",
+          "material_set_id": "set_d2790a62db59",
+          "document_id": "doc_ccde81c9_62db59",
+          "section_id": "doc_ccde81c9_62db59_p019_s007",
+          "page": 21,
+          "quote": "解一元一次不等式组时，一般先求出其中各不等式的解集，再求出这"
+        }
+      ],
+      "review_notes": []
+    }
+  ],
+  "relations": [
+    {
+      "source_key": "T01I1",
+      "target_key": "T01I2",
+      "relation_type": "analogy",
+      "note": "平方根与立方根均通过逆运算引入，课本由平方的逆运算类比研究立方的逆运算。",
+      "basis": "课本8.2开头：在上一节，我们通过研究平方的逆运算学习了平方根，本节来研究立方的逆运算。"
+    },
+    {
+      "source_key": "T01I1",
+      "target_key": "T01I3",
+      "relation_type": "prerequisite",
+      "note": "平方根、算术平方根及开平方运算为无理数和实数的引入提供实例。",
+      "basis": "课本8.3以槡２等无限不循环小数引入无理数，并以槡２在数轴上表示实数。"
+    },
+    {
+      "source_key": "T01I2",
+      "target_key": "T01I3",
+      "relation_type": "prerequisite",
+      "note": "立方根及开立方运算也是认识无理数和实数运算的基础之一。",
+      "basis": "课本8.3指出很多数的平方根、立方根是无限不循环小数，并讨论实数的开平方、开立方运算。"
+    },
+    {
+      "source_key": "T02I1",
+      "target_key": "T02I2",
+      "relation_type": "prerequisite",
+      "note": "理解不等式的解与解集后，才能依据不等式性质研究解不等式。",
+      "basis": "课本11.1.2由比较复杂的不等式不能直接得出解集，引入讨论怎样解不等式，并提出解不等式需要依据不等式的性质。"
+    },
+    {
+      "source_key": "T02I2",
+      "target_key": "T02I3",
+      "relation_type": "prerequisite",
+      "note": "一元一次不等式的解法依据不等式性质，步骤类比解一元一次方程。",
+      "basis": "课本11.2指出利用不等式的性质，采取与解一元一次方程类似的步骤求一元一次不等式的解集。"
+    },
+    {
+      "source_key": "T02I3",
+      "target_key": "T02I4",
+      "relation_type": "prerequisite",
+      "note": "不等式组的解集是各不等式解集的公共部分，需要先解每个一元一次不等式。",
+      "basis": "课本11.3指出解一元一次不等式组时，一般先求出其中各不等式的解集，再求出这些解集的公共部分。"
+    },
+    {
+      "source_key": "T02I1",
+      "target_key": "T02I3",
+      "relation_type": "prerequisite",
+      "note": "不等式的意义、解和解集是列一元一次不等式并求解实际问题的基础。",
+      "basis": "课本11.1.1先学习不等式、不等式的解和解集，11.2在此基础上研究一元一次不等式的解法和应用。"
+    }
+  ]
+}

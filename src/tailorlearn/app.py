@@ -10,6 +10,8 @@ import streamlit as st
 
 import tailorlearn.db as database_module
 import tailorlearn.learning_data_ui as learning_data_ui_module
+import tailorlearn.outline as outline_module
+import tailorlearn.outline_ui as outline_ui_module
 from tailorlearn.analytics import AnalyticsService
 from tailorlearn.analytics_ui import (
     render_class_analysis_page,
@@ -20,8 +22,6 @@ from tailorlearn.extraction import page_as_png
 from tailorlearn.ingest import IngestionService
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
-from tailorlearn.outline import OutlineService
-from tailorlearn.outline_ui import render_outline_page
 from tailorlearn.paths import AppPaths
 from tailorlearn.providers import ProviderStore
 from tailorlearn.student_diagnosis import StudentDiagnosisService
@@ -36,12 +36,20 @@ from tailorlearn.ui import (
 
 _REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
 _LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
+_OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
+_OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
 if (
     getattr(database_module, "REPOSITORY_API_VERSION", None)
     != _REPOSITORY_API_VERSION
 ):
     database_module = importlib.reload(database_module)
 Repository = database_module.Repository
+if (
+    getattr(outline_module, "OUTLINE_SERVICE_VERSION", None)
+    != _OUTLINE_SERVICE_API_VERSION
+):
+    outline_module = importlib.reload(outline_module)
+OutlineService = outline_module.OutlineService
 if (
     getattr(learning_data_ui_module, "LEARNING_DATA_UI_VERSION", None)
     != _LEARNING_DATA_UI_API_VERSION
@@ -50,6 +58,12 @@ if (
 render_answer_anomalies = learning_data_ui_module.render_answer_anomalies
 render_data_type_page = learning_data_ui_module.render_data_type_page
 render_dataset_context = learning_data_ui_module.render_dataset_context
+if (
+    getattr(outline_ui_module, "OUTLINE_UI_VERSION", None)
+    != _OUTLINE_UI_API_VERSION
+):
+    outline_ui_module = importlib.reload(outline_ui_module)
+render_outline_page = outline_ui_module.render_outline_page
 
 
 st.set_page_config(
@@ -58,7 +72,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-11-content-height-learning-tables"
+_APP_SERVICES_CACHE_VERSION = "2026-11-11-outline-history-state-fix"
 
 
 @st.cache_resource

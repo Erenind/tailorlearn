@@ -1,0 +1,439 @@
+[
+  {
+    "ref_id": "R001",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 62,
+    "printed_page": null,
+    "quote": "了解平方根、算术平方根、立方根的概念，会用根号表示数的平方根、算术平方根、立方根。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I1",
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R002",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 62,
+    "printed_page": null,
+    "quote": "了解乘方与开方互为逆运算，会用平方运算求百以内完全平方数的平方根，会用立方运算求千以内完全立方数（及对应的负整数）的立方根，会用计算器计算平方根和立方根。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I1",
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R003",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 2,
+    "printed_page": null,
+    "quote": "如果一个数狓的平方等于犪，即狓２＝犪，那么这个数狓叫作犪的平方根（ｓｑｕａｒｅｒｏｏｔ）或二次方根．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R004",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 2,
+    "printed_page": null,
+    "quote": "求一个数的平方根的运算，叫作开平方．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R005",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 2,
+    "printed_page": null,
+    "quote": "平方与开平方互为逆运算",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R006",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 3,
+    "printed_page": null,
+    "quote": "正数有两个平方根，它们互为相反数．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R007",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 3,
+    "printed_page": null,
+    "quote": "负数没有平方根．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I1"
+    ]
+  },
+  {
+    "ref_id": "R008",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 62,
+    "printed_page": null,
+    "quote": "会用根号表示数的平方根、算术平方根、立方根。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R009",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 62,
+    "printed_page": null,
+    "quote": "能用有理数估计一个无理数的大致范围。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R010",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 4,
+    "printed_page": null,
+    "quote": "正数犪有两个平方根，其中正的平方根槡犪叫作犪的算术平方根．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R011",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 4,
+    "printed_page": null,
+    "quote": "规定：０的算术平方根是０．０的算术平方根也记为槡０．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R012",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 5,
+    "printed_page": null,
+    "quote": "１＜槡２＜２；",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R013",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.1 平方根",
+    "page": 5,
+    "printed_page": null,
+    "quote": "事实上，槡２＝１．４１４２１３５６２３７３…，它是一个无限不循环小数．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I2"
+    ]
+  },
+  {
+    "ref_id": "R014",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.2 立方根",
+    "page": 10,
+    "printed_page": null,
+    "quote": "如果一个数狓的立方等于犪，即狓３＝犪，那么这个数狓叫作犪的立方根（ｃｕｂｅｒｏｏｔ）或三次方根．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R015",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.2 立方根",
+    "page": 10,
+    "printed_page": null,
+    "quote": "求一个数的立方根的运算，叫作开立方．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R016",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.2 立方根",
+    "page": 10,
+    "printed_page": null,
+    "quote": "正数的立方根是正数，负数的立方根是负数，０的立方根是０．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I3"
+    ]
+  },
+  {
+    "ref_id": "R017",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 61,
+    "printed_page": null,
+    "quote": "了解无理数和实数，知道实数由有理数和无理数组成",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R018",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 65,
+    "printed_page": null,
+    "quote": "了解无理数和实数，知道实数由有理数和无理数组成，感悟数的扩充；",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R019",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.3 实数及其简单运算",
+    "page": 14,
+    "printed_page": null,
+    "quote": "无限不循环小数又叫作无理数（ｉｒｒａｔｉｏｎａｌｎｕｍｂｅｒ）．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R020",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.3 实数及其简单运算",
+    "page": 15,
+    "printed_page": null,
+    "quote": "有理数和无理数统称实数（ｒｅａｌｎｕｍｂｅｒ）．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I4"
+    ]
+  },
+  {
+    "ref_id": "R021",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 62,
+    "printed_page": null,
+    "quote": "能用数轴上的点表示实数，能比较实数的大小。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R022",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 62,
+    "printed_page": null,
+    "quote": "能借助数轴理解相反数和绝对值的意义，会求实数的相反数和绝对值。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R023",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.3 实数及其简单运算",
+    "page": 16,
+    "printed_page": null,
+    "quote": "因此，实数与数轴上的点是一一对应的．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R024",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.3 实数及其简单运算",
+    "page": 17,
+    "printed_page": null,
+    "quote": "数犪的相反数是－犪．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R025",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.3 实数及其简单运算",
+    "page": 17,
+    "printed_page": null,
+    "quote": "一个实数的绝对值就是它在数轴上的对应点与原点的距离．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I5"
+    ]
+  },
+  {
+    "ref_id": "R026",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 68,
+    "printed_page": null,
+    "quote": "会进行实数的运算；",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R027",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 62,
+    "printed_page": null,
+    "quote": "了解近似数，在解决实际问题中，能用计算器进行近似计算，会按问题的要求进行简单的近似计算（例65）。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R028",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.3 实数及其简单运算",
+    "page": 18,
+    "printed_page": null,
+    "quote": "有理数的运算法则及运算性质等同样适用．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  },
+  {
+    "ref_id": "R029",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "相交线与平行线",
+    "section": "第八章 实数 / 8.3 实数及其简单运算",
+    "page": 18,
+    "printed_page": null,
+    "quote": "最后对计算结果四舍五入．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T01I6"
+    ]
+  }
+]

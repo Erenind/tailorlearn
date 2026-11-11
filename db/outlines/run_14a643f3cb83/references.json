@@ -1,0 +1,242 @@
+[
+  {
+    "ref_id": "R001",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 63,
+    "printed_page": null,
+    "quote": "掌握等式的基本性质；能解一元一次方程和可化为一元一次方程的分式方程。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T02I1"
+    ]
+  },
+  {
+    "ref_id": "R002",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+    "page": 7,
+    "printed_page": null,
+    "quote": "等式的性质１　等式两边加（或减）同一个数（或式子），结果仍相等．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I1"
+    ]
+  },
+  {
+    "ref_id": "R003",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+    "page": 7,
+    "printed_page": null,
+    "quote": "利用等式的性质可以解方程．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I1"
+    ]
+  },
+  {
+    "ref_id": "R004",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第五章 一元一次方程 / 5.2 解一元一次方程",
+    "page": 19,
+    "printed_page": null,
+    "quote": "解一元一次方程的一般步骤包括：去分母、去括号、移项、合并同类项、系数化为１等．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I1"
+    ]
+  },
+  {
+    "ref_id": "R005",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第五章 一元一次方程 / 0.52 狓－（1－0.52）狓＝80. / 5.1.2 等式的性质",
+    "page": 8,
+    "printed_page": null,
+    "quote": "一般地，从方程解出未知数的值以后，通常需要代入原方程检验，看这个值能否使方程左、右两边的值相等．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I1"
+    ]
+  },
+  {
+    "ref_id": "R006",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 63,
+    "printed_page": null,
+    "quote": "掌握消元法，能解二元一次方程组。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T02I2"
+    ]
+  },
+  {
+    "ref_id": "R007",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.1 代入消元法",
+    "page": 44,
+    "printed_page": null,
+    "quote": "这种将未知数的个数由多化少、逐一解决的思想，叫作消元思想．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I2"
+    ]
+  },
+  {
+    "ref_id": "R008",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.1 代入消元法",
+    "page": 45,
+    "printed_page": null,
+    "quote": "这种解二元一次方程组的方法叫作代入消元法，简称代入法．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I2"
+    ]
+  },
+  {
+    "ref_id": "R009",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.2 加减消元法",
+    "page": 49,
+    "printed_page": null,
+    "quote": "这种解二元一次方程组的方法叫作加减消元法，简称加减法．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I2"
+    ]
+  },
+  {
+    "ref_id": "R010",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第十章 二元一次方程组 / 10.2 消元———解二元一次方程组 / 10.2.2 加减消元法",
+    "page": 51,
+    "printed_page": null,
+    "quote": "解方程组的基本思想是消元．代入消元法和加减消元法是二元一次方程组的两种解法，它们都是通过消元使方程组转化为一元一次方程，只是消元的方法不同．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I2"
+    ]
+  },
+  {
+    "ref_id": "R011",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 63,
+    "printed_page": null,
+    "quote": "能根据现实情境理解方程的意义，能针对具体问题列出方程；理解方程解的意义，经历估计方程解的过程。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T02I3"
+    ]
+  },
+  {
+    "ref_id": "R012",
+    "kind": "课程标准",
+    "material": "义务教育数学课程标准（2022年版）",
+    "file": "课程标准_2022.pdf",
+    "section": "",
+    "page": 63,
+    "printed_page": null,
+    "quote": "能根据具体问题的实际意义，检验方程解的合理性。",
+    "verified": true,
+    "verification_note": "引文已回查课标该页文本",
+    "used_by": [
+      "T02I3"
+    ]
+  },
+  {
+    "ref_id": "R013",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+    "page": 25,
+    "printed_page": null,
+    "quote": "这一过程一般包括设、列、解、检、答等步骤，即设未知数、列方程、解方程、检验所得结果、确定答案．正确分析问题中的相等关系是列方程的基础．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I3"
+    ]
+  },
+  {
+    "ref_id": "R014",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第五章 一元一次方程 / 5.3 实际问题与一元一次方程",
+    "page": 28,
+    "printed_page": null,
+    "quote": "用方程解决实际问题时，不仅要注意解方程的过程是否正确，还要检验方程的解是否符合问题的实际意义．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I3"
+    ]
+  },
+  {
+    "ref_id": "R015",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第十章 二元一次方程组 / 10.1 二元一次方程组的概念",
+    "page": 41,
+    "printed_page": null,
+    "quote": "列方程要先找到相等关系．",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I3"
+    ]
+  },
+  {
+    "ref_id": "R016",
+    "kind": "教材",
+    "material": "七年级数学课本切片（B02）",
+    "file": "B06_相关资料切片.pdf",
+    "section": "第十章 二元一次方程组 / 10.3 实际问题与二元一次方程组",
+    "page": 57,
+    "printed_page": null,
+    "quote": "用方程组解决问题时，要根据问题中的数量关系列出方程组，求出方程组的解后，应进一步考虑它是否符合问题的实际意义。",
+    "verified": true,
+    "verification_note": "引文已回查教材该页文本",
+    "used_by": [
+      "T02I3"
+    ]
+  }
+]

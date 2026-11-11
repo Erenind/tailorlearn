@@ -5,6 +5,7 @@ import io
 import json
 import math
 import re
+import shutil
 import unicodedata
 import uuid
 from collections import Counter, defaultdict
@@ -29,10 +30,18 @@ from tailorlearn.models import (
 )
 from tailorlearn.paths import AppPaths
 
+OUTLINE_SERVICE_VERSION = "2026-11-11-two-stage-outline-v3"
+
 
 METHOD_LABELS = {
     "rule": "规则梳理",
     "ai": "AI 梳理",
+    "ai_two_stage_textbook": "AI 梳理 · 课本模式",
+    "ai_two_stage_theme": "AI 梳理 · 主题模式",
+}
+SCOPE_MODE_LABELS = {
+    "textbook": "课本模式",
+    "theme": "主题模式",
 }
 STATUS_LABELS = {
     OutlineItemStatus.DRAFT.value: "草稿",
@@ -2260,6 +2269,592 @@ class OutlineService:
     # ------------------------------------------------------------------
     # AI assistance
     # ------------------------------------------------------------------
+    def prepare_two_stage_scope(
+        self,
+        *,
+        mode: str,
+        standard_material_id: str,
+        standard_document_id: str,
+        textbook_material_ids: Sequence[str],
+        textbook_document_ids: Sequence[str] = (),
+        dataset_id: str | None = None,
+        theme_codes: Sequence[str] = (),
+    ) -> dict[str, Any]:
+        if mode not in SCOPE_MODE_LABELS:
+            raise ValueError("未知范围模式")
+        standard_material = self.repo.get_material_set(standard_material_id)
+        standard_document = self.repo.get_document(standard_document_id)
+        if (
+            standard_material is None
+            or standard_document is None
+            or standard_document["material_set_id"] != standard_material_id
+        ):
+            raise ValueError("找不到所选课程标准版本")
+        if not textbook_material_ids:
+            raise ValueError("请至少选择一本课本")
+
+        standard_sections = [
+            {
+                **section,
+                "material_set_id": standard_material_id,
+                "material_name": standard_material["name"],
+                "file_name": standard_document["file_name"],
+                "document_id": standard_document_id,
+            }
+            for section in self.repo.list_sections(standard_document_id)
+        ]
+        textbook_materials: list[dict[str, Any]] = []
+        textbook_directory: list[dict[str, Any]] = []
+        selected_document_ids = set(textbook_document_ids)
+        for material_id in textbook_material_ids:
+            material = self.repo.get_material_set(material_id)
+            if material is None or material["material_type"] != "textbook":
+                raise ValueError("所选课本材料不存在")
+            textbook_materials.append(
+                {
+                    "id": material["id"],
+                    "name": material["name"],
+                    "version": material["version"],
+                }
+            )
+            for document in self.repo.list_documents(material_id):
+                if mode == "textbook" and document["id"] not in selected_document_ids:
+                    continue
+                for section in self.repo.list_sections(document["id"]):
+                    textbook_directory.append(
+                        {
+                            "section_id": section["id"],
+                            "document_id": document["id"],
+                            "material_set_id": material_id,
+                            "material_name": material["name"],
+                            "file_name": document["file_name"],
+                            "title": section["title"],
+                            "path": section["path"],
+                            "level": section["level"],
+                            "page_start": section["page_start"],
+                            "page_end": section["page_end"],
+                        }
+                    )
+        if mode == "textbook" and not textbook_directory:
+            raise ValueError("请至少选择一个课本切片")
+
+        themes: list[dict[str, Any]] = []
+        dataset: dict[str, Any] | None = None
+        if mode == "theme":
+            if not dataset_id:
+                raise ValueError("主题模式需要选择学情数据集")
+            dataset = self.get_dataset(dataset_id)
+            if dataset is None:
+                raise ValueError("找不到学情数据集")
+            themes = [
+                theme
+                for theme in self.list_themes(dataset_id)
+                if not theme_codes or theme["theme_code"] in theme_codes
+            ]
+            if not theme_codes:
+                raise ValueError("请至少选择一个主题")
+            if not themes:
+                raise ValueError("所选主题不存在")
+
+        standard_directory = [
+            {
+                "section_id": section["id"],
+                "title": section["title"],
+                "path": section["path"],
+                "level": section["level"],
+                "page_start": section["page_start"],
+                "page_end": section["page_end"],
+            }
+            for section in standard_sections
+        ]
+        scope = {
+            "mode": mode,
+            "mode_label": SCOPE_MODE_LABELS[mode],
+            "dataset": dataset,
+            "themes": themes,
+            "standard": {
+                "material_set_id": standard_material["id"],
+                "material_name": standard_material["name"],
+                "version": standard_material["version"],
+                "document_id": standard_document["id"],
+                "file_name": standard_document["file_name"],
+                "directory": standard_directory,
+            },
+            "textbook": {
+                "materials": textbook_materials,
+                "directory": textbook_directory,
+            },
+            "boundary": {
+                "statement": (
+                    f"{SCOPE_MODE_LABELS[mode]}；课程标准"
+                    f"《{standard_material['name']}》第 {standard_material['version']} 版；"
+                    f"课本 {len(textbook_materials)} 本、目录项 "
+                    f"{len(textbook_directory)} 个"
+                    + (
+                        "；学情数据集"
+                        f"“{dataset['name']}”；主题 "
+                        + "、".join(
+                            f"{theme['theme_code']} {theme['theme_name']}"
+                            for theme in themes
+                        )
+                        if dataset is not None
+                        else "；不涉及学情数据"
+                    )
+                )
+            },
+            "created_at": utc_now(),
+        }
+        return scope
+
+    def _selection_prompt(self, scope: dict[str, Any]) -> str:
+        payload = {
+            "模式": scope["mode_label"],
+            "学情数据": (
+                {
+                    "数据集": scope["dataset"]["name"],
+                    "主题": scope["themes"],
+                }
+                if scope.get("dataset")
+                else "不涉及学情数据"
+            ),
+            "课程标准": {
+                "材料": scope["standard"]["material_name"],
+                "版本": scope["standard"]["version"],
+                "切片": scope["standard"]["file_name"],
+                "目录": scope["standard"]["directory"],
+            },
+            "课本": {
+                "材料": scope["textbook"]["materials"],
+                "目录": scope["textbook"]["directory"],
+            },
+        }
+        return f"""
+你是课程材料检索助手。请根据当前范围和目录，只选择后续生成“学习内容与要求清单”
+真正需要的课程标准目录项与课本目录项。不要返回正文，不要补充目录之外的 ID。
+
+选择依据：
+- 课本模式：以所选课本目录为主，结合课程标准目录确定需要读取的章节。
+- 主题模式：以所选主题、主题目标和观察指标为主，在所选课本的全部目录中检索。
+- 不要发送具体要求，也不要生成学习内容。
+
+输入：
+{json.dumps(payload, ensure_ascii=False, indent=2)}
+
+只输出合法 JSON，不要 Markdown：
+{{
+  "standard_section_ids": ["课标目录 section_id"],
+  "textbook_section_ids": ["课本目录 section_id"],
+  "reasons": ["简短选择理由"]
+}}
+""".strip()
+
+    def select_materials(
+        self,
+        *,
+        scope: dict[str, Any],
+        profile: ProviderProfile,
+    ) -> dict[str, Any]:
+        response, raw, _ = OpenAICompatibleClient(
+            profile
+        ).select_outline_sections(prompt=self._selection_prompt(scope))
+        standard_ids = {
+            item["section_id"] for item in scope["standard"]["directory"]
+        }
+        textbook_ids = {
+            item["section_id"] for item in scope["textbook"]["directory"]
+        }
+        selected_standard = [
+            item for item in response.standard_section_ids if item in standard_ids
+        ]
+        selected_textbook = [
+            item for item in response.textbook_section_ids if item in textbook_ids
+        ]
+        warnings = []
+        unknown_standard = len(selected_standard) != len(
+            response.standard_section_ids
+        )
+        unknown_textbook = len(selected_textbook) != len(
+            response.textbook_section_ids
+        )
+        if unknown_standard:
+            warnings.append("目录检索阶段返回了范围外的课程标准目录项，已忽略。")
+        if unknown_textbook:
+            warnings.append("目录检索阶段返回了范围外的课本目录项，已忽略。")
+        if not selected_standard and not selected_textbook:
+            raise ValueError("目录检索阶段未返回有效目录项")
+        return {
+            "standard_section_ids": list(dict.fromkeys(selected_standard)),
+            "textbook_section_ids": list(dict.fromkeys(selected_textbook)),
+            "reasons": response.reasons,
+            "warnings": warnings,
+            "raw_response": raw,
+        }
+
+    def _generation_prompt(
+        self,
+        *,
+        scope: dict[str, Any],
+        selection: dict[str, Any],
+        specific_requirements: str,
+    ) -> str:
+        standard_by_id = {
+            item["id"]: item for item in self.repo.list_sections(
+                scope["standard"]["document_id"]
+            )
+        }
+        standard_content = [
+            {
+                "section_id": section_id,
+                "title": standard_by_id[section_id]["title"],
+                "path": standard_by_id[section_id]["path"],
+                "page_start": standard_by_id[section_id]["page_start"],
+                "page_end": standard_by_id[section_id]["page_end"],
+                "content": standard_by_id[section_id]["content"],
+            }
+            for section_id in selection["standard_section_ids"]
+            if section_id in standard_by_id
+        ]
+        directory_by_id = {
+            item["section_id"]: item
+            for item in scope["textbook"]["directory"]
+        }
+        textbook_content = []
+        for section_id in selection["textbook_section_ids"]:
+            entry = directory_by_id.get(section_id)
+            if entry is None:
+                continue
+            section = self.repo.get_section(section_id)
+            if section is None:
+                continue
+            textbook_content.append(
+                {
+                    **entry,
+                    "content": section["content"],
+                }
+            )
+        payload = {
+            "模式": scope["mode_label"],
+            "学情数据": (
+                {
+                    "数据集": scope["dataset"]["name"],
+                    "主题": scope["themes"],
+                }
+                if scope.get("dataset")
+                else "不涉及学情数据"
+            ),
+            "课程标准内容": standard_content,
+            "课本内容": textbook_content,
+            "具体要求": specific_requirements.strip(),
+        }
+        return f"""
+你是初中数学课程与教学专家。请依据给出的具体内容生成格式化的学习内容梳理结果。
+只能引用输入中出现的课程标准页、课本章节和原文，不得补充输入之外的页码或引文。
+
+输出 JSON 必须包含：
+1. 学习内容清单；
+2. 每条学习内容对应的要求；
+3. 每条要求对应的课标来源；
+4. 每条学习内容的课本来源；
+5. 学习内容之间的联系。
+
+每个 item 必须包含 item_key、theme_code、item_type、content、key_points、
+indicator_codes、requirements、sources 和 review_notes。requirements 中每条包含
+text、clause、level、standard_page、quote；sources 中每条包含 kind、
+material_set_id、document_id、section_id、page、quote。relations 使用 item_key。
+具体要求可以为空，但不得因此虚构事实。只输出合法 JSON，不要 Markdown。
+
+输入：
+{json.dumps(payload, ensure_ascii=False, indent=2)}
+
+JSON 结构：
+{{
+  "scope_note": "范围说明",
+  "items": [
+    {{
+      "item_key": "T01I1",
+      "theme_code": "T01",
+      "item_type": "knowledge_point",
+      "content": "学习内容",
+      "key_points": ["要点"],
+      "indicator_codes": [],
+      "requirements": [
+        {{
+          "text": "要求",
+          "clause": "①",
+          "level": "掌握",
+          "standard_page": 63,
+          "quote": "逐字原文"
+        }}
+      ],
+      "sources": [
+        {{
+          "kind": "textbook",
+          "material_set_id": "set_xxx",
+          "document_id": "doc_xxx",
+          "section_id": "doc_xxx_p004_s005",
+          "page": 4,
+          "quote": "逐字原文"
+        }}
+      ],
+      "review_notes": []
+    }}
+  ],
+  "relations": [
+    {{
+      "source_key": "T01I1",
+      "target_key": "T01I2",
+      "relation_type": "prerequisite",
+      "note": "说明",
+      "basis": "依据"
+    }}
+  ]
+}}
+""".strip()
+
+    def generate_from_selection(
+        self,
+        *,
+        scope: dict[str, Any],
+        selection: dict[str, Any],
+        specific_requirements: str,
+        profile: ProviderProfile,
+        name: str | None = None,
+    ) -> dict[str, Any]:
+        mode = scope["mode"]
+        dataset_id = (
+            scope["dataset"]["id"]
+            if scope.get("dataset")
+            else self._ensure_textbook_scope_dataset()
+        )
+        run_id = f"run_{uuid.uuid4().hex[:12]}"
+        method = (
+            "ai_two_stage_textbook"
+            if mode == "textbook"
+            else "ai_two_stage_theme"
+        )
+        run_name = (
+            name
+            or f"{SCOPE_MODE_LABELS[mode]} · AI 两阶段梳理 · "
+            f"{datetime.now().astimezone().strftime('%m-%d %H:%M')}"
+        ).strip()
+        run_root = self.outlines_dir / run_id
+        run_root.mkdir(parents=True, exist_ok=True)
+        stage1_raw = selection.get("raw_response") or ""
+        (run_root / "stage1_selection.txt").write_text(
+            stage1_raw,
+            encoding="utf-8",
+        )
+        standard_by_id = {
+            item["id"]: item
+            for item in self.repo.list_sections(
+                scope["standard"]["document_id"]
+            )
+        }
+        textbook_by_id = {
+            item["section_id"]: item
+            for item in scope["textbook"]["directory"]
+        }
+        selected_standard = [
+            {
+                **standard_by_id[section_id],
+                "material_set_id": scope["standard"]["material_set_id"],
+                "material_name": scope["standard"]["material_name"],
+                "file_name": scope["standard"]["file_name"],
+                "document_id": scope["standard"]["document_id"],
+            }
+            for section_id in selection["standard_section_ids"]
+            if section_id in standard_by_id
+        ]
+        selected_textbook = []
+        for section_id in selection["textbook_section_ids"]:
+            entry = textbook_by_id.get(section_id)
+            section = self.repo.get_section(section_id)
+            if entry is None or section is None:
+                continue
+            selected_textbook.append({**entry, "content": section["content"]})
+        scope = {
+            **scope,
+            "standard": {
+                **scope["standard"],
+                "sections": selected_standard,
+            },
+            "textbook": {
+                **scope["textbook"],
+                "sections": selected_textbook,
+                "material_set_id": (
+                    selected_textbook[0]["material_set_id"]
+                    if selected_textbook
+                    else (
+                        scope["textbook"]["materials"][0]["id"]
+                        if scope["textbook"]["materials"]
+                        else ""
+                    )
+                ),
+                "material_name": (
+                    selected_textbook[0]["material_name"]
+                    if selected_textbook
+                    else " / ".join(
+                        item["name"]
+                        for item in scope["textbook"]["materials"]
+                    )
+                ),
+            },
+        }
+        prompt = self._generation_prompt(
+            scope=scope,
+            selection=selection,
+            specific_requirements=specific_requirements,
+        )
+        client = OpenAICompatibleClient(profile)
+        draft, raw_response, _ = client.draft_outline(prompt=prompt)
+        (run_root / "stage2_generation.txt").write_text(
+            raw_response,
+            encoding="utf-8",
+        )
+        items, relations = self.ai_items(scope, draft, profile)
+        for ordinal, item in enumerate(items, start=1):
+            item.id = f"{run_id}_{item.item_key}"
+            item.run_id = run_id
+            item.ordinal = ordinal
+        items = self.validate_items(scope, items)
+        key_to_item = {item.item_key: item for item in items}
+        for relation in relations:
+            source = key_to_item.get(relation.source_item_key)
+            target = key_to_item.get(relation.target_item_key)
+            if source is None or target is None:
+                continue
+            relation.source_item_id = source.id
+            relation.target_item_id = target.id
+            relation.run_id = run_id
+        relations = [
+            relation
+            for relation in relations
+            if relation.source_item_id and relation.target_item_id
+        ]
+        scope = {
+            **scope,
+            "dataset": (
+                {
+                    "id": scope["dataset"]["id"],
+                    "name": scope["dataset"]["name"],
+                    "description": scope["dataset"].get("description") or "",
+                }
+                if scope.get("dataset")
+                else {
+                    "id": dataset_id,
+                    "name": "课本模式",
+                    "description": "不涉及学情数据",
+                }
+            ),
+            "selection": {
+                "standard_section_ids": selection["standard_section_ids"],
+                "textbook_section_ids": selection["textbook_section_ids"],
+                "reasons": selection.get("reasons", []),
+                "warnings": selection.get("warnings", []),
+            },
+            "specific_requirements": specific_requirements.strip(),
+            "workflow": [
+                {
+                    "stage": "范围准备与目录提交",
+                    "detail": scope["boundary"]["statement"],
+                },
+                {
+                    "stage": "目录检索阶段",
+                    "detail": (
+                        "选定课程标准目录 "
+                        f"{len(selection['standard_section_ids'])} 项、"
+                        "课本目录 "
+                        f"{len(selection['textbook_section_ids'])} 项"
+                    ),
+                },
+                {
+                    "stage": "内容提取阶段",
+                    "detail": "已从本地读取目录检索阶段选中的具体内容",
+                },
+                {
+                    "stage": "结构化生成阶段",
+                    "detail": "已生成学习内容、要求、来源和联系",
+                },
+                {
+                    "stage": "结果校验与保存",
+                    "detail": f"已保存 {len(items)} 条学习内容",
+                },
+            ],
+        }
+        raw_path = str(
+            (run_root / "stage2_generation.txt").relative_to(self.paths.db_dir)
+        )
+        self.repo.create_outline_run(
+            run_id=run_id,
+            dataset_id=dataset_id,
+            name=run_name,
+            method=method,
+            scope=scope,
+            boundary_note=scope["boundary"]["statement"],
+            status=(
+                OutlineItemStatus.NEEDS_REVIEW.value
+                if any(item.review_warnings for item in items)
+                else OutlineItemStatus.DRAFT.value
+            ),
+            ai_vendor=profile.vendor_name,
+            ai_base_url=profile.base_url,
+            ai_model=profile.model,
+            raw_response_path=raw_path,
+            notes="AI 两阶段梳理：先选目录，再读取正文并结构化输出。",
+        )
+        self.repo.save_outline_items(
+            run_id=run_id,
+            items=items,
+            change_source="ai_two_stage",
+        )
+        self.repo.save_outline_relations(
+            run_id=run_id,
+            relations=relations,
+            origin="ai",
+        )
+        self.repo.update_outline_run(
+            run_id,
+            item_count=len(items),
+            relation_count=len(relations),
+        )
+        self.write_artifacts(run_id)
+        run = self.repo.get_outline_run(run_id)
+        assert run is not None
+        return {"run": run, "items": items, "relations": relations}
+
+    def _ensure_textbook_scope_dataset(self) -> str:
+        dataset_id = "lds_outline_textbook_scope"
+        now = utc_now()
+        with self.repo.connect() as connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO learning_datasets
+                (id, name, description, created_at, updated_at, deleted_at)
+                VALUES (?, '课本模式', '不涉及学情数据', ?, ?, ?)
+                """,
+                (dataset_id, now, now, now),
+            )
+        return dataset_id
+
+    def scope_mode(self, run: dict[str, Any]) -> str:
+        return str(self.scope_of(run).get("mode") or "")
+
+    def cleanup_legacy_runs(self) -> int:
+        removed = 0
+        for run in self.list_runs():
+            if self.scope_mode(run) in SCOPE_MODE_LABELS:
+                continue
+            run_root = self.outlines_dir / run["id"]
+            if self.repo.delete_outline_run(run["id"]):
+                shutil.rmtree(run_root, ignore_errors=True)
+                removed += 1
+        valid_ids = {run["id"] for run in self.list_runs()}
+        if self.outlines_dir.exists():
+            for directory in self.outlines_dir.iterdir():
+                if directory.is_dir() and directory.name not in valid_ids:
+                    shutil.rmtree(directory, ignore_errors=True)
+        return removed
+
     def _ai_prompt(self, scope: dict[str, Any]) -> str:
         clauses = self._scope_standard_clauses(scope)
         requirements = []
@@ -2437,8 +3032,18 @@ class OutlineService:
                 sources.append(
                     OutlineEvidence(
                         kind=OutlineSourceKind.TEXTBOOK.value,
-                        material_set_id=scope["textbook"]["material_set_id"],
-                        material_name=scope["textbook"]["material_name"],
+                        material_set_id=(
+                            section.get("material_set_id")
+                            or scope["textbook"]["material_set_id"]
+                            if section
+                            else scope["textbook"]["material_set_id"]
+                        ),
+                        material_name=(
+                            section.get("material_name")
+                            or scope["textbook"]["material_name"]
+                            if section
+                            else scope["textbook"]["material_name"]
+                        ),
                         document_id=section["document_id"] if section else entry.document_id,
                         file_name=section["file_name"] if section else "",
                         section_id=entry.section_id,

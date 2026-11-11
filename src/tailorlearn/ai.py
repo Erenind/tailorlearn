@@ -14,6 +14,7 @@ from tailorlearn.models import (
     AIUnit,
     MaterialType,
     OutlineDraftResponse,
+    OutlineSelectionResponse,
     ProviderProfile,
     StudentDiagnosisDraft,
     TeachingRecommendationDraft,
@@ -410,6 +411,39 @@ class OpenAICompatibleClient:
             raw = f"{raw}\n\n--- repaired ---\n{repaired}"
         if not parsed.items:
             raise AIRequestError("AI 未能返回任何学习内容")
+        return parsed, raw, finish_reason
+
+    def select_outline_sections(
+        self,
+        *,
+        prompt: str,
+    ) -> tuple[OutlineSelectionResponse, str, str | None]:
+        raw, finish_reason = self._complete(
+            [
+                {
+                    "role": "system",
+                    "content": (
+                        "你是严谨的课程材料检索助手。只能从用户提供的目录 ID "
+                        "中选择资料，只输出合法 JSON。"
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ]
+        )
+        try:
+            parsed = OutlineSelectionResponse.model_validate(
+                _extract_json(raw)
+            )
+        except (ValueError, json.JSONDecodeError, ValidationError):
+            repaired = self._repair_json(raw)
+            parsed = OutlineSelectionResponse.model_validate(
+                _extract_json(repaired)
+            )
+            raw = f"{raw}\n\n--- repaired ---\n{repaired}"
+        if not (
+            parsed.standard_section_ids or parsed.textbook_section_ids
+        ):
+            raise AIRequestError("AI 未返回任何需要的课程材料目录")
         return parsed, raw, finish_reason
 
     def draft_student_diagnosis(
