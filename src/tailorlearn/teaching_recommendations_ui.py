@@ -79,7 +79,7 @@ def recommendation_markdown(bundle: dict[str, Any]) -> str:
 def _dataset_selector(learning: LearningDataService) -> dict[str, Any] | None:
     datasets = learning.list_datasets()
     if not datasets:
-        st.info("尚无学情数据集。请先在“材料中心”导入数据。")
+        st.info("尚无学情数据集。请先在“材料与数据”导入数据。")
         return None
     dataset_id = st.selectbox(
         "学情数据集",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import json
 from html import escape
 from typing import Any
@@ -7,21 +8,17 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
+import tailorlearn.db as database_module
+import tailorlearn.learning_data_ui as learning_data_ui_module
 from tailorlearn.analytics import AnalyticsService
 from tailorlearn.analytics_ui import (
     render_class_analysis_page,
     render_student_analysis_page,
 )
 from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
-from tailorlearn.db import Repository
 from tailorlearn.extraction import page_as_png
 from tailorlearn.ingest import IngestionService
 from tailorlearn.learning_data import LearningDataService
-from tailorlearn.learning_data_ui import (
-    render_answer_anomalies,
-    render_data_type_page,
-    render_dataset_context,
-)
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
 from tailorlearn.outline import OutlineService
 from tailorlearn.outline_ui import render_outline_page
@@ -37,13 +34,31 @@ from tailorlearn.ui import (
 )
 
 
+_REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
+_LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
+if (
+    getattr(database_module, "REPOSITORY_API_VERSION", None)
+    != _REPOSITORY_API_VERSION
+):
+    database_module = importlib.reload(database_module)
+Repository = database_module.Repository
+if (
+    getattr(learning_data_ui_module, "LEARNING_DATA_UI_VERSION", None)
+    != _LEARNING_DATA_UI_API_VERSION
+):
+    learning_data_ui_module = importlib.reload(learning_data_ui_module)
+render_answer_anomalies = learning_data_ui_module.render_answer_anomalies
+render_data_type_page = learning_data_ui_module.render_data_type_page
+render_dataset_context = learning_data_ui_module.render_dataset_context
+
+
 st.set_page_config(
     page_title="TailorLearn",
     page_icon="📚",
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-11-rename-material-slices"
+_APP_SERVICES_CACHE_VERSION = "2026-11-11-content-height-learning-tables"
 
 
 @st.cache_resource
@@ -739,7 +754,7 @@ def _render_material_browser_path(
         vertical_alignment="center",
         key=f"material_browser_path_{material_type}",
     ):
-        st.markdown("材料中心 /")
+        st.markdown("材料与数据 /")
         if st.button(
             material_type_label,
             type="tertiary",
@@ -1058,7 +1073,7 @@ def _render_material_management_path(
         vertical_alignment="center",
         key=f"material_manage_path_{material_type}",
     ):
-        st.markdown("材料中心 /")
+        st.markdown("材料与数据 /")
         if st.button(
             material_type_label,
             type="tertiary",
@@ -1580,7 +1595,7 @@ def _render_standard_management() -> None:
         vertical_alignment="center",
         key="standard_editor_path",
     ):
-        st.markdown("材料中心 /")
+        st.markdown("材料与数据 /")
         if st.button(
             MATERIAL_LABELS[material_type],
             type="tertiary",
@@ -1962,7 +1977,7 @@ def render_material_library(
     mode: str,
 ) -> None:
     if mode not in {"browse", "edit"}:
-        raise ValueError("未知材料中心材料栏目")
+        raise ValueError("未知材料与数据材料栏目")
     material_type_label = MATERIAL_LABELS[material_type]
     st.subheader(f"{material_type_label}材料库")
     materials = [
@@ -2680,17 +2695,17 @@ def render_material_center() -> None:
             _render_material_management(item["data_type"])
         return
 
-    dataset_id = render_dataset_context(LEARNING_DATA)
+    mode = {
+        "浏览": "browse",
+        "编辑": "edit",
+        "导入和导出": "import",
+    }.get(section, "edit")
+    dataset_id = render_dataset_context(LEARNING_DATA, mode=mode)
     if dataset_id is None:
         return
     if section == "异常检测":
         render_answer_anomalies(LEARNING_DATA, dataset_id)
         return
-    mode = {
-        "浏览": "browse",
-        "编辑": "edit",
-        "导入和导出": "import",
-    }[section]
     render_data_type_page(
         LEARNING_DATA,
         dataset_id,
@@ -2705,7 +2720,7 @@ def main() -> None:
     render_page_header(page)
     if page == "AI 参数设置":
         render_ai_settings()
-    elif page == "材料中心":
+    elif page == "材料与数据":
         render_material_center()
     elif page == "学习内容梳理":
         render_outline_page(OUTLINES, _active_profile())

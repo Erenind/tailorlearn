@@ -1016,7 +1016,7 @@ def render_outline_page(
     _show_notice()
     datasets = service.list_datasets()
     if not datasets:
-        st.info("请先在“材料中心 → 课程要求”中创建数据集并导入课程要求。")
+        st.info("请先在“材料与数据 → 课程要求”中创建数据集并导入课程要求。")
         return
     dataset_ids = [row["id"] for row in datasets]
     dataset_key = "outline_dataset_selector"
@@ -1051,7 +1051,7 @@ def render_outline_page(
     if not requirements:
         st.warning(
             "该数据集没有课程要求，无法确定范围。"
-            "请先在“材料中心 → 课程要求”导入。"
+            "请先在“材料与数据 → 课程要求”导入。"
         )
         return
     (

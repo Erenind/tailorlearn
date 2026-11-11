@@ -17,6 +17,8 @@ from tailorlearn.learning_data import (
     LearningDataService,
 )
 
+LEARNING_DATA_UI_VERSION = "2026-11-11-content-height-data-tables"
+
 
 ACTION_LABELS = {
     "insert": "新增",
@@ -24,6 +26,28 @@ ACTION_LABELS = {
     "skip": "未变化",
     "manual_conflict": "人工修改冲突",
 }
+
+
+def _apply_table_action(
+    *,
+    click_key: str,
+    row_ids: list[int],
+    action_key: str,
+    action: str,
+) -> None:
+    click = st.session_state.get(click_key)
+    if click is None:
+        return
+    try:
+        row_position = int(click["row"])
+    except (KeyError, TypeError, ValueError):
+        return
+    if not 0 <= row_position < len(row_ids):
+        return
+    st.session_state[action_key] = {
+        "action": action,
+        "row_id": int(row_ids[row_position]),
+    }
 
 
 def _rerun() -> None:
@@ -389,23 +413,69 @@ def _visible_records(
 def _records_frame(
     rows: list[dict[str, Any]],
     spec: DataTypeSpec,
+    *,
+    with_actions: bool = False,
 ) -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            {
-                **{
-                    item.label: (
-                        ""
-                        if row.get(item.key) is None
-                        else str(row.get(item.key))
-                    )
-                    for item in spec.fields
-                },
-                "状态": "已删除" if row.get("deleted_at") else "正常",
-            }
-            for row in rows
-        ]
-    )
+    records = []
+    for row in rows:
+        record = {
+            **{
+                item.label: (
+                    ""
+                    if row.get(item.key) is None
+                    else str(row.get(item.key))
+                )
+                for item in spec.fields
+            },
+            "状态": "已删除" if row.get("deleted_at") else "正常",
+        }
+        if with_actions:
+            record["编辑"] = ":material/edit: 编辑"
+            record["删除"] = ":material/delete: 删除"
+        records.append(record)
+    return pd.DataFrame(records)
+
+
+@st.dialog("新增记录", width="large")
+def _add_record_dialog(
+    service: LearningDataService,
+    dataset_id: str,
+    spec: DataTypeSpec,
+) -> None:
+    with st.form(
+        f"learning_add_{dataset_id}_{spec.key}",
+        border=False,
+    ):
+        values = _record_form_values(spec)
+        submitted = st.form_submit_button(
+            "新增",
+            type="primary",
+            icon=":material/add:",
+        )
+    if submitted:
+        try:
+            service.create_record(dataset_id, spec.key, values)
+            st.session_state.pop(
+                f"learning_add_open_{dataset_id}_{spec.key}",
+                None,
+            )
+            _notify(
+                f"learning_notice_{dataset_id}_{spec.key}",
+                f"已新增一条{spec.label}记录",
+            )
+            _rerun()
+        except Exception as exc:
+            _show_error(exc)
+    if st.button(
+        "取消",
+        key=f"learning_add_cancel_{dataset_id}_{spec.key}",
+        width="stretch",
+    ):
+        st.session_state.pop(
+            f"learning_add_open_{dataset_id}_{spec.key}",
+            None,
+        )
+        st.rerun()
 
 
 def _render_add_form(
@@ -413,27 +483,16 @@ def _render_add_form(
     dataset_id: str,
     spec: DataTypeSpec,
 ) -> None:
-    with st.expander("新增记录"):
-        with st.form(
-            f"learning_add_{dataset_id}_{spec.key}",
-            border=False,
-        ):
-            values = _record_form_values(spec)
-            submitted = st.form_submit_button(
-                "新增",
-                type="primary",
-                icon=":material/add:",
-            )
-        if submitted:
-            try:
-                service.create_record(dataset_id, spec.key, values)
-                _notify(
-                    f"learning_notice_{dataset_id}_{spec.key}",
-                    f"已新增一条{spec.label}记录",
-                )
-                _rerun()
-            except Exception as exc:
-                _show_error(exc)
+    add_key = f"learning_add_open_{dataset_id}_{spec.key}"
+    if st.button(
+        "新增记录",
+        icon=":material/add:",
+        key=f"learning_add_toggle_{dataset_id}_{spec.key}",
+    ):
+        st.session_state[add_key] = True
+        st.rerun()
+    if st.session_state.get(add_key):
+        _add_record_dialog(service, dataset_id, spec)
 
 
 def _render_edit_forms(
@@ -441,6 +500,8 @@ def _render_edit_forms(
     dataset_id: str,
     spec: DataTypeSpec,
     row: dict[str, Any],
+    *,
+    action_key: str | None = None,
 ) -> None:
     row_id = int(row["row_id"])
     with st.expander("编辑普通字段", expanded=False):
@@ -477,6 +538,8 @@ def _render_edit_forms(
                     f"learning_notice_{dataset_id}_{spec.key}",
                     "记录已更新，并保留修改审计",
                 )
+                if action_key:
+                    st.session_state.pop(action_key, None)
                 _rerun()
             except Exception as exc:
                 _show_error(exc)
@@ -527,6 +590,8 @@ def _render_edit_forms(
                         f"learning_notice_{dataset_id}_{spec.key}",
                         "业务编号已更新",
                     )
+                    if action_key:
+                        st.session_state.pop(action_key, None)
                     _rerun()
                 except Exception as exc:
                     _show_error(exc)
@@ -537,6 +602,8 @@ def _render_delete_restore(
     dataset_id: str,
     spec: DataTypeSpec,
     row: dict[str, Any],
+    *,
+    action_key: str | None = None,
 ) -> None:
     row_id = int(row["row_id"])
     related = service.related_counts(dataset_id, spec.key, row)
@@ -570,6 +637,8 @@ def _render_delete_restore(
                         f"learning_notice_{dataset_id}_{spec.key}",
                         f"已恢复 {count} 条记录",
                     )
+                    if action_key:
+                        st.session_state.pop(action_key, None)
                     _rerun()
                 except Exception as exc:
                     _show_error(exc)
@@ -611,9 +680,68 @@ def _render_delete_restore(
                         f"learning_notice_{dataset_id}_{spec.key}",
                         f"已软删除 {count} 条记录，可在已删除视图中恢复",
                     )
+                    if action_key:
+                        st.session_state.pop(action_key, None)
                     _rerun()
                 except Exception as exc:
                     _show_error(exc)
+
+
+@st.dialog("记录操作", width="large")
+def _record_action_dialog(
+    service: LearningDataService,
+    dataset_id: str,
+    spec: DataTypeSpec,
+    *,
+    action_key: str,
+) -> None:
+    action = st.session_state.get(action_key)
+    if not isinstance(action, dict):
+        return
+    row_id = action.get("row_id")
+    if row_id is None:
+        st.session_state.pop(action_key, None)
+        return
+    row = service.get_record(dataset_id, spec.key, int(row_id))
+    if row is None:
+        st.session_state.pop(action_key, None)
+        st.info("该记录已不存在。")
+        return
+    st.caption(f"正在处理：{service.record_label(spec.key, row)}")
+    if st.button(
+        "关闭",
+        key=f"{action_key}_close",
+        width="stretch",
+    ):
+        st.session_state.pop(action_key, None)
+        st.rerun()
+    if action.get("action") == "edit" and not row.get("deleted_at"):
+        _render_edit_forms(
+            service,
+            dataset_id,
+            spec,
+            row,
+            action_key=action_key,
+        )
+    else:
+        _render_delete_restore(
+            service,
+            dataset_id,
+            spec,
+            row,
+            action_key=action_key,
+        )
+
+
+def _render_record_action_panel(
+    service: LearningDataService,
+    dataset_id: str,
+    spec: DataTypeSpec,
+    *,
+    action_key: str,
+) -> None:
+    if isinstance(st.session_state.get(action_key), dict):
+        _record_action_dialog(service, dataset_id, spec, action_key=action_key)
 
 
 def _render_records(
@@ -624,38 +752,36 @@ def _render_records(
     allow_edit: bool,
 ) -> None:
     all_active = service.list_records(dataset_id, spec.key)
-    st.subheader("数据管理与导出")
-    export_columns = st.columns(2)
-    full_csv, filename = service.export_csv(dataset_id, spec.key)
-    export_columns[0].download_button(
-        "导出全部",
-        data=full_csv,
-        file_name=filename,
-        mime="text/csv",
-        icon=":material/download:",
-        width="stretch",
-        disabled=not all_active,
-    )
-    st.caption(f"共 {len(all_active)} 条有效记录。")
-
-    search_columns = st.columns([2, 1, 1, 1])
-    query = search_columns[0].text_input(
-        "搜索",
-        type="search",
-        placeholder="输入编号或任意字段内容",
-        label_visibility="collapsed",
-        key=f"learning_search_{dataset_id}_{spec.key}",
-    )
+    query = ""
+    include_deleted = False
     latest_answers = False
     status = None
     node_code = None
-    if spec.key == "answer":
-        latest_answers = search_columns[1].toggle(
+    if allow_edit:
+        toolbar = st.columns([5, 1, 1], vertical_alignment="bottom")
+        query = toolbar[0].text_input(
+            "搜索",
+            type="search",
+            placeholder="输入编号或任意字段内容",
+            label_visibility="collapsed",
+            key=f"learning_search_{dataset_id}_{spec.key}",
+        )
+        include_deleted = toolbar[1].toggle(
+            "显示已删除",
+            value=False,
+            key=f"learning_show_deleted_{dataset_id}_{spec.key}",
+        )
+        with toolbar[2]:
+            _render_add_form(service, dataset_id, spec)
+
+    if spec.key == "answer" and allow_edit:
+        answer_filters = st.columns(3)
+        latest_answers = answer_filters[0].toggle(
             "仅最新修订",
             value=False,
             key=f"learning_latest_{dataset_id}_{spec.key}",
         )
-        status = search_columns[2].selectbox(
+        status = answer_filters[1].selectbox(
             "评分状态",
             ["全部", "已评分", "待评分", "未作答"],
             key=f"learning_status_{dataset_id}_{spec.key}",
@@ -667,7 +793,7 @@ def _render_records(
                 if row.get("node_code")
             }
         )
-        node_code = search_columns[3].selectbox(
+        node_code = answer_filters[2].selectbox(
             "节点",
             ["全部", *nodes],
             key=f"learning_node_filter_{dataset_id}_{spec.key}",
@@ -685,25 +811,6 @@ def _render_records(
         status,
         node_code,
     )
-    filtered_csv, filtered_filename = service.export_csv(
-        dataset_id,
-        spec.key,
-        rows=visible,
-    )
-    export_columns[1].download_button(
-        "导出当前结果",
-        data=filtered_csv,
-        file_name=filtered_filename,
-        mime="text/csv",
-        icon=":material/filter_alt:",
-        width="stretch",
-        disabled=not visible,
-    )
-    include_deleted = st.toggle(
-        "显示已删除记录",
-        value=False,
-        key=f"learning_show_deleted_{dataset_id}_{spec.key}",
-    )
     display_rows = visible
     if include_deleted:
         deleted_rows = [
@@ -717,40 +824,73 @@ def _render_records(
             and _matches_query(row, spec, query)
         ]
         display_rows = [*visible, *deleted_rows]
-    st.caption(f"当前筛选显示 {len(display_rows)} 条记录。")
+    action_key = f"learning_record_action_{dataset_id}_{spec.key}"
     if display_rows:
-        st.dataframe(
-            _records_frame(display_rows, spec),
-            hide_index=True,
-            width="stretch",
-            alt=f"{spec.label}数据记录",
+        table = _records_frame(
+            display_rows,
+            spec,
+            with_actions=allow_edit,
         )
+        if allow_edit:
+            row_ids = [int(row["row_id"]) for row in display_rows]
+            edit_click_key = (
+                f"learning_record_edit_click_{dataset_id}_{spec.key}"
+            )
+            delete_click_key = (
+                f"learning_record_delete_click_{dataset_id}_{spec.key}"
+            )
+            st.dataframe(
+                table,
+                hide_index=True,
+                width="stretch",
+                height="content",
+                alt=f"{spec.label}数据记录",
+                column_config={
+                    "编辑": st.column_config.ButtonColumn(
+                        type="tertiary",
+                        on_click=_apply_table_action,
+                        kwargs={
+                            "click_key": edit_click_key,
+                            "row_ids": row_ids,
+                            "action_key": action_key,
+                            "action": "edit",
+                        },
+                        key=edit_click_key,
+                    ),
+                    "删除": st.column_config.ButtonColumn(
+                        type="tertiary",
+                        on_click=_apply_table_action,
+                        kwargs={
+                            "click_key": delete_click_key,
+                            "row_ids": row_ids,
+                            "action_key": action_key,
+                            "action": "delete",
+                        },
+                        key=delete_click_key,
+                    ),
+                },
+            )
+        else:
+            st.dataframe(
+                table,
+                hide_index=True,
+                width="stretch",
+                height="content",
+                alt=f"{spec.label}数据记录",
+            )
     else:
         st.info("当前筛选条件下没有记录。")
 
     if not allow_edit:
         return
-    _render_add_form(service, dataset_id, spec)
     if not display_rows:
         return
-    row_ids = [int(row["row_id"]) for row in display_rows]
-    row_by_id = {int(row["row_id"]): row for row in display_rows}
-    selector_key = f"learning_record_select_{dataset_id}_{spec.key}"
-    if st.session_state.get(selector_key) not in row_ids:
-        st.session_state[selector_key] = row_ids[0]
-    selected_id = st.selectbox(
-        "选择要操作的记录",
-        row_ids,
-        format_func=lambda value: service.record_label(
-            spec.key,
-            row_by_id[value],
-        ),
-        key=selector_key,
+    _render_record_action_panel(
+        service,
+        dataset_id,
+        spec,
+        action_key=action_key,
     )
-    selected = row_by_id[selected_id]
-    _render_delete_restore(service, dataset_id, spec, selected)
-    if not selected.get("deleted_at"):
-        _render_edit_forms(service, dataset_id, spec, selected)
 
 
 def _render_type(
@@ -761,16 +901,16 @@ def _render_type(
     mode: str,
 ) -> None:
     if mode not in {"browse", "edit", "import"}:
-        raise ValueError("未知材料中心栏目")
-    active_count = len(service.list_records(dataset_id, spec.key))
-    st.subheader(spec.label)
+        raise ValueError("未知材料与数据栏目")
     if spec.key == "answer":
-        st.caption(
-            "原始修订全部保留。表格与导出默认显示全部记录，"
-            "可切换“仅最新修订”。"
-        )
+        if mode != "browse":
+            st.caption(
+                "原始修订全部保留。表格与导出默认显示全部记录，"
+                "可切换“仅最新修订”。"
+            )
     if mode == "import":
         _render_data_export(service, dataset_id, spec)
+        active_count = len(service.list_records(dataset_id, spec.key))
         _render_import(
             service,
             dataset_id,
@@ -923,98 +1063,230 @@ def render_answer_anomalies(
     )
     st.caption(f"当前显示 {len(visible)} / {len(answer_issues)} 个异常项。")
     if visible:
+        row_ids = [
+            int(row["row_id"]) if row.get("row_id") is not None else -1
+            for row in visible
+        ]
+        action_key = f"learning_answer_anomaly_action_{dataset_id}"
+        edit_click_key = f"learning_answer_anomaly_edit_click_{dataset_id}"
+        delete_click_key = f"learning_answer_anomaly_delete_click_{dataset_id}"
+        issue_frame = pd.DataFrame(visible)
+        issue_frame["编辑"] = ":material/edit: 编辑"
+        issue_frame["删除"] = ":material/delete: 删除"
         st.dataframe(
-            pd.DataFrame(visible),
+            issue_frame,
             hide_index=True,
             width="stretch",
+            height="content",
             alt="作答记录异常明细",
+            column_config={
+                "row_id": None,
+                "编辑": st.column_config.ButtonColumn(
+                    type="tertiary",
+                    on_click=_apply_table_action,
+                    kwargs={
+                        "click_key": edit_click_key,
+                        "row_ids": row_ids,
+                        "action_key": action_key,
+                        "action": "edit",
+                    },
+                    key=edit_click_key,
+                ),
+                "删除": st.column_config.ButtonColumn(
+                    type="tertiary",
+                    on_click=_apply_table_action,
+                    kwargs={
+                        "click_key": delete_click_key,
+                        "row_ids": row_ids,
+                        "action_key": action_key,
+                        "action": "delete",
+                    },
+                    key=delete_click_key,
+                ),
+            },
+        )
+        st.caption("使用异常明细末列的“编辑”或“删除”处理对应作答记录。")
+        _render_record_action_panel(
+            service,
+            dataset_id,
+            DATA_TYPE_SPECS["answer"],
+            action_key=action_key,
         )
     else:
         st.info("没有匹配当前搜索条件的异常记录。")
+
+
+@st.dialog("编辑数据集信息", width="medium")
+def _dataset_info_dialog(
+    service: LearningDataService,
+    dataset: dict[str, Any],
+) -> None:
+    with st.form(f"learning_dataset_edit_{dataset['id']}"):
+        name = st.text_input("数据集名称", value=dataset["name"])
+        description = st.text_area(
+            "说明",
+            value=dataset.get("description") or "",
+            height=80,
+        )
+        submitted = st.form_submit_button("保存数据集信息")
+    if submitted:
+        try:
+            service.update_dataset(
+                dataset["id"],
+                name=name,
+                description=description,
+            )
+            st.session_state.pop(
+                f"learning_dataset_info_open_{dataset['id']}",
+                None,
+            )
+            _notify("learning_dataset_notice", "数据集信息已保存")
+            _rerun()
+        except Exception as exc:
+            _show_error(exc)
+    if st.button(
+        "取消",
+        key=f"learning_dataset_info_cancel_{dataset['id']}",
+        width="stretch",
+    ):
+        st.session_state.pop(
+            f"learning_dataset_info_open_{dataset['id']}",
+            None,
+        )
+        st.rerun()
 
 
 def _render_dataset_management(
     service: LearningDataService,
     dataset: dict[str, Any],
 ) -> None:
-    with st.expander("编辑数据集信息"):
-        with st.form(f"learning_dataset_edit_{dataset['id']}"):
-            name = st.text_input("数据集名称", value=dataset["name"])
-            description = st.text_area(
-                "说明",
-                value=dataset.get("description") or "",
-                height=80,
-            )
-            submitted = st.form_submit_button("保存数据集信息")
-        if submitted:
-            try:
-                service.update_dataset(
-                    dataset["id"],
-                    name=name,
-                    description=description,
-                )
-                _notify("learning_dataset_notice", "数据集信息已保存")
-                _rerun()
-            except Exception as exc:
-                _show_error(exc)
+    info_key = f"learning_dataset_info_open_{dataset['id']}"
+    if st.button(
+        "数据集信息",
+        icon=":material/info:",
+        type="tertiary",
+        key=f"learning_dataset_info_toggle_{dataset['id']}",
+    ):
+        st.session_state[info_key] = True
+        st.rerun()
+    if st.session_state.get(info_key):
+        _dataset_info_dialog(service, dataset)
 
 
-def render_dataset_context(service: LearningDataService) -> str | None:
+def render_dataset_context(
+    service: LearningDataService,
+    *,
+    mode: str = "edit",
+) -> str | None:
     _show_notice("learning_dataset_notice")
-    with st.expander("新建学情数据集", expanded=not service.list_datasets()):
-        with st.form("learning_dataset_create"):
-            name = st.text_input(
-                "数据集名称",
-                placeholder="例如：公开模拟学情数据",
-            )
-            description = st.text_area(
-                "说明",
-                placeholder="可记录数据来源、批次或使用范围",
-                height=80,
-            )
-            submitted = st.form_submit_button(
-                "创建数据集",
-                type="primary",
-                icon=":material/create_new_folder:",
-            )
-        if submitted:
-            try:
-                dataset = service.create_dataset(name, description)
-                st.session_state["learning_dataset_selector"] = dataset["id"]
-                _notify("learning_dataset_notice", "学情数据集已创建")
-                _rerun()
-            except Exception as exc:
-                _show_error(exc)
-
     datasets = service.list_datasets()
-    if not datasets:
-        st.info("请先创建一个学情数据集。")
-        return None
     dataset_ids = [row["id"] for row in datasets]
     selector_key = "learning_dataset_selector"
-    if st.session_state.get(selector_key) not in dataset_ids:
-        st.session_state[selector_key] = dataset_ids[0]
-    dataset_id = st.selectbox(
-        "学情数据集",
-        dataset_ids,
-        format_func=lambda value: next(
-            (
-                row["name"]
-                + (
-                    f" · {row['description']}"
-                    if row.get("description")
-                    else ""
+    selected_id = st.session_state.get(selector_key)
+    if selected_id not in dataset_ids:
+        selected_id = None
+        st.session_state[selector_key] = None
+    if selected_id is None:
+        create_key = "learning_dataset_create_open"
+        with st.container(
+            horizontal=True,
+            vertical_alignment="center",
+            key="learning_dataset_list_header",
+        ):
+            st.markdown("**学情数据集**")
+            if st.button(
+                "新建学情数据集",
+                icon=":material/create_new_folder:",
+                key="learning_dataset_create_toggle",
+            ):
+                st.session_state[create_key] = True
+                st.rerun()
+        if st.session_state.get(create_key):
+            with st.form("learning_dataset_create"):
+                name = st.text_input(
+                    "数据集名称",
+                    placeholder="例如：公开模拟学情数据",
                 )
-                for row in datasets
-                if row["id"] == value
-            ),
-            value,
-        ),
-        key=selector_key,
-    )
-    dataset = next(row for row in datasets if row["id"] == dataset_id)
-    _render_dataset_management(service, dataset)
-    return dataset_id
+                description = st.text_area(
+                    "说明",
+                    placeholder="可记录数据来源、批次或使用范围",
+                    height=80,
+                )
+                create_columns = st.columns(2)
+                submitted = create_columns[0].form_submit_button(
+                    "创建数据集",
+                    type="primary",
+                    icon=":material/create_new_folder:",
+                    width="stretch",
+                )
+                cancelled = create_columns[1].form_submit_button(
+                    "取消",
+                    width="stretch",
+                )
+            if cancelled:
+                st.session_state.pop(create_key, None)
+                st.rerun()
+            if submitted:
+                try:
+                    dataset = service.create_dataset(name, description)
+                    st.session_state[selector_key] = dataset["id"]
+                    st.session_state.pop(create_key, None)
+                    _notify("learning_dataset_notice", "学情数据集已创建")
+                    _rerun()
+                except Exception as exc:
+                    _show_error(exc)
+        if not datasets:
+            st.info("请先创建一个学情数据集。")
+            return None
+        with st.container(key="material_browser_files"):
+            with st.grid("auto", min_column_width=240, gap="small"):
+                for dataset in datasets:
+                    counts = {
+                        spec.label: len(
+                            service.list_records(dataset["id"], spec.key)
+                        )
+                        for spec in DATA_TYPE_SPECS.values()
+                    }
+                    with st.container(
+                        border=True,
+                        key=f"learning_dataset_card_{dataset['id']}",
+                    ):
+                        st.markdown(f"**{dataset['name']}**")
+                        if dataset.get("description"):
+                            st.caption(dataset["description"])
+                        st.caption(
+                            f"{sum(counts.values())} 条记录 · "
+                            f"学生 {counts['模拟学生']} · "
+                            f"作答 {counts['作答记录']}"
+                        )
+                        if st.button(
+                            "查看",
+                            key=f"learning_dataset_open_{dataset['id']}",
+                            width="stretch",
+                        ):
+                            st.session_state[selector_key] = dataset["id"]
+                            st.rerun()
+        return None
+
+    dataset = next(row for row in datasets if row["id"] == selected_id)
+    with st.container(
+        horizontal=True,
+        vertical_alignment="center",
+        key="learning_dataset_path",
+    ):
+        st.markdown("材料中心 /")
+        if st.button(
+            "学情数据集",
+            type="tertiary",
+            key="learning_dataset_path_root",
+        ):
+            st.session_state[selector_key] = None
+            st.rerun()
+        st.markdown("/")
+        st.markdown(f"**{dataset['name']}**")
+        if mode == "edit":
+            _render_dataset_management(service, dataset)
+    return str(selected_id)
 
 
 def render_data_type_page(

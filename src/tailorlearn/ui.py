@@ -16,8 +16,8 @@ PAGE_META: dict[str, PageMeta] = {
         label="学习内容梳理",
         icon="outline.svg",
     ),
-    "材料中心": PageMeta(
-        label="材料中心",
+    "材料与数据": PageMeta(
+        label="材料与数据",
         icon="material_center.svg",
     ),
     "学生分析": PageMeta(
@@ -41,7 +41,7 @@ PAGE_META: dict[str, PageMeta] = {
 NAV_ORDER = list(PAGE_META)
 PAGE_SLUGS = {
     "学习内容梳理": "outline",
-    "材料中心": "material_center",
+    "材料与数据": "material_center",
     "学生分析": "student",
     "班级分析": "class",
     "教学建议": "teaching",

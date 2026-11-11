@@ -20,6 +20,8 @@ from tailorlearn.models import (
     UnitStatus,
 )
 
+REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
+
 
 def utc_now() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
