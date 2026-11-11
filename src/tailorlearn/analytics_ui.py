@@ -5,6 +5,7 @@ from io import StringIO
 import json
 from typing import Any
 
+import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -15,17 +16,18 @@ from tailorlearn.models import ProviderProfile
 from tailorlearn.student_diagnosis import StudentDiagnosisService
 
 
+ANALYTICS_UI_VERSION = "2026-11-11-student-ranking-issues-v3"
+STUDENT_ANALYSIS_SECTIONS = ("数据概览", "问题分析")
+STUDENT_RANKING_SORT_OPTIONS = (
+    "综合得分降序",
+    "综合得分升序",
+    "按学生编号",
+)
 EVIDENCE_LABELS = {
     "sufficient": "证据充分",
     "limited": "证据有限",
     "insufficient": "信息不足",
     "unavailable": "不可用",
-}
-EVIDENCE_COLORS = {
-    "sufficient": "#1f77b4",
-    "limited": "#ff9f1c",
-    "insufficient": "#9aa0a6",
-    "unavailable": "#d62728",
 }
 
 
@@ -119,77 +121,6 @@ def _csv_text(rows: list[dict[str, Any]]) -> str:
 
 def _json_text(data: dict[str, Any]) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2)
-
-
-def _render_radar(metrics: list[dict[str, Any]]) -> None:
-    available = [metric for metric in metrics if metric.get("score_rate") is not None]
-    if not available:
-        st.info("所选范围没有可绘制的主题表现；请查看数据充分度和待评分记录。")
-        return
-    labels = [metric["theme_name"] for metric in available]
-    rates = [float(metric["score_rate"]) * 100 for metric in available]
-    figure = go.Figure(
-        go.Scatterpolar(
-            r=[*rates, rates[0]],
-            theta=[*labels, labels[0]],
-            fill="toself",
-            name="已观察表现",
-            customdata=[
-                [
-                    metric["scored_records"],
-                    EVIDENCE_LABELS[metric["evidence_status"]],
-                ]
-                for metric in [*available, available[0]]
-            ],
-            hovertemplate=(
-                "%{theta}<br>得分率：%{r:.1f}%<br>有效记录：%{customdata[0]}"
-                "<br>%{customdata[1]}<extra></extra>"
-            ),
-        )
-    )
-    figure.update_layout(
-        polar={"radialaxis": {"visible": True, "range": [0, 100]}},
-        margin={"l": 30, "r": 30, "t": 30, "b": 30},
-        showlegend=False,
-    )
-    st.plotly_chart(figure, width="stretch", key="analytics_student_radar")
-    missing = [
-        metric["theme_name"]
-        for metric in metrics
-        if metric.get("score_rate") is None
-    ]
-    if missing:
-        st.caption("未绘制的信息不足主题：" + "、".join(missing))
-
-
-def _render_trend(analytics: AnalyticsService, dataset_id: str, student: str, theme: str) -> None:
-    trend = analytics.student_theme_trend(dataset_id, student, theme)
-    points = [point for point in trend["points"] if point.get("score_rate") is not None]
-    if not points:
-        st.info("没有可绘制的节点表现。")
-        return
-    figure = go.Figure(
-        go.Scatter(
-            x=[point["test_date"] or point["node_code"] for point in points],
-            y=[point["score_rate"] * 100 for point in points],
-            mode="lines+markers",
-            text=[
-                f"{point['node_code']} · {EVIDENCE_LABELS[point['evidence_status']]}"
-                for point in points
-            ],
-            hovertemplate="%{text}<br>得分率：%{y:.1f}%<extra></extra>",
-        )
-    )
-    figure.update_layout(
-        yaxis={"range": [0, 100], "title": "得分率（%）"},
-        xaxis={"title": "测验节点"},
-        margin={"l": 30, "r": 20, "t": 30, "b": 30},
-    )
-    st.plotly_chart(figure, width="stretch", key="analytics_student_trend")
-    if trend["status"] != "observable":
-        st.warning("前驱或后继节点证据不足，图中仅展示已有测验表现，不判定变化趋势。")
-    elif trend["delta"] is not None:
-        st.caption(f"相邻充分证据节点的得分率变化：{trend['delta']:+.1%}。")
 
 
 def _render_ai_diagnosis_tab(
@@ -329,111 +260,386 @@ def _render_ai_diagnosis_tab(
         st.info("草稿已拒绝，原始响应仍保留以便追溯。")
 
 
-def render_student_analysis_page(
-    analytics: AnalyticsService,
-    learning: LearningDataService,
-    diagnosis: StudentDiagnosisService,
-    profile: ProviderProfile | None,
+def _render_student_analysis_top_nav() -> str:
+    section_keys = {
+        "数据概览": ("overview", ":material/dashboard:"),
+        "问题分析": ("issues", ":material/troubleshoot:"),
+    }
+    active = st.session_state.get("student_analysis_section")
+    if active not in STUDENT_ANALYSIS_SECTIONS:
+        active = STUDENT_ANALYSIS_SECTIONS[0]
+        st.session_state["student_analysis_section"] = active
+    with st.container(
+        horizontal=True,
+        wrap=False,
+        gap="xsmall",
+        key="student_analysis_top_nav",
+    ):
+        for section in STUDENT_ANALYSIS_SECTIONS:
+            suffix, icon = section_keys[section]
+            if st.button(
+                f"{icon} {section}",
+                key=f"student_analysis_nav_{suffix}",
+                type="secondary",
+                width="content",
+            ):
+                st.session_state["student_analysis_section"] = section
+                st.rerun()
+    active_suffix = section_keys[str(active)][0]
+    st.html(
+        f"""
+        <style>
+        .st-key-student_analysis_top_nav {{
+            padding: 0.35rem;
+            border: 1px solid #E1E5EB;
+            border-radius: 0.9rem;
+            background: #FFFFFF;
+        }}
+        .st-key-student_analysis_nav_{active_suffix} button {{
+            background: #EDF2FF !important;
+            border-color: #D6E1FF !important;
+            color: #1F46C5 !important;
+            font-weight: 700;
+            box-shadow: inset 3px 0 0 #2F5BEA;
+        }}
+        </style>
+        """
+    )
+    return str(active)
+
+
+def _ranking_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "综合名次": (
+                    str(row["rank"])
+                    if row["rank"] is not None
+                    else "暂无排名"
+                ),
+                "学生编号": row["student_code"],
+                "班级": row["class_code"],
+                "综合得分率": row["score_rate"],
+                "已观察主题": (
+                    f"{row['observed_theme_count']}/{row['total_theme_count']}"
+                ),
+                "证据状态": EVIDENCE_LABELS[row["evidence_status"]],
+            }
+            for row in rows
+        ]
+    )
+
+
+def _sorted_ranking(
+    rows: list[dict[str, Any]],
+    sort_mode: str,
+) -> list[dict[str, Any]]:
+    scored = [row for row in rows if row["score_rate"] is not None]
+    unscored = sorted(
+        (row for row in rows if row["score_rate"] is None),
+        key=lambda row: str(row["student_code"]),
+    )
+    if sort_mode == "综合得分升序":
+        scored = sorted(
+            scored,
+            key=lambda row: (
+                float(row["score_rate"]),
+                str(row["student_code"]),
+            ),
+        )
+    elif sort_mode == "按学生编号":
+        scored = sorted(scored, key=lambda row: str(row["student_code"]))
+    else:
+        scored = sorted(
+            scored,
+            key=lambda row: (
+                -float(row["score_rate"]),
+                str(row["student_code"]),
+            ),
+        )
+    return [*scored, *unscored]
+
+
+def _render_student_ranking(
+    dataset_id: str,
+    ranking: list[dict[str, Any]],
+) -> dict[str, Any]:
+    sort_key = f"analytics_student_ranking_sort_{dataset_id}"
+    selection_key = f"analytics_student_selected_{dataset_id}"
+    with st.container(
+        border=True,
+        key=f"analytics_student_ranking_card_{dataset_id}",
+    ):
+        heading, sort_column = st.columns(
+            [3, 1.6],
+            vertical_alignment="bottom",
+        )
+        heading.markdown("**学生综合排名**")
+        sort_mode = sort_column.segmented_control(
+            "排序方式",
+            STUDENT_RANKING_SORT_OPTIONS,
+            default=STUDENT_RANKING_SORT_OPTIONS[0],
+            required=True,
+            key=sort_key,
+            width="stretch",
+        )
+        heading.caption(
+            "综合得分率取有有效评分主题的算术平均；点击表格行切换当前学生。"
+        )
+        visible = _sorted_ranking(ranking, str(sort_mode))
+        valid_codes = {str(row["student_code"]) for row in ranking}
+        selected_code = str(st.session_state.get(selection_key) or "")
+        if selected_code not in valid_codes:
+            selected_code = str(visible[0]["student_code"])
+            st.session_state[selection_key] = selected_code
+        default_row = next(
+            (
+                index
+                for index, row in enumerate(visible)
+                if str(row["student_code"]) == selected_code
+            ),
+            0,
+        )
+        table_key = f"analytics_student_ranking_table_{dataset_id}"
+        applied_sort_key = f"{sort_key}_applied"
+        previous_sort = st.session_state.get(applied_sort_key)
+        if previous_sort is not None and previous_sort != sort_mode:
+            st.session_state[table_key] = {
+                "selection": {"rows": [default_row]}
+            }
+        st.session_state[applied_sort_key] = str(sort_mode)
+        event = st.dataframe(
+            _ranking_frame(visible),
+            hide_index=True,
+            width="stretch",
+            height=315,
+            on_select="rerun",
+            selection_mode="single-row",
+            selection_default={"selection": {"rows": [default_row]}},
+            key=table_key,
+            column_config={
+                "综合名次": st.column_config.TextColumn(
+                    "综合名次",
+                    width="small",
+                ),
+                "综合得分率": st.column_config.NumberColumn(
+                    "综合得分率",
+                    format="percent",
+                ),
+                "已观察主题": st.column_config.TextColumn(
+                    "已观察主题",
+                    width="small",
+                ),
+            },
+            alt="学生综合排名列表，可点击行切换当前学生",
+        )
+        selected_rows = list(event.selection.rows)
+        if selected_rows:
+            row_index = selected_rows[0]
+            if 0 <= row_index < len(visible):
+                selected_code = str(visible[row_index]["student_code"])
+                st.session_state[selection_key] = selected_code
+        selected = next(
+            row for row in ranking if str(row["student_code"]) == selected_code
+        )
+        st.caption(
+            f"当前学生：{selected['student_code']} · {selected['class_code']} · "
+            f"综合得分率 {selected['score_rate']:.1%}"
+            if selected["score_rate"] is not None
+            else f"当前学生：{selected['student_code']} · "
+            "暂无有效评分记录"
+        )
+    return selected
+
+
+def _render_theme_overview(
+    *,
+    dataset_id: str,
+    student_code: str,
+    node_code: str | None,
+    metrics: list[dict[str, Any]],
 ) -> None:
-    dataset = _dataset_selector(learning, key="analytics_student_dataset")
-    if dataset is None:
-        return
-    students = learning.list_records(dataset["id"], "student")
-    if not students:
-        st.info("该数据集尚未导入学生记录。")
-        return
-    student_code = st.selectbox(
-        "学生",
-        [row["student_code"] for row in students],
-        key="analytics_student_selector",
-    )
-    class_code = next(
-        str(row.get("class_code") or "未分班")
-        for row in students
-        if row["student_code"] == student_code
-    )
-    node_code = _node_selector(
-        learning,
-        dataset["id"],
-        key="analytics_student_node",
-    )
-    metrics = analytics.student_theme_metrics(dataset["id"], student_code, node_code)
-    if not metrics:
-        st.info("所选学生和节点没有作答记录。")
-        return
-    summary = st.columns(4)
-    summary[0].metric("主题数", len(metrics), border=True)
-    summary[1].metric(
-        "有效记录",
-        sum(item["scored_records"] for item in metrics),
+    scope_key = node_code or "all"
+    with st.container(
         border=True,
-    )
-    summary[2].metric(
-        "待评分/未作答",
-        sum(item["pending_records"] + item["unanswered_records"] for item in metrics),
-        border=True,
-    )
-    summary[3].metric(
-        "需补充观察",
-        sum(item["evidence_status"] != "sufficient" for item in metrics),
-        border=True,
-    )
-    radar_tab, indicator_tab, trend_tab, evidence_tab, diagnosis_tab = st.tabs(
-        ["主题概览", "观察指标", "节点变化", "依据与补充观察", "AI 诊断与教师复核"]
-    )
-    with radar_tab:
-        _render_radar(metrics)
-        st.dataframe(_metric_table(metrics), hide_index=True, width="stretch")
+        key=f"analytics_theme_overview_{dataset_id}_{student_code}_{scope_key}",
+    ):
+        st.subheader("主题概览", icon=":material/radar:")
+        available = [
+            metric
+            for metric in metrics
+            if metric.get("score_rate") is not None
+        ]
+        if available:
+            st.echarts_chart(
+                {
+                    "tooltip": {
+                        "trigger": "item",
+                        "valueFormatter": "percent",
+                    },
+                    "radar": {
+                        "indicator": [
+                            {"name": metric["theme_name"], "max": 1}
+                            for metric in available
+                        ],
+                        "radius": "62%",
+                        "splitNumber": 4,
+                    },
+                    "series": [
+                        {
+                            "type": "radar",
+                            "name": "主题得分率",
+                            "data": [
+                                {
+                                    "name": "主题得分率",
+                                    "value": [
+                                        float(metric["score_rate"])
+                                        for metric in available
+                                    ],
+                                }
+                            ],
+                        }
+                    ],
+                },
+                height=370,
+                key=f"analytics_student_radar_{dataset_id}_{student_code}_{scope_key}",
+                alt=f"{student_code} 当前范围主题得分率概览",
+            )
+            missing = [
+                metric["theme_name"]
+                for metric in metrics
+                if metric.get("score_rate") is None
+            ]
+            if missing:
+                st.caption("信息不足、未纳入雷达图的主题：" + "、".join(missing))
+        else:
+            st.info("当前范围没有可绘制的主题表现。")
+        st.dataframe(
+            _metric_table(metrics),
+            hide_index=True,
+            width="stretch",
+            alt="当前学生主题得分率与证据状态",
+        )
         st.download_button(
             "下载主题统计 CSV",
             data=_csv_text(metrics),
             file_name=f"{student_code}_主题统计.csv",
             mime="text/csv",
-            key="analytics_student_theme_csv",
+            key=f"analytics_student_theme_csv_{dataset_id}_{student_code}_{scope_key}",
         )
-    with indicator_tab:
+
+
+def _render_indicator_overview(
+    analytics: AnalyticsService,
+    *,
+    dataset_id: str,
+    student_code: str,
+    node_code: str | None,
+) -> None:
+    scope_key = node_code or "all"
+    with st.container(
+        border=True,
+        key=f"analytics_indicator_overview_{dataset_id}_{student_code}_{scope_key}",
+    ):
+        st.subheader("观察指标", icon=":material/query_stats:")
         indicators = analytics.student_indicator_metrics(
-            dataset["id"], student_code, node_code
+            dataset_id,
+            student_code,
+            node_code,
         )
-        figure = go.Figure(
-            go.Bar(
-                x=[(item["score_rate"] or 0) * 100 for item in indicators],
-                y=[item["indicator_name"] for item in indicators],
-                orientation="h",
-                marker_color=[EVIDENCE_COLORS[item["evidence_status"]] for item in indicators],
-                customdata=[
-                    [item["scored_records"], EVIDENCE_LABELS[item["evidence_status"]]]
-                    for item in indicators
-                ],
-                hovertemplate=(
-                    "%{y}<br>得分率：%{x:.1f}%<br>有效记录：%{customdata[0]}"
-                    "<br>%{customdata[1]}<extra></extra>"
-                ),
+        available = [
+            item for item in indicators if item.get("score_rate") is not None
+        ]
+        if available:
+            chart_rows = pd.DataFrame(
+                [
+                    {
+                        "观察指标": item["indicator_name"],
+                        "得分率": float(item["score_rate"]) * 100,
+                        "证据状态": EVIDENCE_LABELS[item["evidence_status"]],
+                    }
+                    for item in available
+                ]
             )
+            st.echarts_chart(
+                {
+                    "tooltip": {
+                        "trigger": "axis",
+                        "valueFormatter": "%.1f%%",
+                    },
+                    "grid": {
+                        "left": 20,
+                        "right": 36,
+                        "top": 20,
+                        "bottom": 20,
+                        "containLabel": True,
+                    },
+                    "dataset": {"source": chart_rows},
+                    "xAxis": {
+                        "type": "value",
+                        "min": 0,
+                        "max": 100,
+                        "axisLabel": {"formatter": "{value}%"},
+                    },
+                    "yAxis": {"type": "category"},
+                    "series": [
+                        {
+                            "type": "bar",
+                            "encode": {
+                                "x": "得分率",
+                                "y": "观察指标",
+                            },
+                            "barMaxWidth": 30,
+                        }
+                    ],
+                },
+                height=340,
+                key=(
+                    f"analytics_student_indicators_{dataset_id}_"
+                    f"{student_code}_{scope_key}"
+                ),
+                alt=f"{student_code} 当前范围观察指标得分率",
+            )
+        else:
+            st.info("当前范围没有可绘制的观察指标表现。")
+        st.dataframe(
+            _metric_table(indicators),
+            hide_index=True,
+            width="stretch",
+            alt="当前学生观察指标得分率与证据状态",
         )
-        figure.update_layout(
-            xaxis={"range": [0, 100], "title": "得分率（%）"},
-            margin={"l": 30, "r": 20, "t": 30, "b": 30},
-        )
-        st.plotly_chart(figure, width="stretch", key="analytics_student_indicators")
-        st.dataframe(_metric_table(indicators), hide_index=True, width="stretch")
-    with trend_tab:
-        theme_code = st.selectbox(
-            "主题",
-            [item["theme_code"] for item in metrics],
-            format_func=lambda value: next(
-                item["theme_name"] for item in metrics if item["theme_code"] == value
-            ),
-            key="analytics_student_trend_theme",
-        )
-        _render_trend(analytics, dataset["id"], student_code, theme_code)
-    with evidence_tab:
-        st.subheader("分析快照与变化")
+
+
+def _render_student_snapshots(
+    analytics: AnalyticsService,
+    *,
+    dataset_id: str,
+    student_code: str,
+    node_code: str | None,
+) -> None:
+    scope_key = node_code or "all"
+    with st.expander(
+        "分析快照与导出",
+        icon=":material/history:",
+        key=(
+            f"analytics_student_snapshots_{dataset_id}_"
+            f"{student_code}_{scope_key}"
+        ),
+        on_change="rerun",
+    ) as panel:
+        if not panel.open:
+            return
         snapshot_scope = {"student_code": student_code, "node_code": node_code}
-        if st.button("生成当前分析快照", key="analytics_student_snapshot_create"):
-            snapshot = analytics.create_snapshot(dataset["id"], snapshot_scope)
+        if st.button(
+            "生成当前分析快照",
+            key=(
+                f"analytics_student_snapshot_create_{dataset_id}_"
+                f"{student_code}_{scope_key}"
+            ),
+        ):
+            snapshot = analytics.create_snapshot(dataset_id, snapshot_scope)
             st.success(f"已保存分析快照 {snapshot['id']}")
-        snapshots = analytics.list_snapshots(dataset["id"])
+        snapshots = analytics.list_snapshots(dataset_id)
         matching_snapshots = [
             item for item in snapshots if item["scope"] == snapshot_scope
         ]
@@ -441,12 +647,26 @@ def render_student_analysis_page(
             snapshot_id = st.selectbox(
                 "与已保存快照比较",
                 [item["id"] for item in matching_snapshots],
-                key="analytics_student_snapshot_selector",
+                key=(
+                    f"analytics_student_snapshot_selector_{dataset_id}_"
+                    f"{student_code}_{scope_key}"
+                ),
             )
-            if st.button("查看前后变化", key="analytics_student_snapshot_compare"):
+            if st.button(
+                "查看前后变化",
+                key=(
+                    f"analytics_student_snapshot_compare_{dataset_id}_"
+                    f"{student_code}_{scope_key}"
+                ),
+            ):
                 comparison = analytics.compare_snapshot(snapshot_id)
                 if comparison["changes"]:
-                    st.dataframe(comparison["changes"], hide_index=True, width="stretch")
+                    st.dataframe(
+                        comparison["changes"],
+                        hide_index=True,
+                        width="stretch",
+                        alt="当前结果与所选分析快照的主题变化",
+                    )
                 else:
                     st.info("当前结果与所选快照没有主题表现或证据状态变化。")
                 if comparison["affected_record_codes"]:
@@ -455,48 +675,463 @@ def render_student_analysis_page(
                         + "、".join(comparison["affected_record_codes"])
                     )
         case_bundle = analytics.typical_case_bundle(
-            dataset["id"], student_code, node_code
+            dataset_id,
+            student_code,
+            node_code,
         )
         st.download_button(
             "下载当前学生典型案例 JSON",
             data=_json_text(case_bundle),
             file_name=f"{student_code}_典型案例.json",
             mime="application/json",
-            key="analytics_student_case_json",
+            key=(
+                f"analytics_student_case_json_{dataset_id}_"
+                f"{student_code}_{scope_key}"
+            ),
         )
-        if node_code is None:
-            st.info("请选择一个具体测验节点，以查看可回溯的作答证据和补充观察。")
+
+
+def _render_node_changes(
+    analytics: AnalyticsService,
+    *,
+    dataset_id: str,
+    student_code: str,
+    metrics: list[dict[str, Any]],
+    node_code: str | None,
+) -> None:
+    scope_key = node_code or "all"
+    with st.container(
+        border=True,
+        key=f"analytics_node_changes_{dataset_id}_{student_code}_{scope_key}",
+    ):
+        st.subheader("节点变化", icon=":material/timeline:")
+        if not metrics:
+            st.info("当前学生还没有可用于比较的主题记录。")
             return
         theme_code = st.selectbox(
-            "查看主题依据",
+            "查看主题",
             [item["theme_code"] for item in metrics],
             format_func=lambda value: next(
-                item["theme_name"] for item in metrics if item["theme_code"] == value
+                item["theme_name"]
+                for item in metrics
+                if item["theme_code"] == value
             ),
-            key="analytics_student_evidence_theme",
+            key=(
+                f"analytics_student_trend_theme_{dataset_id}_"
+                f"{student_code}_{scope_key}"
+            ),
         )
-        evidence = analytics.theme_evidence(
-            dataset["id"], student_code, node_code, theme_code
+        trend = analytics.student_theme_trend(
+            dataset_id,
+            student_code,
+            str(theme_code),
         )
-        st.caption("观察指标：" + "、".join(evidence["requirement_ids"]))
-        st.dataframe(evidence["records"], hide_index=True, width="stretch")
-        suggestions = analytics.supplemental_observations(
-            dataset["id"], student_code, node_code
-        )
-        if suggestions:
-            st.subheader("建议补充观察")
-            st.dataframe(suggestions, hide_index=True, width="stretch")
+        points = [
+            point
+            for point in trend["points"]
+            if point.get("score_rate") is not None
+        ]
+        if points:
+            trend_rows = pd.DataFrame(
+                [
+                    {
+                        "节点": (
+                            f"{point['node_code']} · "
+                            f"{point.get('test_date') or '未标日期'}"
+                        ),
+                        "得分率": float(point["score_rate"]) * 100,
+                        "证据状态": EVIDENCE_LABELS[
+                            point["evidence_status"]
+                        ],
+                    }
+                    for point in points
+                ]
+            )
+            st.echarts_chart(
+                {
+                    "tooltip": {
+                        "trigger": "axis",
+                        "valueFormatter": "%.1f%%",
+                    },
+                    "grid": {
+                        "left": 30,
+                        "right": 25,
+                        "top": 25,
+                        "bottom": 45,
+                        "containLabel": True,
+                    },
+                    "dataset": {"source": trend_rows},
+                    "xAxis": {
+                        "type": "category",
+                        "axisLabel": {"rotate": 15},
+                    },
+                    "yAxis": {
+                        "type": "value",
+                        "min": 0,
+                        "max": 100,
+                        "axisLabel": {"formatter": "{value}%"},
+                    },
+                    "series": [
+                        {
+                            "type": "line",
+                            "connectNulls": False,
+                            "symbolSize": 8,
+                            "encode": {"x": "节点", "y": "得分率"},
+                        }
+                    ],
+                },
+                height=330,
+                key=(
+                    f"analytics_student_trend_chart_{dataset_id}_"
+                    f"{student_code}_{scope_key}_{theme_code}"
+                ),
+                alt=f"{student_code} 所选主题在各测验节点的得分率变化",
+            )
+            st.dataframe(
+                trend_rows,
+                hide_index=True,
+                width="stretch",
+                alt="所选主题在各测验节点的得分率与证据状态",
+            )
         else:
-            st.success("当前指标均达到最小有效记录门槛。")
-    with diagnosis_tab:
+            st.info("所选主题没有可绘制的节点表现。")
+        if trend["status"] == "observable" and trend["delta"] is not None:
+            st.caption(
+                f"最近两个证据充分节点的得分率变化：{trend['delta']:+.1%}。"
+            )
+        elif trend["status"] != "observable":
+            st.warning(
+                "相邻节点证据不足，图中仅展示已有测验表现，不判定变化趋势。"
+            )
+        _render_student_snapshots(
+            analytics,
+            dataset_id=dataset_id,
+            student_code=student_code,
+            node_code=node_code,
+        )
+
+
+def _render_issue_card(
+    issue: dict[str, Any],
+    *,
+    kind: str,
+    scope_key: str,
+    class_view: bool = False,
+) -> None:
+    theme_code = str(issue["theme_code"])
+    with st.container(
+        border=True,
+        key=f"analytics_issue_{kind}_{scope_key}_{theme_code}",
+    ):
+        title, rate, comparison = st.columns([3, 1.2, 1.5])
+        title.markdown(f"**{issue['theme_name']}**")
+        title.caption(issue["reason"])
+        rate.metric(
+            "班级平均得分率" if class_view else "当前得分率",
+            f"{float(issue['score_rate']):.1%}",
+        )
+        if kind == "personalized":
+            comparison.metric(
+                "较班级平均",
+                f"{float(issue['delta']):+.1%}",
+                border=False,
+            )
+            comparison.caption(
+                f"班级平均 {float(issue['class_score_rate']):.1%}"
+            )
+        elif class_view:
+            comparison.metric(
+                "有效观察",
+                f"{int(issue['student_count'])} 人",
+            )
+            comparison.caption(f"有效评分 {int(issue['scored_records'])} 条")
+        else:
+            comparison.metric("证据状态", "证据充分")
+            comparison.caption("已达到巩固判定门槛")
+        with st.expander(
+            "依据来源与对应记录",
+            icon=":material/source:",
+            key=f"analytics_issue_evidence_{kind}_{scope_key}_{theme_code}",
+            on_change="rerun",
+        ) as evidence_panel:
+            if not evidence_panel.open:
+                return
+            st.markdown("**依据来源**")
+            source_rows = issue.get("sources", [])
+            if source_rows:
+                st.dataframe(
+                    source_rows,
+                    hide_index=True,
+                    width="stretch",
+                    alt=f"{issue['theme_name']}的课标、教材与指标依据",
+                )
+            else:
+                st.caption("当前主题没有关联的课程要求来源。")
+            st.markdown("**对应作答记录**")
+            record_rows = issue.get("records", [])
+            if record_rows:
+                st.dataframe(
+                    record_rows,
+                    hide_index=True,
+                    width="stretch",
+                    alt=f"{issue['theme_name']}对应的有效评分记录",
+                )
+            else:
+                st.caption("当前范围没有可追溯的有效评分记录。")
+
+
+def _render_problem_analysis(
+    analytics: AnalyticsService,
+    diagnosis: StudentDiagnosisService,
+    profile: ProviderProfile | None,
+    *,
+    dataset_id: str,
+    student_code: str,
+    node_code: str | None,
+) -> None:
+    analysis = analytics.student_issue_analysis(
+        dataset_id,
+        student_code,
+        node_code,
+    )
+    scope_key = f"{dataset_id}_{student_code}_{node_code or 'all'}"
+    summary = st.columns(4)
+    summary[0].metric(
+        "需要巩固",
+        len(analysis["need_consolidation"]),
+        border=True,
+    )
+    summary[1].metric(
+        "个性化问题",
+        len(analysis["personalized"]),
+        border=True,
+    )
+    summary[2].metric(
+        "共性问题",
+        len(analysis["common"]),
+        border=True,
+    )
+    summary[3].metric(
+        "待补充观察",
+        len(analysis["supplemental"]),
+        border=True,
+    )
+    st.caption(
+        f"判定阈值：证据充分且得分率低于 {analysis['threshold']:.0%}；"
+        "证据不足、待评分和未作答不判为问题。"
+    )
+
+    st.subheader("需要巩固的内容", icon=":material/priority_high:")
+    need_consolidation = sorted(
+        analysis["need_consolidation"],
+        key=lambda item: float(item["score_rate"]),
+    )
+    if need_consolidation:
+        for issue in need_consolidation:
+            _render_issue_card(
+                issue,
+                kind="consolidation",
+                scope_key=scope_key,
+            )
+    else:
+        st.success("当前没有达到证据门槛且低于巩固阈值的主题。")
+
+    st.subheader("个性化问题", icon=":material/person_alert:")
+    personalized = sorted(
+        analysis["personalized"],
+        key=lambda item: float(item["delta"]),
+    )
+    if personalized:
+        for issue in personalized:
+            _render_issue_card(
+                issue,
+                kind="personalized",
+                scope_key=scope_key,
+            )
+    else:
+        st.success("当前学生在已充分观察的主题中没有低于同班平均的表现。")
+
+    st.subheader("共性问题", icon=":material/groups:")
+    common = sorted(
+        analysis["common"],
+        key=lambda item: float(item["score_rate"]),
+    )
+    if common:
+        for issue in common:
+            _render_issue_card(
+                issue,
+                kind="common",
+                scope_key=scope_key,
+                class_view=True,
+            )
+    else:
+        st.success("当前班级在已充分观察的主题中没有低于巩固阈值的共性表现。")
+
+    st.subheader("待补充观察", icon=":material/visibility:")
+    if analysis["supplemental"]:
+        st.caption(
+            "以下主题证据不足，只建议补充观察，不形成掌握或未掌握结论。"
+        )
+        st.dataframe(
+            [
+                {
+                    "主题": item["theme_name"],
+                    "证据状态": EVIDENCE_LABELS[item["evidence_status"]],
+                    "有效评分": item["scored_records"],
+                    "待评分": item["pending_records"],
+                    "未作答": item["unanswered_records"],
+                    "说明": item["reason"],
+                }
+                for item in analysis["supplemental"]
+            ],
+            hide_index=True,
+            width="stretch",
+            alt=f"{student_code} 证据不足、需要补充观察的主题",
+        )
+        suggestions = analytics.supplemental_observations(
+            dataset_id,
+            student_code,
+            node_code or "",
+        ) if node_code is not None else []
+        if suggestions:
+            st.dataframe(
+                suggestions,
+                hide_index=True,
+                width="stretch",
+                alt="可补充观察的已有题目与材料",
+            )
+    else:
+        st.success("当前学生的已导入主题均达到最小有效记录门槛。")
+
+    with st.expander(
+        "AI 诊断与教师复核",
+        icon=":material/clinical_notes:",
+        key=f"analytics_ai_diagnosis_{scope_key}",
+        on_change="rerun",
+    ) as diagnosis_panel:
+        if not diagnosis_panel.open:
+            return
         _render_ai_diagnosis_tab(
+            diagnosis,
+            profile,
+            dataset_id=dataset_id,
+            student_code=student_code,
+            class_code=analysis["class_code"],
+            node_code=node_code,
+        )
+
+
+def render_student_analysis_page(
+    analytics: AnalyticsService,
+    learning: LearningDataService,
+    diagnosis: StudentDiagnosisService,
+    profile: ProviderProfile | None,
+) -> None:
+    section = _render_student_analysis_top_nav()
+    dataset = _dataset_selector(learning, key="analytics_student_dataset")
+    if dataset is None:
+        return
+    ranking = analytics.student_performance_ranking(dataset["id"])
+    if not ranking:
+        st.info("该数据集尚未导入学生记录。")
+        return
+    selected = _render_student_ranking(dataset["id"], ranking)
+    student_code = str(selected["student_code"])
+    node_code = _node_selector(
+        learning,
+        dataset["id"],
+        key=f"analytics_student_node_{dataset['id']}",
+    )
+    metrics = analytics.student_theme_metrics(
+        dataset["id"],
+        student_code,
+        node_code,
+    )
+
+    if section == "问题分析":
+        _render_problem_analysis(
+            analytics,
             diagnosis,
             profile,
             dataset_id=dataset["id"],
             student_code=student_code,
-            class_code=class_code,
             node_code=node_code,
         )
+        return
+
+    observed_metrics = [
+        metric for metric in metrics if metric.get("score_rate") is not None
+    ]
+    scope_score_rate = (
+        sum(float(metric["score_rate"]) for metric in observed_metrics)
+        / len(observed_metrics)
+        if observed_metrics
+        else None
+    )
+    st.subheader("数据统计标签", icon=":material/label:")
+    with st.grid("auto", min_column_width=150, gap="small"):
+        st.metric(
+            "当前范围综合得分率",
+            (
+                f"{scope_score_rate:.1%}"
+                if scope_score_rate is not None
+                else "—"
+            ),
+            border=True,
+            height="stretch",
+        )
+        st.metric(
+            "综合名次",
+            f"第 {selected['rank']} 名" if selected["rank"] else "暂无排名",
+            border=True,
+            height="stretch",
+        )
+        st.metric(
+            "有效评分",
+            sum(int(item["scored_records"]) for item in metrics),
+            border=True,
+            height="stretch",
+        )
+        st.metric(
+            "待评分/未作答",
+            sum(
+                int(item["pending_records"]) + int(item["unanswered_records"])
+                for item in metrics
+            ),
+            border=True,
+            height="stretch",
+        )
+        st.metric(
+            "需补充观察",
+            sum(
+                item["evidence_status"] != "sufficient"
+                for item in metrics
+            ),
+            border=True,
+            height="stretch",
+        )
+    if not metrics:
+        st.info("所选学生和节点没有作答记录。")
+        return
+    _render_theme_overview(
+        dataset_id=dataset["id"],
+        student_code=student_code,
+        node_code=node_code,
+        metrics=metrics,
+    )
+    _render_indicator_overview(
+        analytics,
+        dataset_id=dataset["id"],
+        student_code=student_code,
+        node_code=node_code,
+    )
+    _render_node_changes(
+        analytics,
+        dataset_id=dataset["id"],
+        student_code=student_code,
+        metrics=metrics,
+        node_code=node_code,
+    )
 
 
 def render_class_analysis_page(

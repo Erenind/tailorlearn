@@ -463,3 +463,168 @@ def test_typical_case_bundle_keeps_evidence_status_and_traceable_records(
     assert bundle["student_code"] == "D01"
     assert bundle["themes"][0]["evidence_status"] == "limited"
     assert bundle["evidence"]["T01"]["records"][0]["record_code"] == "DR001"
+
+
+def test_student_ranking_uses_theme_rate_mean_and_competition_ranks(
+    tmp_path: Path,
+) -> None:
+    repository, learning, dataset_id = _services(tmp_path)
+    _seed_base(learning, dataset_id)
+    learning.create_record(
+        dataset_id,
+        "requirement",
+        {
+            "theme_code": "T02",
+            "theme_name": "方程",
+            "theme_goal": "理解方程",
+            "indicator_code": "T02I1",
+            "indicator_name": "解方程",
+            "standard_ref": "CR02",
+            "standard_page": "2/2",
+            "textbook_page": "2",
+        },
+    )
+    for student_code in ("D02", "D03", "D04"):
+        learning.create_record(
+            dataset_id,
+            "student",
+            {
+                "student_code": student_code,
+                "class_code": "DC01",
+                "grade": 7,
+            },
+        )
+    for index in range(1, 4):
+        learning.create_record(
+            dataset_id,
+            "material",
+            {
+                "material_code": f"Q1{index:02d}",
+                "theme_code": "T02",
+                "material_type": "题目",
+                "question_type": "填空",
+                "content": f"第二主题题目 {index}",
+                "full_score": 1,
+                "indicator_codes": "T02I1",
+                "source": "测试",
+            },
+        )
+
+    def add_theme_answers(
+        student: str,
+        *,
+        theme: str,
+        materials: tuple[str, ...],
+        score: int,
+    ) -> None:
+        for index, material in enumerate(materials, start=1):
+            learning.create_record(
+                dataset_id,
+                "answer",
+                {
+                    "record_code": f"DR-{student}-{theme}-{index}",
+                    "student_code": student,
+                    "material_code": material,
+                    "theme_code": theme,
+                    "node_code": "N01",
+                    "answer_event_code": f"E-{student}-{theme}-{index}",
+                    "revision": 1,
+                    "submitted_at": "2026-01-20T09:00:00",
+                    "grading_status": "已评分",
+                    "score": score,
+                    "full_score": 1,
+                },
+            )
+
+    add_theme_answers(
+        "D01",
+        theme="T01",
+        materials=("Q001", "Q002", "Q003"),
+        score=1,
+    )
+    add_theme_answers(
+        "D01",
+        theme="T02",
+        materials=("Q101", "Q102", "Q103"),
+        score=0,
+    )
+    add_theme_answers(
+        "D02",
+        theme="T01",
+        materials=("Q001", "Q002", "Q003"),
+        score=0,
+    )
+    add_theme_answers(
+        "D02",
+        theme="T02",
+        materials=("Q101", "Q102", "Q103"),
+        score=1,
+    )
+    add_theme_answers(
+        "D03",
+        theme="T01",
+        materials=("Q001", "Q002", "Q003"),
+        score=1,
+    )
+    add_theme_answers(
+        "D03",
+        theme="T02",
+        materials=("Q101", "Q102", "Q103"),
+        score=1,
+    )
+
+    analytics = import_module("tailorlearn.analytics").AnalyticsService(repository)
+    ranking = analytics.student_performance_ranking(dataset_id)
+
+    assert [
+        (row["student_code"], row["score_rate"], row["rank"])
+        for row in ranking
+    ] == [
+        ("D03", 1.0, 1),
+        ("D01", 0.5, 2),
+        ("D02", 0.5, 2),
+        ("D04", None, None),
+    ]
+    assert ranking[-1]["evidence_status"] == "insufficient"
+
+
+def test_student_issue_analysis_distinguishes_threshold_and_class_comparison(
+    tmp_path: Path,
+) -> None:
+    repository, learning, dataset_id = _services(tmp_path)
+    _seed_base(learning, dataset_id)
+    for student_index in range(2, 6):
+        learning.create_record(
+            dataset_id,
+            "student",
+            {
+                "student_code": f"D{student_index:02d}",
+                "class_code": "DC01",
+                "grade": 7,
+            },
+        )
+    for student_index in range(1, 6):
+        student = f"D{student_index:02d}"
+        for material_index in range(1, 4):
+            score = 0 if student_index == 1 else int(material_index == 1)
+            _answer(
+                learning,
+                dataset_id,
+                record=f"DR{student_index}{material_index}",
+                event=f"E{student_index}{material_index}",
+                material=f"Q{material_index:03d}",
+                score=score,
+                student=student,
+            )
+
+    analytics = import_module("tailorlearn.analytics").AnalyticsService(repository)
+    analysis = analytics.student_issue_analysis(dataset_id, "D01", "N01")
+
+    assert analysis["threshold"] == 0.6
+    assert [item["theme_code"] for item in analysis["need_consolidation"]] == ["T01"]
+    assert [item["theme_code"] for item in analysis["personalized"]] == ["T01"]
+    assert analysis["personalized"][0]["delta"] < 0
+    assert [item["theme_code"] for item in analysis["common"]] == ["T01"]
+    assert analysis["common"][0]["student_count"] == 5
+    assert analysis["common"][0]["sources"][0]["课标依据"] == "CR01 · 第 62/55 页"
+    assert analysis["common"][0]["records"][0]["记录编号"]

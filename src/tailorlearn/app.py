@@ -8,15 +8,12 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
+import tailorlearn.analytics as analytics_module
+import tailorlearn.analytics_ui as analytics_ui_module
 import tailorlearn.db as database_module
 import tailorlearn.learning_data_ui as learning_data_ui_module
 import tailorlearn.outline as outline_module
 import tailorlearn.outline_ui as outline_ui_module
-from tailorlearn.analytics import AnalyticsService
-from tailorlearn.analytics_ui import (
-    render_class_analysis_page,
-    render_student_analysis_page,
-)
 from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.extraction import page_as_png
 from tailorlearn.ingest import IngestionService
@@ -35,9 +32,24 @@ from tailorlearn.ui import (
 
 
 _REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
+_ANALYTICS_SERVICE_API_VERSION = "2026-11-11-student-ranking-issues"
+_ANALYTICS_UI_API_VERSION = "2026-11-11-student-ranking-issues-v3"
 _LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
+if (
+    getattr(analytics_module, "ANALYTICS_SERVICE_VERSION", None)
+    != _ANALYTICS_SERVICE_API_VERSION
+):
+    analytics_module = importlib.reload(analytics_module)
+AnalyticsService = analytics_module.AnalyticsService
+if (
+    getattr(analytics_ui_module, "ANALYTICS_UI_VERSION", None)
+    != _ANALYTICS_UI_API_VERSION
+):
+    analytics_ui_module = importlib.reload(analytics_ui_module)
+render_class_analysis_page = analytics_ui_module.render_class_analysis_page
+render_student_analysis_page = analytics_ui_module.render_student_analysis_page
 if (
     getattr(database_module, "REPOSITORY_API_VERSION", None)
     != _REPOSITORY_API_VERSION
@@ -72,7 +84,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-11-outline-history-state-fix"
+_APP_SERVICES_CACHE_VERSION = "2026-11-11-student-ranking-issues"
 
 
 @st.cache_resource

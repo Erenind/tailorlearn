@@ -9,6 +9,10 @@ from tailorlearn.db import Repository, utc_now
 from tailorlearn.learning_data import split_multi_value
 
 
+ANALYTICS_SERVICE_VERSION = "2026-11-11-student-ranking-issues"
+ISSUE_SCORE_RATE_THRESHOLD = 0.6
+
+
 class AnalyticsService:
     """Derive evidence-aware learning metrics from a single dataset."""
 
@@ -150,6 +154,328 @@ class AnalyticsService:
                 }
             )
         return metrics
+
+    def student_performance_ranking(
+        self,
+        dataset_id: str,
+    ) -> list[dict[str, Any]]:
+        """Rank students by the arithmetic mean of their observed theme rates."""
+        student_rows = self._dataset_rows("learning_students", dataset_id)
+        requirement_rows = self._dataset_rows(
+            "learning_requirements",
+            dataset_id,
+        )
+        total_theme_count = len(
+            {
+                str(row["theme_code"])
+                for row in requirement_rows
+                if row.get("theme_code")
+            }
+        )
+        ranking: list[dict[str, Any]] = []
+        for student in student_rows:
+            student_code = str(student["student_code"])
+            metrics = self.student_theme_metrics(dataset_id, student_code)
+            observed = [
+                metric
+                for metric in metrics
+                if metric.get("score_rate") is not None
+            ]
+            score_rate = (
+                sum(float(metric["score_rate"]) for metric in observed)
+                / len(observed)
+                if observed
+                else None
+            )
+            observed_theme_count = len(observed)
+            sufficient_theme_count = sum(
+                metric["evidence_status"] == "sufficient"
+                for metric in observed
+            )
+            if score_rate is None:
+                evidence_status = "insufficient"
+            elif (
+                observed_theme_count == total_theme_count
+                and sufficient_theme_count == total_theme_count
+            ):
+                evidence_status = "sufficient"
+            else:
+                evidence_status = "limited"
+            ranking.append(
+                {
+                    "student_code": student_code,
+                    "class_code": str(student.get("class_code") or "未分班"),
+                    "grade": student.get("grade"),
+                    "score_rate": score_rate,
+                    "valid_records": sum(
+                        int(metric["scored_records"]) for metric in observed
+                    ),
+                    "observed_theme_count": observed_theme_count,
+                    "total_theme_count": total_theme_count,
+                    "evidence_status": evidence_status,
+                    "rank": None,
+                }
+            )
+
+        ranked_rates = sorted(
+            {
+                round(float(row["score_rate"]), 12)
+                for row in ranking
+                if row["score_rate"] is not None
+            },
+            reverse=True,
+        )
+        rank_by_rate = {
+            score_rate: index + 1
+            for index, score_rate in enumerate(ranked_rates)
+        }
+        for row in ranking:
+            if row["score_rate"] is not None:
+                row["rank"] = rank_by_rate[round(float(row["score_rate"]), 12)]
+        return sorted(
+            ranking,
+            key=lambda row: (
+                row["score_rate"] is None,
+                -float(row["score_rate"] or 0),
+                str(row["student_code"]),
+            ),
+        )
+
+    def _theme_issue_evidence(
+        self,
+        dataset_id: str,
+        *,
+        theme_code: str,
+        student_code: str,
+        node_code: str | None,
+        class_code: str | None = None,
+    ) -> dict[str, list[dict[str, Any]]]:
+        requirement_rows = [
+            row
+            for row in self._dataset_rows("learning_requirements", dataset_id)
+            if row.get("theme_code") == theme_code
+        ]
+        source_rows = [
+            {
+                "主题": row.get("theme_name") or theme_code,
+                "观察指标": row.get("indicator_name") or row["indicator_code"],
+                "指标编号": row["indicator_code"],
+                "主题目标": row.get("theme_goal") or "",
+                "课标依据": " · ".join(
+                    value
+                    for value in (
+                        str(row.get("standard_ref") or ""),
+                        (
+                            f"第 {row['standard_page']} 页"
+                            if row.get("standard_page")
+                            else ""
+                        ),
+                    )
+                    if value
+                ),
+                "教材正文": (
+                    f"第 {row['textbook_page']} 页"
+                    if row.get("textbook_page")
+                    else ""
+                ),
+            }
+            for row in requirement_rows
+        ]
+        student_rows = self._dataset_rows("learning_students", dataset_id)
+        student_by_code = {
+            str(row["student_code"]): row for row in student_rows
+        }
+        material_by_code = {
+            str(row["material_code"]): row
+            for row in self._dataset_rows("learning_materials", dataset_id)
+        }
+        nodes = {
+            str(row["node_code"])
+            for row in self._dataset_rows("learning_nodes", dataset_id)
+        }
+        themes = {
+            str(row["theme_code"])
+            for row in self._dataset_rows("learning_requirements", dataset_id)
+            if row.get("theme_code")
+        }
+        records: list[dict[str, Any]] = []
+        for answer in self._latest_answers(dataset_id):
+            answer_student = str(answer.get("student_code") or "")
+            if class_code is not None:
+                student = student_by_code.get(answer_student)
+                if (
+                    student is None
+                    or str(student.get("class_code") or "未分班") != class_code
+                ):
+                    continue
+            elif answer_student != student_code:
+                continue
+            if answer.get("theme_code") != theme_code:
+                continue
+            if node_code is not None and answer.get("node_code") != node_code:
+                continue
+            if not self._is_valid_scored_answer(
+                answer,
+                students=set(student_by_code),
+                materials=set(material_by_code),
+                nodes=nodes,
+                themes=themes,
+            ):
+                continue
+            material = material_by_code[str(answer["material_code"])]
+            records.append(
+                {
+                    "学生编号": answer_student,
+                    "记录编号": answer["record_code"],
+                    "节点编号": answer.get("node_code") or "",
+                    "材料编号": answer["material_code"],
+                    "题干或内容": material.get("content") or "",
+                    "得分": answer["score"],
+                    "满分": answer["full_score"],
+                    "题目来源": material.get("source") or "",
+                    "提交时间": answer.get("submitted_at") or "",
+                }
+            )
+        return {"sources": source_rows, "records": records}
+
+    def student_issue_analysis(
+        self,
+        dataset_id: str,
+        student_code: str,
+        node_code: str | None = None,
+    ) -> dict[str, Any]:
+        """Classify evidence-backed student and class issues deterministically."""
+        student_rows = self._dataset_rows("learning_students", dataset_id)
+        student = next(
+            (
+                row
+                for row in student_rows
+                if str(row["student_code"]) == student_code
+            ),
+            None,
+        )
+        if student is None:
+            raise ValueError("找不到当前学生")
+        class_code = str(student.get("class_code") or "未分班")
+        student_metrics = {
+            str(metric["theme_code"]): metric
+            for metric in self.student_theme_metrics(
+                dataset_id,
+                student_code,
+                node_code,
+            )
+        }
+        class_metrics = {
+            str(metric["theme_code"]): metric
+            for metric in self.class_theme_metrics(dataset_id, node_code)
+            if metric["class_code"] == class_code
+        }
+
+        def evidence(theme_code: str, *, common: bool = False) -> dict[str, Any]:
+            return self._theme_issue_evidence(
+                dataset_id,
+                theme_code=theme_code,
+                student_code=student_code,
+                node_code=node_code,
+                class_code=class_code if common else None,
+            )
+
+        need_consolidation: list[dict[str, Any]] = []
+        personalized: list[dict[str, Any]] = []
+        for theme_code, metric in sorted(student_metrics.items()):
+            score_rate = metric.get("score_rate")
+            if (
+                metric["evidence_status"] != "sufficient"
+                or score_rate is None
+            ):
+                continue
+            if float(score_rate) < ISSUE_SCORE_RATE_THRESHOLD:
+                need_consolidation.append(
+                    {
+                        "theme_code": theme_code,
+                        "theme_name": metric["theme_name"],
+                        "score_rate": float(score_rate),
+                        "reason": (
+                            f"当前主题得分率为 {float(score_rate):.1%}，"
+                            f"低于 {ISSUE_SCORE_RATE_THRESHOLD:.0%} 的巩固阈值。"
+                        ),
+                        **evidence(theme_code),
+                    }
+                )
+            class_metric = class_metrics.get(theme_code)
+            if (
+                class_metric is None
+                or class_metric.get("score_rate") is None
+                or class_metric["evidence_status"] != "sufficient"
+            ):
+                continue
+            class_rate = float(class_metric["score_rate"])
+            if float(score_rate) < class_rate:
+                personalized.append(
+                    {
+                        "theme_code": theme_code,
+                        "theme_name": metric["theme_name"],
+                        "score_rate": float(score_rate),
+                        "class_score_rate": class_rate,
+                        "delta": float(score_rate) - class_rate,
+                        "reason": (
+                            f"低于 {class_code} 同节点平均 "
+                            f"{float(score_rate) - class_rate:+.1%}。"
+                        ),
+                        **evidence(theme_code),
+                    }
+                )
+
+        common: list[dict[str, Any]] = []
+        for theme_code, metric in sorted(class_metrics.items()):
+            score_rate = metric.get("score_rate")
+            if (
+                metric["evidence_status"] != "sufficient"
+                or score_rate is None
+                or float(score_rate) >= ISSUE_SCORE_RATE_THRESHOLD
+            ):
+                continue
+            common.append(
+                {
+                    "theme_code": theme_code,
+                    "theme_name": metric["theme_name"],
+                    "class_code": class_code,
+                    "score_rate": float(score_rate),
+                    "student_count": int(metric["student_count"]),
+                    "scored_records": int(metric["scored_records"]),
+                    "reason": (
+                        f"{class_code} 同节点平均得分率为 "
+                        f"{float(score_rate):.1%}，低于 "
+                        f"{ISSUE_SCORE_RATE_THRESHOLD:.0%}。"
+                    ),
+                    **evidence(theme_code, common=True),
+                }
+            )
+
+        supplemental = [
+            {
+                "theme_code": theme_code,
+                "theme_name": metric["theme_name"],
+                "evidence_status": metric["evidence_status"],
+                "scored_records": int(metric["scored_records"]),
+                "pending_records": int(metric.get("pending_records", 0)),
+                "unanswered_records": int(metric.get("unanswered_records", 0)),
+                "reason": (
+                    f"仅有 {int(metric['scored_records'])} 条有效评分记录，"
+                    "未达到主题巩固判定条件。"
+                ),
+            }
+            for theme_code, metric in sorted(student_metrics.items())
+            if metric["evidence_status"] != "sufficient"
+        ]
+        return {
+            "class_code": class_code,
+            "threshold": ISSUE_SCORE_RATE_THRESHOLD,
+            "need_consolidation": need_consolidation,
+            "personalized": personalized,
+            "common": common,
+            "supplemental": supplemental,
+        }
 
     def student_theme_trend(
         self,

@@ -93,5 +93,23 @@ def test_streamlit_renders_student_and_class_analysis_navigation(
     at.button(key="nav_student").click().run()
     assert not at.exception
     assert any(item.value == "学生分析" for item in at.title)
-    assert any(item.label == "AI 诊断与教师复核" for item in at.tabs)
+    assert at.button(key="student_analysis_nav_overview").label.endswith("数据概览")
+    assert at.button(key="student_analysis_nav_issues").label.endswith("问题分析")
+    assert any(item.value == "数据统计标签" for item in at.subheader)
+    ranking = at.dataframe(
+        key=f"analytics_student_ranking_table_{dataset_id}"
+    ).value
+    assert ranking.loc[0, "综合名次"] == "1"
+    assert ranking.loc[0, "学生编号"] == "D01"
+    assert ranking.loc[0, "综合得分率"] == 1.0
+
+    at.button(key="student_analysis_nav_issues").click().run()
+    assert not at.exception
+    assert any(item.value == "需要巩固的内容" for item in at.subheader)
+    assert any(item.value == "个性化问题" for item in at.subheader)
+    assert any(item.value == "共性问题" for item in at.subheader)
+    assert any(
+        item.label == "AI 诊断与教师复核"
+        for item in at.expander
+    )
     st.cache_resource.clear()
