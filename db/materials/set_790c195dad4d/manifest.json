@@ -23,7 +23,7 @@
       "stored_path": "materials/set_790c195dad4d/doc_1183b95c_5dad4d/source/original.pdf",
       "page_count": 189,
       "order_index": 1,
-      "extraction_status": "succeeded",
+      "extraction_status": "running",
       "extraction_method": "text-first-ocr-fallback",
       "metadata_json": "{}",
       "created_at": "2026-11-08T03:39:31+00:00",

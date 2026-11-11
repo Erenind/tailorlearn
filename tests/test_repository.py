@@ -95,3 +95,101 @@ def test_repository_units_status_versions_and_soft_delete(tmp_path):
     assert deleted[0]["deleted_at"]
     assert repo.restore_units(ids) == 1
     assert len(repo.list_units(document_id="doc_test")) == 1
+
+
+def test_repository_updates_section_text_and_descendant_paths(tmp_path):
+    repo = Repository(tmp_path / "catalog.sqlite3")
+    repo.initialize()
+    material = repo.create_material_set(
+        name="测试课程标准",
+        material_type="curriculum_standard",
+    )
+    document, _ = repo.add_document(
+        document_id="doc_standard",
+        material_set_id=material["id"],
+        file_name="standard.pdf",
+        sha256="standard",
+        stored_path="materials/standard.pdf",
+        order_index=1,
+        page_count=2,
+    )
+    parent = ExtractedSection(
+        id="doc_standard_p001_s001",
+        document_id=document["id"],
+        path="第一章 课程内容",
+        title="第一章 课程内容",
+        level=1,
+        order_index=1,
+        page_start=1,
+        page_end=2,
+        content="原章节内容",
+    )
+    child = ExtractedSection(
+        id="doc_standard_p001_s002",
+        document_id=document["id"],
+        parent_id=parent.id,
+        path="第一章 课程内容 / 数与代数",
+        title="数与代数",
+        level=2,
+        order_index=2,
+        page_start=1,
+        page_end=1,
+        content="子章节内容",
+    )
+    repo.replace_sections(document["id"], [parent, child])
+
+    repo.update_section(
+        section_id=parent.id,
+        title="课程内容（修订）",
+        content="修订后的章节内容",
+    )
+
+    sections = repo.list_sections(document["id"])
+    assert sections[0]["title"] == "课程内容（修订）"
+    assert sections[0]["path"] == "课程内容（修订）"
+    assert sections[0]["content"] == "修订后的章节内容"
+    assert sections[0]["page_start"] == 1
+    assert sections[0]["level"] == 1
+    assert sections[1]["path"] == "课程内容（修订） / 数与代数"
+    assert sections[1]["content"] == "子章节内容"
+
+
+def test_repository_soft_deletes_document(tmp_path):
+    repo = Repository(tmp_path / "catalog.sqlite3")
+    repo.initialize()
+    material = repo.create_material_set(
+        name="测试课本",
+        material_type="textbook",
+    )
+    document, _ = repo.add_document(
+        document_id="doc_slice",
+        material_set_id=material["id"],
+        file_name="slice.pdf",
+        sha256="slice",
+        stored_path="materials/slice.pdf",
+        order_index=1,
+        page_count=1,
+    )
+
+    assert repo.soft_delete_document(document["id"]) is True
+    assert repo.list_documents(material["id"]) == []
+    deleted = repo.get_document(document["id"])
+    assert deleted is not None
+    assert deleted["deleted_at"]
+    assert repo.soft_delete_document(document["id"]) is False
+
+    restored, inserted = repo.add_document(
+        document_id=document["id"],
+        material_set_id=material["id"],
+        file_name="slice-restored.pdf",
+        sha256="slice",
+        stored_path="materials/slice.pdf",
+        order_index=2,
+        page_count=1,
+    )
+    assert inserted is True
+    assert restored["id"] == document["id"]
+    assert restored["deleted_at"] is None
+    assert restored["file_name"] == "slice-restored.pdf"
+    assert restored["order_index"] == 2
+    assert len(repo.list_documents(material["id"])) == 1

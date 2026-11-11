@@ -43,7 +43,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-11-remove-direct-pdf-ai"
+_APP_SERVICES_CACHE_VERSION = "2026-11-11-restore-deleted-slices"
 
 
 @st.cache_resource
@@ -630,6 +630,53 @@ def _document_label(documents: list[dict[str, Any]], document_id: str) -> str:
     return f"{document['order_index']}. {document['file_name']} · {document['extraction_status']}"
 
 
+def _render_document_delete_control(
+    document: dict[str, Any],
+    material_set_id: str,
+    *,
+    button_prefix: str,
+) -> None:
+    confirm_key = f"{button_prefix}_confirm_{document['id']}"
+    if st.session_state.get(confirm_key):
+        st.warning(
+            f"确认删除切片“{document['file_name']}”？"
+            "删除后将从材料目录和导出清单中移除。"
+        )
+        with st.container(horizontal=True):
+            if st.button(
+                "确认删除",
+                key=f"{button_prefix}_confirm_delete_{document['id']}",
+            ):
+                try:
+                    deleted = REPO.soft_delete_document(document["id"])
+                    if not deleted:
+                        raise ValueError("该切片不存在或已被删除")
+                    INGEST.sync_material_exports(material_set_id)
+                except Exception as exc:
+                    st.error(str(exc))
+                else:
+                    st.session_state.pop(confirm_key, None)
+                    st.session_state["_material_slice_notice"] = (
+                        f"已删除切片“{document['file_name']}”"
+                    )
+                    st.rerun()
+            if st.button(
+                "取消",
+                key=f"{button_prefix}_cancel_{document['id']}",
+            ):
+                st.session_state.pop(confirm_key, None)
+                st.rerun()
+        return
+    if st.button(
+        "删除切片",
+        icon=":material/delete:",
+        key=f"{button_prefix}_{document['id']}",
+        width="stretch",
+    ):
+        st.session_state[confirm_key] = True
+        st.rerun()
+
+
 def _render_material_browser_path(
     material_type: str,
     material: dict[str, Any] | None,
@@ -670,6 +717,8 @@ def _render_material_browser_path(
 
 def _render_material_unit_workspace(
     units: list[dict[str, Any]],
+    *,
+    show_status: bool = True,
 ) -> None:
     status_labels = {
         UnitStatus.VERIFIED.value: "已确认",
@@ -685,13 +734,29 @@ def _render_material_unit_workspace(
     content_blocks: list[str] = []
     for unit in units:
         anchor_id = f"tl-unit-{unit['id']}"
-        status = status_labels.get(unit["status"], unit["status"])
-        status_class = status_classes.get(unit["status"], "draft")
+        unit_status = unit.get("status", "")
+        status = status_labels.get(unit_status, unit_status)
+        status_class = status_classes.get(unit_status, "draft")
+        indent = max(int(unit.get("level") or 1) - 1, 0) * 12
+        status_html = (
+            f'<span class="tl-status tl-status-{status_class}">'
+            f"{escape(status)}</span>"
+            if show_status
+            else ""
+        )
+        subtitle = unit.get("subtitle")
+        subtitle_html = (
+            f'<div class="tl-unit-subtitle">{escape(str(subtitle))}</div>'
+            if subtitle
+            else ""
+        )
         directory_items.append(
             f"""
             <a class="tl-directory-item" href="#{escape(anchor_id, quote=True)}">
-                <span class="tl-directory-title">{escape(unit['title'])}</span>
-                <span class="tl-status tl-status-{status_class}">{escape(status)}</span>
+                <span class="tl-directory-title" style="padding-left: {indent}px">
+                    {escape(unit['title'])}
+                </span>
+                {status_html}
             </a>
             """
         )
@@ -699,6 +764,7 @@ def _render_material_unit_workspace(
             f"""
             <section class="tl-unit-block" id="{escape(anchor_id, quote=True)}">
                 <h3>{escape(unit['title'])}</h3>
+                {subtitle_html}
                 <div class="tl-unit-divider"></div>
                 <div class="tl-unit-content">{escape(unit['content'])}</div>
             </section>
@@ -802,6 +868,12 @@ def _render_material_unit_workspace(
             margin: 0;
             color: #172033;
             font-size: 1rem;
+            line-height: 1.4;
+        }}
+        .tl-unit-subtitle {{
+            margin-top: 0.3rem;
+            color: #7A8496;
+            font-size: 0.76rem;
             line-height: 1.4;
         }}
         .tl-unit-divider {{
@@ -969,6 +1041,11 @@ def _render_material_management(material_type: str) -> None:
         UnitStatus.DRAFT.value: "草稿",
         UnitStatus.NEEDS_REVIEW.value: "待审核",
     }
+    manage_status_colors = {
+        UnitStatus.VERIFIED.value: "green",
+        UnitStatus.DRAFT.value: "gray",
+        UnitStatus.NEEDS_REVIEW.value: "orange",
+    }
     material_key = f"material_manage_material_{material_type}"
     document_key = f"material_manage_document_{material_type}"
     materials = REPO.list_material_sets(material_type=material_type)
@@ -1003,6 +1080,9 @@ def _render_material_management(material_type: str) -> None:
         selected_material,
         selected_document,
     )
+    slice_notice = st.session_state.pop("_material_slice_notice", None)
+    if slice_notice:
+        st.success(slice_notice)
 
     if selected_material is None:
         if not materials:
@@ -1059,6 +1139,11 @@ def _render_material_management(material_type: str) -> None:
                         ):
                             st.session_state[document_key] = document["id"]
                             st.rerun()
+                        _render_document_delete_control(
+                            document,
+                            selected_material["id"],
+                            button_prefix="material_manage_delete_slice",
+                        )
         return
 
     units = REPO.list_units(document_id=selected_document["id"])
@@ -1259,7 +1344,10 @@ def _render_material_management(material_type: str) -> None:
             st.markdown("**目录**")
             for unit in units:
                 unit_id = str(unit["id"])
-                check_col, title_col, status_col = st.columns([0.14, 0.58, 0.28])
+                check_col, title_col, status_col = st.columns(
+                    [0.14, 0.58, 0.28],
+                    vertical_alignment="center",
+                )
                 directory_key = _material_unit_checkbox_key(
                     selected_document["id"],
                     "directory",
@@ -1284,7 +1372,8 @@ def _render_material_management(material_type: str) -> None:
                 )
                 title_col.markdown(f"**{unit['title']}**")
                 status_col.markdown(
-                    f":gray-badge[{manage_status_labels.get(unit['status'], unit['status'])}]"
+                    f":{manage_status_colors.get(unit['status'], 'gray')}-badge["
+                    f"{manage_status_labels.get(unit['status'], unit['status'])}]"
                 )
 
     with content_area:
@@ -1292,8 +1381,10 @@ def _render_material_management(material_type: str) -> None:
         for unit in units:
             unit_id = str(unit["id"])
             with st.container(border=True):
-                check_col, title_col, type_col, status_col, edit_col, delete_col = (
-                    st.columns([0.08, 0.38, 0.18, 0.16, 0.1, 0.1])
+                check_col, title_col, edit_col, delete_col = st.columns(
+                    [0.04, 0.76, 0.1, 0.1],
+                    gap="xsmall",
+                    vertical_alignment="center",
                 )
                 content_key = _material_unit_checkbox_key(
                     selected_document["id"],
@@ -1317,13 +1408,16 @@ def _render_material_management(material_type: str) -> None:
                         directory_key,
                     ),
                 )
-                title_col.markdown(f"**{unit['title']}**")
-                type_col.markdown(
-                    f":blue-badge[{type_labels.get(unit['unit_type'], unit['unit_type'])}]"
-                )
-                status_col.markdown(
-                    f":gray-badge[{manage_status_labels.get(unit['status'], unit['status'])}]"
-                )
+                with title_col.container(
+                    key=f"material_unit_title_{unit_id}"
+                ):
+                    st.markdown(
+                        f"**{unit['title']}** "
+                        f":blue-badge["
+                        f"{type_labels.get(unit['unit_type'], unit['unit_type'])}] "
+                        f":{manage_status_colors.get(unit['status'], 'gray')}-badge["
+                        f"{manage_status_labels.get(unit['status'], unit['status'])}]"
+                    )
                 if edit_col.button(
                     "编辑",
                     key=f"material_edit_unit_{unit_id}",
@@ -1392,8 +1486,219 @@ def _render_material_management(material_type: str) -> None:
                         st.session_state[editing_key] = None
                         _rerun()
                 else:
-                    st.divider()
                     st.markdown(unit["content"])
+
+
+def _render_standard_management() -> None:
+    material_type = MaterialType.STANDARD.value
+    material_key = "standard_editor_material"
+    document_key = "standard_editor_document"
+    materials = REPO.list_material_sets(material_type=material_type)
+    material_by_id = {str(item["id"]): item for item in materials}
+    selected_material_id = st.session_state.get(material_key)
+    if selected_material_id not in material_by_id:
+        selected_material_id = None
+        st.session_state[material_key] = None
+        st.session_state[document_key] = None
+    selected_material = (
+        material_by_id[str(selected_material_id)]
+        if selected_material_id
+        else None
+    )
+    documents = (
+        REPO.list_documents(str(selected_material["id"]))
+        if selected_material
+        else []
+    )
+    document_by_id = {str(item["id"]): item for item in documents}
+    selected_document_id = st.session_state.get(document_key)
+    if selected_document_id not in document_by_id:
+        selected_document_id = None
+        st.session_state[document_key] = None
+    selected_document = (
+        document_by_id[str(selected_document_id)]
+        if selected_document_id
+        else None
+    )
+
+    with st.container(
+        horizontal=True,
+        vertical_alignment="center",
+        key="standard_editor_path",
+    ):
+        st.markdown("材料中心 /")
+        if st.button(
+            MATERIAL_LABELS[material_type],
+            type="tertiary",
+            key="standard_editor_path_root",
+        ):
+            st.session_state[material_key] = None
+            st.session_state[document_key] = None
+            st.rerun()
+        if selected_material is not None:
+            st.markdown("/")
+            if selected_document is None:
+                st.markdown(f"**{selected_material['name']}**")
+            else:
+                if st.button(
+                    selected_material["name"],
+                    type="tertiary",
+                    key="standard_editor_path_material",
+                ):
+                    st.session_state[document_key] = None
+                    st.rerun()
+                st.markdown("/")
+                st.markdown(f"**{selected_document['file_name']}**")
+
+    slice_notice = st.session_state.pop("_material_slice_notice", None)
+    if slice_notice:
+        st.success(slice_notice)
+    notice = st.session_state.pop("_standard_editor_notice", None)
+    if notice:
+        st.success(notice)
+
+    if selected_material is None:
+        if not materials:
+            st.info("尚未导入课程标准，请切换到“导入和导出”栏目。")
+            return
+        with st.grid("auto", min_column_width=220, gap="small"):
+            for material in materials:
+                section_count = sum(
+                    len(REPO.list_sections(document["id"]))
+                    for document in REPO.list_documents(material["id"])
+                )
+                with st.container(
+                    border=True,
+                    key=f"standard_editor_material_card_{material['id']}",
+                ):
+                    st.markdown(f"**{material['name']}**")
+                    st.caption(
+                        f"第 {material['version']} 版 · "
+                        f"{section_count} 个章节"
+                    )
+                    if st.button(
+                        "查看",
+                        key=f"standard_editor_open_{material['id']}",
+                        width="stretch",
+                    ):
+                        st.session_state[material_key] = material["id"]
+                        st.session_state[document_key] = None
+                        st.rerun()
+        return
+
+    if selected_document is None:
+        if not documents:
+            st.info("该课程标准还没有切片。")
+            return
+        with st.grid("auto", min_column_width=220, gap="small"):
+            for document in documents:
+                sections = REPO.list_sections(document["id"])
+                with st.container(
+                    border=True,
+                    key=f"standard_editor_document_card_{document['id']}",
+                ):
+                    st.markdown(f"**{document['file_name']}**")
+                    st.caption(
+                        f"第 {document['order_index']} 个切片 · "
+                        f"{document['page_count']} 页 · {len(sections)} 个章节"
+                    )
+                    if st.button(
+                        "查看切片",
+                        key=f"standard_editor_document_open_{document['id']}",
+                        width="stretch",
+                    ):
+                        st.session_state[document_key] = document["id"]
+                        st.rerun()
+                    _render_document_delete_control(
+                        document,
+                        selected_material["id"],
+                        button_prefix="standard_editor_delete_slice",
+                    )
+        return
+
+    sections = REPO.list_sections(selected_document["id"])
+    if not sections:
+        st.info("该课程标准尚无可用章节，请重新导入或完成文字提取。")
+        return
+    st.caption("可修改章节标题和正文；页码、层级和顺序保留为只读。")
+    editing_key = f"standard_editor_editing_{selected_document['id']}"
+    editing_id = st.session_state.get(editing_key)
+    directory, content_area = st.columns([1, 3], gap="large")
+
+    with directory:
+        with st.container(key="standard_editor_directory", border=True):
+            st.markdown("**目录**")
+            for section in sections:
+                indent = "　" * max(int(section["level"]) - 1, 0)
+                st.markdown(f"{indent}**{section['title']}**")
+                st.caption(
+                    f"第 {section['page_start']}–{section['page_end']} 页"
+                )
+
+    with content_area:
+        for section in sections:
+            section_id = str(section["id"])
+            with st.container(border=True):
+                title_col, action_col = st.columns(
+                    [0.82, 0.18],
+                    vertical_alignment="center",
+                )
+                title_col.markdown(f"**{section['title']}**")
+                title_col.caption(
+                    f"第 {section['page_start']}–{section['page_end']} 页 · "
+                    f"层级 {section['level']} · 顺序 {section['order_index']}"
+                )
+                if action_col.button(
+                    "编辑",
+                    key=f"standard_editor_edit_{section_id}",
+                    width="stretch",
+                ):
+                    st.session_state[editing_key] = (
+                        None if editing_id == section_id else section_id
+                    )
+                    st.rerun()
+
+                if editing_id == section_id:
+                    with st.form(
+                        f"standard_editor_form_{section_id}",
+                        border=False,
+                    ):
+                        edited_title = st.text_input(
+                            "标题",
+                            value=section["title"],
+                            key=f"standard_editor_title_{section_id}",
+                        )
+                        edited_content = st.text_area(
+                            "正文",
+                            value=section["content"],
+                            height=320,
+                            key=f"standard_editor_content_{section_id}",
+                        )
+                        submitted = st.form_submit_button(
+                            "保存修改",
+                            type="primary",
+                            key=f"standard_editor_save_{section_id}",
+                        )
+                    if submitted:
+                        try:
+                            REPO.update_section(
+                                section_id=section_id,
+                                title=edited_title,
+                                content=edited_content,
+                            )
+                        except ValueError as exc:
+                            st.error(str(exc))
+                        else:
+                            INGEST.sync_material_exports(
+                                selected_material["id"]
+                            )
+                            st.session_state[editing_key] = None
+                            st.session_state["_standard_editor_notice"] = (
+                                f"已保存“{edited_title.strip()}”"
+                            )
+                            st.rerun()
+                else:
+                    st.markdown(section["content"])
 
 
 def _render_material_browser(material_type: str) -> None:
@@ -1488,7 +1793,12 @@ def _render_material_browser(material_type: str) -> None:
 
     pages = REPO.list_pages(selected_document["id"])
     sections = REPO.list_sections(selected_document["id"])
-    units = REPO.list_units(document_id=selected_document["id"])
+    is_standard = material_type == MaterialType.STANDARD.value
+    units = (
+        []
+        if is_standard
+        else REPO.list_units(document_id=selected_document["id"])
+    )
     warning_pages = [page for page in pages if page["status"] != "ok"]
     with st.container(
         horizontal=True,
@@ -1496,25 +1806,33 @@ def _render_material_browser(material_type: str) -> None:
         gap="xsmall",
         key="material_slice_badges",
     ):
-        st.badge(
-            "已结构化" if units else "未结构化",
-            icon=(
-                ":material/check_circle:"
-                if units
-                else ":material/pending:"
-            ),
-            color="green" if units else "orange",
-        )
+        if is_standard:
+            st.badge(
+                f"章节 {len(sections)}",
+                icon=":material/format_list_bulleted:",
+                color="green" if sections else "orange",
+            )
+        else:
+            st.badge(
+                "已结构化" if units else "未结构化",
+                icon=(
+                    ":material/check_circle:"
+                    if units
+                    else ":material/pending:"
+                ),
+                color="green" if units else "orange",
+            )
         st.badge(
             f"页数 {len(pages) or selected_document['page_count']}",
             icon=":material/description:",
             color="blue",
         )
-        st.badge(
-            f"章节块 {len(sections)}",
-            icon=":material/format_list_bulleted:",
-            color="gray",
-        )
+        if not is_standard:
+            st.badge(
+                f"章节块 {len(sections)}",
+                icon=":material/format_list_bulleted:",
+                color="gray",
+            )
         st.badge(
             f"提取状态 {selected_document['extraction_status']}",
             icon=":material/sync:",
@@ -1525,6 +1843,24 @@ def _render_material_browser(material_type: str) -> None:
             icon=":material/warning:",
             color="red" if warning_pages else "gray",
         )
+
+    if is_standard:
+        if not sections:
+            st.info("该课程标准尚无可用章节，请重新导入或完成文字提取。")
+            return
+        _render_material_unit_workspace(
+            [
+                {
+                    **section,
+                    "subtitle": (
+                        f"第 {section['page_start']}–{section['page_end']} 页"
+                    ),
+                }
+                for section in sections
+            ],
+            show_status=False,
+        )
+        return
 
     if units:
         _render_material_unit_workspace(units)
@@ -2239,7 +2575,11 @@ def _render_material_center_top_nav() -> str:
 
 def _render_material_center_section_nav(item: dict[str, Any]) -> str:
     if item["kind"] == "material":
-        options = ["浏览", "AI结构化和管理", "导入和导出"]
+        options = (
+            ["浏览", "编辑", "导入和导出"]
+            if item["key"] == "standard"
+            else ["浏览", "AI结构化和管理", "导入和导出"]
+        )
     else:
         options = ["浏览", "编辑", "导入和导出"]
     if item["key"] == "answers":
@@ -2275,6 +2615,8 @@ def render_material_center() -> None:
             _render_material_import_export(item["data_type"])
         elif section == "浏览":
             _render_material_browser(item["data_type"])
+        elif item["key"] == "standard":
+            _render_standard_management()
         else:
             _render_material_management(item["data_type"])
         return

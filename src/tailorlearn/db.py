@@ -679,7 +679,29 @@ class Repository:
                 (material_set_id, sha256),
             ).fetchone()
             if existing:
-                return dict(existing), False
+                if existing["deleted_at"] is None:
+                    return dict(existing), False
+                connection.execute(
+                    """
+                    UPDATE documents
+                    SET file_name=?, stored_path=?, page_count=?,
+                        order_index=?, extraction_method=?, deleted_at=NULL
+                    WHERE id=?
+                    """,
+                    (
+                        file_name,
+                        stored_path,
+                        page_count,
+                        order_index,
+                        extraction_method,
+                        existing["id"],
+                    ),
+                )
+                restored = connection.execute(
+                    "SELECT * FROM documents WHERE id=?",
+                    (existing["id"],),
+                ).fetchone()
+                return dict(restored), True
             connection.execute(
                 """
                 INSERT INTO documents
@@ -743,6 +765,19 @@ class Repository:
                 (material_set_id,),
             ).fetchall()
             return [dict(row) for row in rows]
+
+    def soft_delete_document(self, document_id: str) -> bool:
+        now = utc_now()
+        with self.connect() as connection:
+            cursor = connection.execute(
+                """
+                UPDATE documents
+                SET deleted_at=?
+                WHERE id=? AND deleted_at IS NULL
+                """,
+                (now, document_id),
+            )
+            return cursor.rowcount > 0
 
     def list_material_sets(
         self,
@@ -965,6 +1000,72 @@ class Repository:
                 "SELECT * FROM sections WHERE id=?", (section_id,)
             ).fetchone()
             return dict(row) if row else None
+
+    def update_section(
+        self,
+        *,
+        section_id: str,
+        title: str,
+        content: str,
+    ) -> None:
+        clean_title = title.strip()
+        if not clean_title:
+            raise ValueError("章节标题不能为空")
+        with self.connect() as connection:
+            current = connection.execute(
+                "SELECT * FROM sections WHERE id=?",
+                (section_id,),
+            ).fetchone()
+            if current is None:
+                raise ValueError("找不到该章节")
+            sections = [
+                dict(row)
+                for row in connection.execute(
+                    """
+                    SELECT * FROM sections
+                    WHERE document_id=?
+                    ORDER BY order_index
+                    """,
+                    (current["document_id"],),
+                ).fetchall()
+            ]
+            section_by_id = {section["id"]: section for section in sections}
+            parent = section_by_id.get(current["parent_id"])
+            new_path = (
+                f"{parent['path']} / {clean_title}"
+                if parent is not None
+                else clean_title
+            )
+            old_path = current["path"]
+            updated_paths: dict[str, str] = {}
+            for section in sections:
+                if section["id"] == section_id:
+                    updated_paths[section_id] = new_path
+                elif section["path"].startswith(f"{old_path} / "):
+                    updated_paths[section["id"]] = (
+                        new_path + section["path"][len(old_path) :]
+                    )
+            paths_by_id = {
+                section["id"]: updated_paths.get(section["id"], section["path"])
+                for section in sections
+            }
+            if len(set(paths_by_id.values())) != len(paths_by_id):
+                raise ValueError("章节标题与同一文档中的其他章节冲突")
+            for path_section_id, path in updated_paths.items():
+                if path_section_id == section_id:
+                    connection.execute(
+                        """
+                        UPDATE sections
+                        SET title=?, path=?, content=?
+                        WHERE id=?
+                        """,
+                        (clean_title, path, content, section_id),
+                    )
+                else:
+                    connection.execute(
+                        "UPDATE sections SET path=? WHERE id=?",
+                        (path, path_section_id),
+                    )
 
     def refresh_section_contents(self, document_id: str) -> int:
         pages = self.list_pages(document_id)

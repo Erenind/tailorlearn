@@ -195,6 +195,24 @@ def apply_app_style() -> None:
             border-radius: 0.9rem;
             background: #F7F8FB;
         }
+        [class*="st-key-material_unit_title_"] {
+            align-self: center;
+        }
+        [class*="st-key-material_unit_title_"] p {
+            margin: 0;
+            line-height: 1.5rem;
+        }
+        [class*="st-key-material_manage_content_select_"] {
+            align-self: center;
+            min-height: 1.5rem;
+        }
+        [class*="st-key-material_manage_content_select_"] label {
+            display: flex;
+            align-items: center;
+            min-height: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
         .st-key-provider_summary {
             margin-bottom: 0.35rem;
         }

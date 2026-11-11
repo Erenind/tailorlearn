@@ -87,3 +87,36 @@ def test_reprocess_document_forces_fresh_text_extraction(
     assert result["pages"] == 3
     assert result["structure_mode"] == "rebuilt-sections"
     assert repo.list_pages(document_id)[0]["final_text"] != "人工修改后的缓存文本"
+
+
+def test_reimport_restores_soft_deleted_document(
+    tmp_path: Path,
+    sample_pdf: Path,
+):
+    paths = AppPaths(tmp_path)
+    paths.ensure()
+    repo = Repository(paths.database_file)
+    repo.initialize()
+    service = IngestionService(paths, repo)
+    material, documents = service.create_material_from_paths(
+        name="重新导入测试课本",
+        material_type="textbook",
+        pdf_paths=[sample_pdf],
+    )
+    document_id = documents[0]["id"]
+    service.process_document(document_id)
+    assert repo.soft_delete_document(document_id) is True
+    assert repo.list_documents(material["id"]) == []
+
+    _, imported = service.create_material_from_paths(
+        name=material["name"],
+        material_type="textbook",
+        pdf_paths=[sample_pdf],
+        append_to=material["id"],
+    )
+
+    assert [document["id"] for document in imported] == [document_id]
+    active_documents = repo.list_documents(material["id"])
+    assert [document["id"] for document in active_documents] == [document_id]
+    assert active_documents[0]["deleted_at"] is None
+    assert service.process_document(document_id)["pages"] == 3
