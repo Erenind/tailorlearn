@@ -16,20 +16,6 @@
   },
   "documents": [
     {
-      "id": "doc_ccde81c9_62db59",
-      "material_set_id": "set_d2790a62db59",
-      "file_name": "B02_相关资料切片.pdf",
-      "sha256": "ccde81c935d7adeaf3c0da331b8881ea86ca0b173e01d20c4ab427d202efc6b6",
-      "stored_path": "materials/set_d2790a62db59/doc_ccde81c9_62db59/source/original.pdf",
-      "page_count": 26,
-      "order_index": 1,
-      "extraction_status": "succeeded",
-      "extraction_method": "text-first-ocr-fallback",
-      "metadata_json": "{}",
-      "created_at": "2026-11-08T03:39:30+00:00",
-      "deleted_at": null
-    },
-    {
       "id": "doc_b1e5c192_62db59",
       "material_set_id": "set_d2790a62db59",
       "file_name": "B03_相关资料切片.pdf",
@@ -55,6 +41,20 @@
       "extraction_method": "text-first-ocr-fallback",
       "metadata_json": "{}",
       "created_at": "2026-11-08T05:39:15+00:00",
+      "deleted_at": null
+    },
+    {
+      "id": "doc_ccde81c9_62db59",
+      "material_set_id": "set_d2790a62db59",
+      "file_name": "不等式与不等式组",
+      "sha256": "ccde81c935d7adeaf3c0da331b8881ea86ca0b173e01d20c4ab427d202efc6b6",
+      "stored_path": "materials/set_d2790a62db59/doc_ccde81c9_62db59/source/original.pdf",
+      "page_count": 26,
+      "order_index": 1,
+      "extraction_status": "succeeded",
+      "extraction_method": "text-first-ocr-fallback",
+      "metadata_json": "{}",
+      "created_at": "2026-11-08T03:39:30+00:00",
       "deleted_at": null
     },
     {

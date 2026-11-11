@@ -424,3 +424,89 @@ def test_streamlit_reimport_restores_deleted_textbook_slice(
         "查看切片"
     )
     st.cache_resource.clear()
+
+
+def test_streamlit_renames_slices_in_both_management_views(
+    tmp_path: Path,
+    monkeypatch,
+):
+    paths = AppPaths(tmp_path)
+    paths.ensure()
+    repository = Repository(paths.database_file)
+    repository.initialize()
+
+    textbook = repository.create_material_set(
+        name="重命名测试课本",
+        material_type="textbook",
+    )
+    textbook_document, _ = repository.add_document(
+        document_id="doc_rename_textbook",
+        material_set_id=textbook["id"],
+        file_name="原课本切片.pdf",
+        sha256="rename-textbook",
+        stored_path="materials/textbook/source/original.pdf",
+        order_index=1,
+        page_count=1,
+    )
+    standard = repository.create_material_set(
+        name="重命名测试课程标准",
+        material_type="curriculum_standard",
+    )
+    standard_document, _ = repository.add_document(
+        document_id="doc_rename_standard",
+        material_set_id=standard["id"],
+        file_name="原课标切片.pdf",
+        sha256="rename-standard",
+        stored_path="materials/standard/source/original.pdf",
+        order_index=1,
+        page_count=1,
+    )
+
+    monkeypatch.setattr(
+        AppPaths,
+        "default",
+        classmethod(lambda cls: paths),
+    )
+    st.cache_resource.clear()
+    app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
+    at = AppTest.from_file(str(app_file), default_timeout=20).run()
+
+    assert not at.exception
+    at.button(key="nav_material_center").click().run()
+    at.segmented_control(
+        key="material_section_textbook"
+    ).set_value("AI结构化和管理").run()
+    at.button(key=f"material_manage_open_{textbook['id']}").click().run()
+    at.button(
+        key=f"material_manage_rename_slice_{textbook_document['id']}"
+    ).click().run()
+    at.text_input(
+        key=f"material_manage_rename_slice_input_{textbook_document['id']}"
+    ).set_value("重命名后的课本切片.pdf")
+    at.button(
+        key=f"material_manage_rename_slice_save_{textbook_document['id']}"
+    ).click().run()
+    assert not at.exception
+    assert repository.get_document(textbook_document["id"])["file_name"] == (
+        "重命名后的课本切片.pdf"
+    )
+
+    at.button(key="material_nav_standard").click().run()
+    at.segmented_control(
+        key="material_section_standard"
+    ).set_value("编辑").run()
+    at.button(key=f"standard_editor_open_{standard['id']}").click().run()
+    at.button(
+        key=f"standard_editor_rename_slice_{standard_document['id']}"
+    ).click().run()
+    at.text_input(
+        key=f"standard_editor_rename_slice_input_{standard_document['id']}"
+    ).set_value("重命名后的课标切片.pdf")
+    at.button(
+        key=f"standard_editor_rename_slice_save_{standard_document['id']}"
+    ).click().run()
+    assert not at.exception
+    assert repository.get_document(standard_document["id"])["file_name"] == (
+        "重命名后的课标切片.pdf"
+    )
+    st.cache_resource.clear()

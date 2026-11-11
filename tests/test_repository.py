@@ -193,3 +193,27 @@ def test_repository_soft_deletes_document(tmp_path):
     assert restored["file_name"] == "slice-restored.pdf"
     assert restored["order_index"] == 2
     assert len(repo.list_documents(material["id"])) == 1
+
+
+def test_repository_renames_document_without_changing_source_path(tmp_path):
+    repo = Repository(tmp_path / "catalog.sqlite3")
+    repo.initialize()
+    material = repo.create_material_set(
+        name="测试课程标准",
+        material_type="curriculum_standard",
+    )
+    document, _ = repo.add_document(
+        document_id="doc_rename",
+        material_set_id=material["id"],
+        file_name="原切片.pdf",
+        sha256="rename",
+        stored_path="materials/rename/source/original.pdf",
+        order_index=1,
+        page_count=3,
+    )
+
+    renamed = repo.rename_document(document["id"], "新切片名称.pdf")
+
+    assert renamed["file_name"] == "新切片名称.pdf"
+    assert renamed["stored_path"] == document["stored_path"]
+    assert repo.get_document(document["id"])["file_name"] == "新切片名称.pdf"

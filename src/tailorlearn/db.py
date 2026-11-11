@@ -766,6 +766,27 @@ class Repository:
             ).fetchall()
             return [dict(row) for row in rows]
 
+    def rename_document(self, document_id: str, file_name: str) -> dict[str, Any]:
+        clean_name = file_name.strip()
+        if not clean_name:
+            raise ValueError("切片名称不能为空")
+        with self.connect() as connection:
+            cursor = connection.execute(
+                """
+                UPDATE documents
+                SET file_name=?
+                WHERE id=? AND deleted_at IS NULL
+                """,
+                (clean_name, document_id),
+            )
+            if cursor.rowcount == 0:
+                raise ValueError("该切片不存在或已被删除")
+            row = connection.execute(
+                "SELECT * FROM documents WHERE id=?",
+                (document_id,),
+            ).fetchone()
+            return dict(row)
+
     def soft_delete_document(self, document_id: str) -> bool:
         now = utc_now()
         with self.connect() as connection:

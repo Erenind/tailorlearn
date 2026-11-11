@@ -43,7 +43,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-11-restore-deleted-slices"
+_APP_SERVICES_CACHE_VERSION = "2026-11-11-rename-material-slices"
 
 
 @st.cache_resource
@@ -630,6 +630,55 @@ def _document_label(documents: list[dict[str, Any]], document_id: str) -> str:
     return f"{document['order_index']}. {document['file_name']} · {document['extraction_status']}"
 
 
+def _render_document_rename_control(
+    document: dict[str, Any],
+    material_set_id: str,
+    *,
+    button_prefix: str,
+) -> None:
+    rename_key = f"{button_prefix}_open_{document['id']}"
+    if not st.session_state.get(rename_key):
+        if st.button(
+            "重命名切片",
+            icon=":material/edit:",
+            key=f"{button_prefix}_{document['id']}",
+            width="stretch",
+        ):
+            st.session_state[rename_key] = True
+            st.rerun()
+        return
+
+    with st.form(f"{button_prefix}_form_{document['id']}", border=False):
+        new_name = st.text_input(
+            "切片名称",
+            value=document["file_name"],
+            key=f"{button_prefix}_input_{document['id']}",
+        )
+        submitted = st.form_submit_button(
+            "保存名称",
+            type="primary",
+            key=f"{button_prefix}_save_{document['id']}",
+        )
+    if submitted:
+        try:
+            renamed = REPO.rename_document(document["id"], new_name)
+            INGEST.sync_material_exports(material_set_id)
+        except ValueError as exc:
+            st.error(str(exc))
+        else:
+            st.session_state.pop(rename_key, None)
+            st.session_state["_material_slice_notice"] = (
+                f"已将切片重命名为“{renamed['file_name']}”"
+            )
+            st.rerun()
+    if st.button(
+        "取消",
+        key=f"{button_prefix}_cancel_{document['id']}",
+    ):
+        st.session_state.pop(rename_key, None)
+        st.rerun()
+
+
 def _render_document_delete_control(
     document: dict[str, Any],
     material_set_id: str,
@@ -1139,6 +1188,11 @@ def _render_material_management(material_type: str) -> None:
                         ):
                             st.session_state[document_key] = document["id"]
                             st.rerun()
+                        _render_document_rename_control(
+                            document,
+                            selected_material["id"],
+                            button_prefix="material_manage_rename_slice",
+                        )
                         _render_document_delete_control(
                             document,
                             selected_material["id"],
@@ -1609,6 +1663,11 @@ def _render_standard_management() -> None:
                     ):
                         st.session_state[document_key] = document["id"]
                         st.rerun()
+                    _render_document_rename_control(
+                        document,
+                        selected_material["id"],
+                        button_prefix="standard_editor_rename_slice",
+                    )
                     _render_document_delete_control(
                         document,
                         selected_material["id"],
