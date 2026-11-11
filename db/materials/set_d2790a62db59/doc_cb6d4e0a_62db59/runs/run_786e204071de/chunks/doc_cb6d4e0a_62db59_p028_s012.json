@@ -1,0 +1,160 @@
+[
+  {
+    "unit_type": "concept",
+    "title": "余角的定义",
+    "content": "在一副三角尺中，每个三角尺都有一个角是90°，而其他两个角的和是90°（30°+60°=90°，45°+45°=90°）。一般地，如图6.3-13，如果两个角的和等于90°（直角），就说这两个角互为余角（complementary angle），简称这两个角互余，其中一个角是另一个角的余角。",
+    "source_refs": [
+      {
+        "page": 28,
+        "quote": "如果两个角的和等于９０°（直角），就说这两个角互为余角（ｃｏｍｐｌｅｍｅｎｔａｒｙａｎｇｌｅ），简称这两个角互余，其中一个角是另一个角的余角．",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": []
+  },
+  {
+    "unit_type": "concept",
+    "title": "补角的定义",
+    "content": "类似地，如图6.3-14，如果两个角的和等于180°（平角），就说这两个角互为补角（supplementary angle），简称这两个角互补，其中一个角是另一个角的补角。",
+    "source_refs": [
+      {
+        "page": 28,
+        "quote": "类似地，如图６．３１４，如果两个角的和等于１８０°（平角），就说这两个角互为补角（ｓｕｐｐｌｅｍｅｎｔａｒｙａｎｇｌｅ），简称这两个角互补，其中一个角是另一个角的补角．",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": [
+      "第 28 页的原文摘录未能精确匹配 OCR/提取文本"
+    ]
+  },
+  {
+    "unit_type": "property",
+    "title": "同角（等角）的余角相等",
+    "content": "∠1与∠2，∠3都互为余角，∠2与∠3的大小有什么关系？因为∠1与∠2，∠3都互为余角，所以∠2=90°-∠1，∠3=90°-∠1，所以∠2=∠3。由此得到关于余角的一个性质：同角（等角）的余角相等。",
+    "source_refs": [
+      {
+        "page": 28,
+        "quote": "因为∠１与∠２，∠３都互为余角，所以∠２＝９０°－∠１，∠３＝９０°－∠１，所以∠２＝∠３．",
+        "block_id": null
+      },
+      {
+        "page": 28,
+        "quote": "同角（等角）的余角相等．",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": []
+  },
+  {
+    "unit_type": "property",
+    "title": "同角（等角）的补角相等",
+    "content": "类似地，与同一个角互补的两个角的大小有什么关系？对于补角也有类似的性质：同角（等角）的补角相等。你能说明为什么“同角（等角）的补角相等”吗？",
+    "source_refs": [
+      {
+        "page": 28,
+        "quote": "类似地，与同一个角互补的两个角的大小有什么关系？",
+        "block_id": null
+      },
+      {
+        "page": 28,
+        "quote": "同角（等角）的补角相等．",
+        "block_id": null
+      },
+      {
+        "page": 28,
+        "quote": "你能说明为什么“同角（等角）的补角相等”吗？",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": []
+  },
+  {
+    "unit_type": "example",
+    "title": "例4 利用补角和角平分线判定互余角",
+    "content": "例4 如图6.3-15，点A，O，B在同一条直线上，射线OD和射线OE分别平分∠AOC和∠BOC。图中哪些角互为余角？\n分析：互为余角的两个角的和是90°，而已知条件中隐含互为补角的条件，再利用角平分线的条件，便可以发现互为余角的角。\n解：因为点A，O，B在同一条直线上，所以∠AOC和∠BOC互为补角。\n又因为射线OD和射线OE分别平分∠AOC和∠BOC，所以\n∠COD+∠COE=1/2∠AOC+1/2∠BOC=1/2（∠AOC+∠BOC）=90°。\n所以，∠COD和∠COE互为余角。\n同理，∠AOD和∠BOE，∠AOD和∠COE，∠COD和∠BOE也互为余角。",
+    "source_refs": [
+      {
+        "page": 29,
+        "quote": "例４　如图６．３１５，点犃，犗，犅在同一条直线上，射线犗犇和射线犗犈分别平分∠犃犗犆和∠犅犗犆．图中哪些角互为余角？",
+        "block_id": null
+      },
+      {
+        "page": 29,
+        "quote": "∠犆犗犇＋∠犆犗犈＝１２∠犃犗犆＋１２∠犅犗犆＝１２（∠犃犗犆＋∠犅犗犆）＝９０°．",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": [
+      "原文分式OCR为“１２∠…”，按上下文整理为1/2∠…。",
+      "第 29 页的原文摘录未能精确匹配 OCR/提取文本"
+    ]
+  },
+  {
+    "unit_type": "exercise",
+    "title": "练习 第1题",
+    "content": "1．图中给出的各角中，哪些互为余角？哪些互为补角？\n给出的角：10°，30°，60°，80°，100°，120°，150°，170°。",
+    "source_refs": [
+      {
+        "page": 29,
+        "quote": "１．图中给出的各角中，哪些互为余角？哪些互为补角？",
+        "block_id": null
+      },
+      {
+        "page": 29,
+        "quote": "10e\n30e\n60e\n80e\n100e\n120e\n150e\n170e",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": [
+      "题中角度符号在原文OCR中显示为“e”，按上下文整理为“°”。"
+    ]
+  },
+  {
+    "unit_type": "exercise",
+    "title": "练习 第2题",
+    "content": "2．一个角是70°39′，求它的余角和补角。",
+    "source_refs": [
+      {
+        "page": 29,
+        "quote": "２．一个角是７０°３９′，求它的余角和补角．",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": []
+  },
+  {
+    "unit_type": "exercise",
+    "title": "练习 第3题",
+    "content": "3．∠α的补角是它的3倍，∠α是多少度？",
+    "source_refs": [
+      {
+        "page": 29,
+        "quote": "３．∠α的补角是它的３倍，∠α是多少度？",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": []
+  },
+  {
+    "unit_type": "exercise",
+    "title": "练习 第4题",
+    "content": "4．如图，要测量两堵围墙所形成的∠AOB的度数，但人不能进入围墙，如何测量？",
+    "source_refs": [
+      {
+        "page": 29,
+        "quote": "４．如图，要测量两堵围墙所形成的∠犃犗犅的度数，但人不能进入围墙，如何测量？",
+        "block_id": null
+      }
+    ],
+    "related_unit_ids": [],
+    "review_warnings": []
+  }
+]
