@@ -24,6 +24,8 @@ from tailorlearn.providers import ProviderStore
 from tailorlearn.student_diagnosis import StudentDiagnosisService
 from tailorlearn.teaching_recommendations import TeachingRecommendationService
 from tailorlearn.teaching_recommendations_ui import render_teaching_recommendations_page
+from tailorlearn.teacher_workbench import TeacherWorkbenchService
+from tailorlearn.teacher_workbench_ui import render_teacher_workbench_page
 from tailorlearn.ui import (
     apply_app_style,
     render_page_header,
@@ -84,7 +86,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-12-class-analysis-v2"
+_APP_SERVICES_CACHE_VERSION = "2026-11-12-teacher-workbench-v1"
 
 
 @st.cache_resource
@@ -98,22 +100,33 @@ def app_services(cache_version: str) -> tuple[
     AnalyticsService,
     StudentDiagnosisService,
     TeachingRecommendationService,
+    TeacherWorkbenchService,
 ]:
     paths = AppPaths.default()
     paths.ensure()
     repository = Repository(paths.database_file)
     repository.initialize()
     analytics = AnalyticsService(repository)
+    learning = LearningDataService(repository, paths.db_dir)
+    diagnoses = StudentDiagnosisService(repository, analytics)
+    recommendations = TeachingRecommendationService(repository, analytics)
     return (
         paths,
         repository,
         IngestionService(paths, repository),
         ProviderStore(paths.provider_file),
-        LearningDataService(repository, paths.db_dir),
+        learning,
         OutlineService(paths, repository),
         analytics,
-        StudentDiagnosisService(repository, analytics),
-        TeachingRecommendationService(repository, analytics),
+        diagnoses,
+        recommendations,
+        TeacherWorkbenchService(
+            repository,
+            learning,
+            analytics,
+            diagnoses,
+            recommendations,
+        ),
     )
 
 
@@ -127,6 +140,7 @@ def app_services(cache_version: str) -> tuple[
     ANALYTICS,
     DIAGNOSES,
     TEACHING_RECOMMENDATIONS,
+    TEACHER_WORKBENCH,
 ) = app_services(_APP_SERVICES_CACHE_VERSION)
 
 MATERIAL_LABELS = {
@@ -2740,10 +2754,62 @@ def render_material_center() -> None:
     )
 
 
+def _apply_workbench_route(page: str) -> None:
+    """Apply a workbench handoff before a destination page renders widgets."""
+    route = st.session_state.pop("workbench_pending_route", None)
+    if not isinstance(route, dict) or route.get("target_page") != page:
+        return
+    context = route.get("context")
+    if not isinstance(context, dict):
+        return
+    dataset_id = context.get("dataset_id")
+    node_code = context.get("node_code")
+    student_code = context.get("student_code")
+    class_code = context.get("class_code")
+    focus = context.get("focus")
+
+    if page == "材料与数据":
+        st.session_state["material_center_item"] = "answers"
+        st.session_state["learning_dataset_selector"] = dataset_id
+        st.session_state["_pending_material_section"] = {
+            "item": "answers",
+            "section": "异常检测" if focus == "answer_anomalies" else "编辑",
+        }
+        if focus == "pending_answers":
+            st.session_state[f"learning_latest_{dataset_id}_answer"] = True
+            st.session_state[f"learning_status_{dataset_id}_answer"] = "待评分"
+            if node_code:
+                st.session_state[f"learning_node_filter_{dataset_id}_answer"] = node_code
+    elif page == "学生分析":
+        st.session_state["student_analysis_section"] = "问题分析"
+        st.session_state["analytics_student_dataset"] = dataset_id
+        if dataset_id and student_code:
+            st.session_state[f"analytics_student_selected_{dataset_id}"] = student_code
+        if dataset_id and node_code:
+            st.session_state[f"analytics_student_node_{dataset_id}"] = node_code
+    elif page == "班级分析":
+        st.session_state["class_analysis_section"] = "具体班级分析"
+        st.session_state["analytics_class_dataset"] = dataset_id
+        if dataset_id and node_code:
+            st.session_state[f"analytics_class_node_{dataset_id}"] = node_code
+        if dataset_id and class_code:
+            scope = node_code or "all"
+            st.session_state[
+                f"analytics_specific_class_{dataset_id}_{scope}"
+            ] = class_code
+    elif page == "教学建议":
+        st.session_state["teaching_dataset"] = dataset_id
+        if class_code:
+            st.session_state["teaching_class"] = class_code
+        if node_code:
+            st.session_state["teaching_node"] = node_code
+
+
 def main() -> None:
     apply_app_style()
     page = render_sidebar_navigation()
     render_page_header(page)
+    _apply_workbench_route(page)
     if page == "AI 参数设置":
         render_ai_settings()
     elif page == "材料与数据":
@@ -2765,6 +2831,8 @@ def main() -> None:
             LEARNING_DATA,
             _active_profile(),
         )
+    elif page == "教师工作台":
+        render_teacher_workbench_page(TEACHER_WORKBENCH, LEARNING_DATA)
 
 
 main()
