@@ -10,3 +10,6 @@ db/.upload_tmp/
 db/backups/
 赛题数据/
 db/learning/
+db/tailorlearn.sqlite3
+db/outlines/
+_docx_render*/

@@ -32,6 +32,10 @@ PAGE_META: dict[str, PageMeta] = {
         label="教学建议",
         icon="teaching.svg",
     ),
+    "教师工作台": PageMeta(
+        label="教师工作台",
+        icon="database.svg",
+    ),
     "AI 参数设置": PageMeta(
         label="AI 参数设置",
         icon="settings.svg",
@@ -45,6 +49,7 @@ PAGE_SLUGS = {
     "学生分析": "student",
     "班级分析": "class",
     "教学建议": "teaching",
+    "教师工作台": "workbench",
     "AI 参数设置": "ai_settings",
 }
 
