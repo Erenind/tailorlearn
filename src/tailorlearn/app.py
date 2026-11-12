@@ -32,8 +32,8 @@ from tailorlearn.ui import (
 
 
 _REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
-_ANALYTICS_SERVICE_API_VERSION = "2026-11-11-student-ranking-issues"
-_ANALYTICS_UI_API_VERSION = "2026-11-11-student-ranking-issues-v3"
+_ANALYTICS_SERVICE_API_VERSION = "2026-11-12-class-analysis-v2"
+_ANALYTICS_UI_API_VERSION = "2026-11-12-class-analysis-v2"
 _LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
@@ -84,7 +84,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-11-student-ranking-issues"
+_APP_SERVICES_CACHE_VERSION = "2026-11-12-class-analysis-v2"
 
 
 @st.cache_resource

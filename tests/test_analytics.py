@@ -465,7 +465,7 @@ def test_typical_case_bundle_keeps_evidence_status_and_traceable_records(
     assert bundle["evidence"]["T01"]["records"][0]["record_code"] == "DR001"
 
 
-def test_student_ranking_uses_theme_rate_mean_and_competition_ranks(
+def test_student_ranking_excludes_incomplete_records_from_main_ranks(
     tmp_path: Path,
 ) -> None:
     repository, learning, dataset_id = _services(tmp_path)
@@ -484,7 +484,7 @@ def test_student_ranking_uses_theme_rate_mean_and_competition_ranks(
             "textbook_page": "2",
         },
     )
-    for student_code in ("D02", "D03", "D04"):
+    for student_code in ("D02", "D03", "D04", "D05"):
         learning.create_record(
             dataset_id,
             "student",
@@ -572,6 +572,12 @@ def test_student_ranking_uses_theme_rate_mean_and_competition_ranks(
         materials=("Q101", "Q102", "Q103"),
         score=1,
     )
+    add_theme_answers(
+        "D05",
+        theme="T01",
+        materials=("Q001", "Q002", "Q003"),
+        score=1,
+    )
 
     analytics = import_module("tailorlearn.analytics").AnalyticsService(repository)
     ranking = analytics.student_performance_ranking(dataset_id)
@@ -583,12 +589,19 @@ def test_student_ranking_uses_theme_rate_mean_and_competition_ranks(
         ("D03", 1.0, 1),
         ("D01", 0.5, 2),
         ("D02", 0.5, 2),
+        ("D05", 1.0, None),
         ("D04", None, None),
     ]
+    special = ranking[3]
+    assert special["record_completeness"] == 0.5
+    assert special["complete_theme_count"] == 1
+    assert special["total_theme_count"] == 2
+    assert special["ranking_eligible"] is False
+    assert special["evidence_status"] == "limited"
     assert ranking[-1]["evidence_status"] == "insufficient"
 
 
-def test_student_issue_analysis_distinguishes_threshold_and_class_comparison(
+def test_student_and_class_issue_analysis_use_separate_issue_scopes(
     tmp_path: Path,
 ) -> None:
     repository, learning, dataset_id = _services(tmp_path)
@@ -624,7 +637,16 @@ def test_student_issue_analysis_distinguishes_threshold_and_class_comparison(
     assert [item["theme_code"] for item in analysis["need_consolidation"]] == ["T01"]
     assert [item["theme_code"] for item in analysis["personalized"]] == ["T01"]
     assert analysis["personalized"][0]["delta"] < 0
-    assert [item["theme_code"] for item in analysis["common"]] == ["T01"]
-    assert analysis["common"][0]["student_count"] == 5
-    assert analysis["common"][0]["sources"][0]["课标依据"] == "CR01 · 第 62/55 页"
-    assert analysis["common"][0]["records"][0]["记录编号"]
+    assert "common" not in analysis
+
+    class_analysis = analytics.class_issue_analysis(dataset_id, "DC01", "N01")
+
+    assert class_analysis["student_count"] == 5
+    assert class_analysis["composite_score_rate"] == 4 / 15
+    assert [item["theme_code"] for item in class_analysis["common"]] == ["T01"]
+    issue = class_analysis["common"][0]
+    assert issue["student_count"] == 5
+    assert issue["scored_records"] == 15
+    assert issue["threshold_gap"] == 0.6 - 4 / 15
+    assert issue["sources"][0]["课标依据"] == "CR01 · 第 62/55 页"
+    assert issue["records"][0]["记录编号"]

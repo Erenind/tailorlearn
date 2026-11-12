@@ -9,7 +9,7 @@ from tailorlearn.db import Repository, utc_now
 from tailorlearn.learning_data import split_multi_value
 
 
-ANALYTICS_SERVICE_VERSION = "2026-11-11-student-ranking-issues"
+ANALYTICS_SERVICE_VERSION = "2026-11-12-class-analysis-v2"
 ISSUE_SCORE_RATE_THRESHOLD = 0.6
 
 
@@ -159,7 +159,7 @@ class AnalyticsService:
         self,
         dataset_id: str,
     ) -> list[dict[str, Any]]:
-        """Rank students by the arithmetic mean of their observed theme rates."""
+        """Rank only students with sufficient evidence across every theme."""
         student_rows = self._dataset_rows("learning_students", dataset_id)
         requirement_rows = self._dataset_rows(
             "learning_requirements",
@@ -201,6 +201,10 @@ class AnalyticsService:
                 evidence_status = "sufficient"
             else:
                 evidence_status = "limited"
+            ranking_eligible = (
+                evidence_status == "sufficient"
+                and total_theme_count > 0
+            )
             ranking.append(
                 {
                     "student_code": student_code,
@@ -212,7 +216,14 @@ class AnalyticsService:
                     ),
                     "observed_theme_count": observed_theme_count,
                     "total_theme_count": total_theme_count,
+                    "complete_theme_count": sufficient_theme_count,
+                    "record_completeness": (
+                        sufficient_theme_count / total_theme_count
+                        if total_theme_count
+                        else 0.0
+                    ),
                     "evidence_status": evidence_status,
+                    "ranking_eligible": ranking_eligible,
                     "rank": None,
                 }
             )
@@ -221,7 +232,8 @@ class AnalyticsService:
             {
                 round(float(row["score_rate"]), 12)
                 for row in ranking
-                if row["score_rate"] is not None
+                if row["ranking_eligible"]
+                and row["score_rate"] is not None
             },
             reverse=True,
         )
@@ -230,11 +242,14 @@ class AnalyticsService:
             for index, score_rate in enumerate(ranked_rates)
         }
         for row in ranking:
-            if row["score_rate"] is not None:
+            if row["ranking_eligible"] and row["score_rate"] is not None:
                 row["rank"] = rank_by_rate[round(float(row["score_rate"]), 12)]
         return sorted(
             ranking,
             key=lambda row: (
+                not row["ranking_eligible"],
+                row["rank"] if row["rank"] is not None else 10**9,
+                -float(row["record_completeness"]),
                 row["score_rate"] is None,
                 -float(row["score_rate"] or 0),
                 str(row["student_code"]),
@@ -344,7 +359,7 @@ class AnalyticsService:
         student_code: str,
         node_code: str | None = None,
     ) -> dict[str, Any]:
-        """Classify evidence-backed student and class issues deterministically."""
+        """Classify evidence-backed student issues deterministically."""
         student_rows = self._dataset_rows("learning_students", dataset_id)
         student = next(
             (
@@ -426,32 +441,6 @@ class AnalyticsService:
                     }
                 )
 
-        common: list[dict[str, Any]] = []
-        for theme_code, metric in sorted(class_metrics.items()):
-            score_rate = metric.get("score_rate")
-            if (
-                metric["evidence_status"] != "sufficient"
-                or score_rate is None
-                or float(score_rate) >= ISSUE_SCORE_RATE_THRESHOLD
-            ):
-                continue
-            common.append(
-                {
-                    "theme_code": theme_code,
-                    "theme_name": metric["theme_name"],
-                    "class_code": class_code,
-                    "score_rate": float(score_rate),
-                    "student_count": int(metric["student_count"]),
-                    "scored_records": int(metric["scored_records"]),
-                    "reason": (
-                        f"{class_code} 同节点平均得分率为 "
-                        f"{float(score_rate):.1%}，低于 "
-                        f"{ISSUE_SCORE_RATE_THRESHOLD:.0%}。"
-                    ),
-                    **evidence(theme_code, common=True),
-                }
-            )
-
         supplemental = [
             {
                 "theme_code": theme_code,
@@ -473,6 +462,111 @@ class AnalyticsService:
             "threshold": ISSUE_SCORE_RATE_THRESHOLD,
             "need_consolidation": need_consolidation,
             "personalized": personalized,
+            "supplemental": supplemental,
+        }
+
+    def class_issue_analysis(
+        self,
+        dataset_id: str,
+        class_code: str,
+        node_code: str | None = None,
+    ) -> dict[str, Any]:
+        """Analyze evidence-backed common issues for one class."""
+        student_rows = self._dataset_rows("learning_students", dataset_id)
+        class_students = [
+            row
+            for row in student_rows
+            if str(row.get("class_code") or "未分班") == class_code
+        ]
+        if not class_students:
+            raise ValueError("找不到当前班级")
+
+        metrics = [
+            metric
+            for metric in self.class_theme_metrics(dataset_id, node_code)
+            if str(metric["class_code"]) == class_code
+        ]
+        observed_metrics = [
+            metric
+            for metric in metrics
+            if metric.get("score_rate") is not None
+        ]
+        composite_score_rate = (
+            sum(float(metric["score_rate"]) for metric in observed_metrics)
+            / len(observed_metrics)
+            if observed_metrics
+            else None
+        )
+        total_theme_count = len(
+            {
+                str(row["theme_code"])
+                for row in self._dataset_rows(
+                    "learning_requirements",
+                    dataset_id,
+                )
+                if row.get("theme_code")
+            }
+        )
+
+        common: list[dict[str, Any]] = []
+        for metric in sorted(metrics, key=lambda item: str(item["theme_code"])):
+            score_rate = metric.get("score_rate")
+            if (
+                metric["evidence_status"] != "sufficient"
+                or score_rate is None
+                or float(score_rate) >= ISSUE_SCORE_RATE_THRESHOLD
+            ):
+                continue
+            theme_code = str(metric["theme_code"])
+            common.append(
+                {
+                    "theme_code": theme_code,
+                    "theme_name": metric["theme_name"],
+                    "class_code": class_code,
+                    "score_rate": float(score_rate),
+                    "student_count": int(metric["student_count"]),
+                    "scored_records": int(metric["scored_records"]),
+                    "threshold_gap": (
+                        ISSUE_SCORE_RATE_THRESHOLD - float(score_rate)
+                    ),
+                    "reason": (
+                        f"{class_code} 同节点平均得分率为 "
+                        f"{float(score_rate):.1%}，低于 "
+                        f"{ISSUE_SCORE_RATE_THRESHOLD:.0%}。"
+                    ),
+                    **self._theme_issue_evidence(
+                        dataset_id,
+                        theme_code=theme_code,
+                        student_code="",
+                        node_code=node_code,
+                        class_code=class_code,
+                    ),
+                }
+            )
+
+        supplemental = [
+            {
+                "theme_code": str(metric["theme_code"]),
+                "theme_name": metric["theme_name"],
+                "evidence_status": metric["evidence_status"],
+                "student_count": int(metric["student_count"]),
+                "scored_records": int(metric["scored_records"]),
+                "pending_records": int(metric.get("pending_records", 0)),
+                "unanswered_records": int(metric.get("unanswered_records", 0)),
+                "reason": (
+                    "未达到班级共性问题判定所需的学生数与有效记录数。"
+                ),
+            }
+            for metric in sorted(metrics, key=lambda item: str(item["theme_code"]))
+            if metric["evidence_status"] != "sufficient"
+        ]
+        return {
+            "class_code": class_code,
+            "threshold": ISSUE_SCORE_RATE_THRESHOLD,
+            "student_count": len(class_students),
+            "composite_score_rate": composite_score_rate,
+            "observed_theme_count": len(observed_metrics),
+            "total_theme_count": total_theme_count,
             "common": common,
             "supplemental": supplemental,
         }
