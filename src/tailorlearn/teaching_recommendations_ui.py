@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 from pathlib import Path
 from typing import Any
 
@@ -18,20 +17,19 @@ from tailorlearn.teaching_chat import (
 )
 
 
-TEACHING_CHAT_UI_VERSION = "2026-11-13-teaching-chat-ui-v1"
+TEACHING_CHAT_UI_VERSION = "2026-11-13-teaching-chat-ui-v2"
 HISTORY_PAGE_SIZE = 20
 TEMPORARY_FILE_CHAR_LIMIT = 60_000
 PURE_MODE_KEY = "teaching_chat_pure_mode"
 DATASET_KEY = "teaching_chat_dataset"
 CHAT_INPUT_KEY = "teaching_chat_input"
 COMMON_QUESTION_KEY = "teaching_chat_common_question"
-COMMON_QUESTION_EDIT_KEY = "teaching_chat_question_edit"
 HISTORY_LIMIT_KEY = "teaching_chat_history_limit"
 PLACEHOLDER_INDEX_KEY = "teaching_chat_placeholder_index"
 TEMP_FILES_KEY = "teaching_chat_temporary_files"
-TEMP_IGNORED_FILES_KEY = "teaching_chat_ignored_temporary_files"
 PENDING_ACTION_KEY = "teaching_chat_pending_action"
-QUESTION_NOTICE_KEY = "teaching_chat_question_notice"
+QUESTION_ACTION_KEY = "teaching_chat_question_action"
+RESET_COMMON_QUESTION_KEY = "teaching_chat_reset_common_question"
 
 
 def _temporary_file_text(uploaded_file: Any) -> tuple[str, str]:
@@ -62,12 +60,11 @@ def _temporary_file_text(uploaded_file: Any) -> tuple[str, str]:
 
 def _merge_temporary_files(service_files: list[dict[str, Any]]) -> None:
     existing = st.session_state.setdefault(TEMP_FILES_KEY, [])
-    ignored = set(st.session_state.get(TEMP_IGNORED_FILES_KEY, []))
     known = {str(item["signature"]) for item in existing}
     errors: list[str] = []
     for uploaded in service_files:
         signature = hashlib.sha256(uploaded.getvalue()).hexdigest()
-        if signature in known or signature in ignored:
+        if signature in known:
             continue
         try:
             text, file_type = _temporary_file_text(uploaded)
@@ -105,110 +102,136 @@ def _fill_common_question(
     st.session_state[PLACEHOLDER_INDEX_KEY] = (
         int(st.session_state.get(PLACEHOLDER_INDEX_KEY, 0)) + 1
     )
-    st.session_state[COMMON_QUESTION_KEY] = "__choose__"
 
 
-def _render_question_manager(service: TeachingAssistantService) -> None:
-    suggestions = service.list_suggestions()
-    notice = st.session_state.pop(QUESTION_NOTICE_KEY, None)
-    if notice:
-        st.success(notice)
-
-    with st.form("teaching_question_add", clear_on_submit=True):
-        new_question = st.text_input(
-            "新增常用问题",
-            placeholder="输入一个问题",
-            key="teaching_question_new",
-        )
-        add = st.form_submit_button(
-            "添加",
-            icon=":material/add:",
-            width="stretch",
-        )
-    if add:
+@st.dialog("新增常用问题", width="small")
+def _add_question_dialog(service: TeachingAssistantService) -> None:
+    text = st.text_area(
+        "问题内容",
+        placeholder="输入要保存的问题",
+        key="teaching_question_dialog_add_text",
+        height=90,
+    )
+    save, cancel = st.columns(2)
+    if save.button(
+        "保存",
+        icon=":material/check:",
+        type="primary",
+        key="teaching_question_dialog_add_save",
+        width="stretch",
+    ):
         try:
-            service.add_suggestion(new_question)
-            st.session_state[QUESTION_NOTICE_KEY] = "常用问题已添加"
+            service.add_suggestion(text)
+            st.session_state.pop(QUESTION_ACTION_KEY, None)
             st.rerun()
         except ValueError as exc:
             st.error(str(exc))
+    if cancel.button(
+        "取消",
+        key="teaching_question_dialog_add_cancel",
+        width="stretch",
+    ):
+        st.session_state.pop(QUESTION_ACTION_KEY, None)
+        st.rerun()
 
-    if not suggestions:
-        return
-    edit_options = [item["id"] for item in suggestions]
-    if st.session_state.get(COMMON_QUESTION_EDIT_KEY) not in edit_options:
-        st.session_state[COMMON_QUESTION_EDIT_KEY] = edit_options[0]
-    selected_id = st.selectbox(
-        "编辑常用问题",
-        edit_options,
-        key=COMMON_QUESTION_EDIT_KEY,
-        format_func=lambda value: next(
-            item["text"] for item in suggestions if item["id"] == value
+
+@st.dialog("编辑常用问题", width="small")
+def _edit_question_dialog(
+    service: TeachingAssistantService,
+    suggestion_id: str,
+) -> None:
+    suggestion = next(
+        (
+            item
+            for item in service.list_suggestions()
+            if item["id"] == suggestion_id
         ),
+        None,
     )
-    selected = next(
-        item for item in suggestions if item["id"] == selected_id
-    )
-    edited_text = st.text_area(
+    if suggestion is None:
+        st.session_state.pop(QUESTION_ACTION_KEY, None)
+        st.rerun()
+    text = st.text_area(
         "问题内容",
-        value=selected["text"],
-        key=f"teaching_question_edit_text_{selected_id}",
-        height=82,
+        value=suggestion["text"],
+        key=f"teaching_question_dialog_edit_{suggestion_id}",
+        height=90,
     )
-    save_column, delete_column = st.columns(2)
-    if save_column.button(
+    save, cancel = st.columns(2)
+    if save.button(
         "保存修改",
         icon=":material/check:",
-        key=f"teaching_question_save_{selected_id}",
+        type="primary",
+        key=f"teaching_question_dialog_save_{suggestion_id}",
         width="stretch",
     ):
         try:
-            service.update_suggestion(selected_id, edited_text)
-            st.session_state[QUESTION_NOTICE_KEY] = "常用问题已更新"
+            service.update_suggestion(suggestion_id, text)
+            st.session_state.pop(QUESTION_ACTION_KEY, None)
             st.rerun()
         except ValueError as exc:
             st.error(str(exc))
-    if delete_column.button(
+    if cancel.button(
+        "取消",
+        key=f"teaching_question_dialog_cancel_{suggestion_id}",
+        width="stretch",
+    ):
+        st.session_state.pop(QUESTION_ACTION_KEY, None)
+        st.rerun()
+
+
+@st.dialog("删除常用问题", width="small")
+def _delete_question_dialog(
+    service: TeachingAssistantService,
+    suggestion_id: str,
+) -> None:
+    suggestion = next(
+        (
+            item
+            for item in service.list_suggestions()
+            if item["id"] == suggestion_id
+        ),
+        None,
+    )
+    if suggestion is None:
+        st.session_state.pop(QUESTION_ACTION_KEY, None)
+        st.rerun()
+    st.warning(f"确定删除“{suggestion['text']}”吗？")
+    confirm, cancel = st.columns(2)
+    if confirm.button(
         "删除",
         icon=":material/delete:",
-        key=f"teaching_question_delete_{selected_id}",
+        type="primary",
+        key=f"teaching_question_dialog_delete_{suggestion_id}",
         width="stretch",
     ):
-        try:
-            service.delete_suggestion(selected_id)
-            st.session_state[QUESTION_NOTICE_KEY] = "常用问题已删除"
-            st.rerun()
-        except ValueError as exc:
-            st.error(str(exc))
+        service.delete_suggestion(suggestion_id)
+        st.session_state[COMMON_QUESTION_KEY] = "__choose__"
+        st.session_state.pop(QUESTION_ACTION_KEY, None)
+        st.rerun()
+    if cancel.button(
+        "取消",
+        key=f"teaching_question_dialog_delete_cancel_{suggestion_id}",
+        width="stretch",
+    ):
+        st.session_state.pop(QUESTION_ACTION_KEY, None)
+        st.rerun()
 
 
-def _render_material_uploader() -> None:
-    files = st.file_uploader(
-        "上传临时素材",
-        type=["pdf", "txt", "md", "csv", "json"],
-        accept_multiple_files=True,
-        key="teaching_temporary_upload",
-    )
-    if files:
-        _merge_temporary_files(files)
-    temporary_files = st.session_state.get(TEMP_FILES_KEY, [])
-    if temporary_files:
-        st.caption(
-            "已附加："
-            + "、".join(str(item["name"]) for item in temporary_files)
-        )
-        if st.button(
-            "清除临时素材",
-            icon=":material/delete_sweep:",
-            key="teaching_temporary_clear",
-            width="stretch",
-        ):
-            st.session_state[TEMP_IGNORED_FILES_KEY] = [
-                str(item["signature"]) for item in temporary_files
-            ]
-            st.session_state[TEMP_FILES_KEY] = []
-            st.rerun()
-    st.caption("临时素材只用于当前对话，不会写入数据库。")
+def _render_question_dialog(service: TeachingAssistantService) -> None:
+    pending = st.session_state.get(QUESTION_ACTION_KEY)
+    if not isinstance(pending, dict):
+        return
+    action = pending.get("action")
+    suggestion_id = str(pending.get("suggestion_id") or "")
+    if action == "add":
+        _add_question_dialog(service)
+    elif action == "edit" and suggestion_id:
+        _edit_question_dialog(service, suggestion_id)
+    elif action == "delete" and suggestion_id:
+        _delete_question_dialog(service, suggestion_id)
+    else:
+        st.session_state.pop(QUESTION_ACTION_KEY, None)
 
 
 def _render_pending_action(
@@ -312,13 +335,127 @@ def _render_messages(service: TeachingAssistantService) -> None:
                 st.markdown(message["content"])
 
 
+def _apply_composer_style() -> None:
+    st.html(
+        """
+        <style>
+        .st-key-teaching_chat_composer {
+            padding: 0.2rem 0.15rem 0;
+            border: none;
+            background: transparent;
+        }
+        .st-key-teaching_chat_input,
+        .st-key-teaching_chat_input > div,
+        .st-key-teaching_chat_input > div > div {
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+        .st-key-teaching_chat_input textarea {
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+        .st-key-teaching_chat_toolbar {
+            padding: 0.15rem 0.3rem 0.05rem;
+        }
+        .st-key-teaching_chat_pure_mode button {
+            min-height: 2rem;
+            border: 1px solid #D0D5DD !important;
+            border-radius: 999px !important;
+            background: transparent !important;
+            color: #667085 !important;
+            box-shadow: none !important;
+        }
+        .st-key-teaching_chat_pure_mode button[data-selected] {
+            border-color: #2F5BEA !important;
+            background: #EDF2FF !important;
+            color: #2F5BEA !important;
+        }
+        .st-key-teaching_chat_pure_mode button[data-selected] * {
+            color: #2F5BEA !important;
+            fill: #2F5BEA !important;
+        }
+        .st-key-teaching_question_combo {
+            gap: 0 !important;
+        }
+        .st-key-teaching_question_combo .st-key-teaching_question_combo_actions button {
+            min-height: 2.5rem;
+            border-color: #E1E5EB !important;
+            border-left: none !important;
+            border-radius: 0 10px 10px 0 !important;
+        }
+        .st-key-teaching_question_combo .st-key-teaching_chat_common_question > div {
+            border-radius: 10px 0 0 10px !important;
+        }
+        </style>
+        """
+    )
+
+
+def _select_pure_mode() -> tuple[Any, bool]:
+    state = st.session_state.get(PURE_MODE_KEY)
+    if isinstance(state, bool):
+        st.session_state[PURE_MODE_KEY] = "纯净模式" if state else None
+    selected = st.pills(
+        "模式",
+        ["纯净模式"],
+        default=None,
+        format_func=lambda _: ":material/eco: 纯净模式",
+        key=PURE_MODE_KEY,
+        label_visibility="collapsed",
+        width="content",
+    )
+    return selected, selected == "纯净模式"
+
+
+def _render_common_question_actions(
+    suggestions: list[dict[str, Any]],
+) -> None:
+    selected_id = st.session_state.get(COMMON_QUESTION_KEY)
+    selected = next(
+        (item for item in suggestions if item["id"] == selected_id),
+        None,
+    )
+    action = st.menu_button(
+        ":material/more_horiz:",
+        ["新增问题", "编辑当前问题", "删除当前问题"],
+        key="teaching_question_combo_actions",
+        help="管理常用问题",
+        type="tertiary",
+        width="content",
+        format_func={
+            "新增问题": "新增问题",
+            "编辑当前问题": "编辑当前问题",
+            "删除当前问题": "删除当前问题",
+        }.get,
+    )
+    if action is None:
+        return
+    if action == "新增问题":
+        st.session_state[QUESTION_ACTION_KEY] = {"action": "add"}
+        st.rerun()
+    if selected is None:
+        st.toast("请先在常用问题下拉框中选择一项")
+        return
+    st.session_state[QUESTION_ACTION_KEY] = {
+        "action": "edit" if action == "编辑当前问题" else "delete",
+        "suggestion_id": selected["id"],
+    }
+    st.rerun()
+
+
 def _render_composer(
     service: TeachingAssistantService,
     learning: LearningDataService,
     profile: ProviderProfile | None,
 ) -> str | None:
+    _apply_composer_style()
     suggestions = service.list_suggestions()
     datasets = _dataset_options(learning)
+    if st.session_state.pop(RESET_COMMON_QUESTION_KEY, False):
+        st.session_state[COMMON_QUESTION_KEY] = "__choose__"
     placeholder_index = int(st.session_state.get(PLACEHOLDER_INDEX_KEY, 0))
     if suggestions:
         showcase = suggestions[placeholder_index % len(suggestions)]["text"]
@@ -329,47 +466,65 @@ def _render_composer(
     prompt: str | None = None
     chat_available = profile is not None and bool(profile.api_key)
     with st.bottom:
-        with st.container(
-            border=True,
-            key="teaching_chat_composer",
-        ):
+        with st.container(key="teaching_chat_composer"):
+            submission = st.chat_input(
+                placeholder,
+                key=CHAT_INPUT_KEY,
+                accept_file="multiple",
+                file_type=["pdf", "txt", "md", "csv", "json"],
+                submit_mode="disable",
+                disabled=not chat_available,
+            )
+            if not chat_available:
+                st.caption("请先在“AI 参数设置”中启用 AI 接入")
             with st.container(
-                horizontal=True,
-                vertical_alignment="center",
-                wrap=True,
-                gap="small",
                 key="teaching_chat_toolbar",
             ):
-                pure_mode = st.toggle(
-                    "纯净模式",
-                    key=PURE_MODE_KEY,
-                    help="不读取学生、班级、作答和学习主题数据",
-                )
-                dataset_id: str | None = None
-                if not pure_mode:
-                    if datasets:
-                        dataset_options = [item["id"] for item in datasets]
-                        if st.session_state.get(DATASET_KEY) not in dataset_options:
-                            st.session_state[DATASET_KEY] = dataset_options[0]
-                        dataset_id = st.selectbox(
-                            "学情数据集",
-                            dataset_options,
-                            key=DATASET_KEY,
-                            format_func=lambda value: next(
-                                item["name"]
-                                for item in datasets
-                                if item["id"] == value
-                            ),
-                            persist_state="page",
-                        )
-                    else:
-                        st.caption("尚无学情数据集")
-                with st.popover(
-                    "临时素材",
-                    icon=":material/add:",
-                ):
-                    _render_material_uploader()
-                if suggestions:
+                current_mode = st.session_state.get(PURE_MODE_KEY)
+                current_pure_mode = current_mode == "纯净模式"
+                if current_pure_mode:
+                    mode_column, question_column = st.columns(
+                        [1, 3],
+                        vertical_alignment="center",
+                        gap="small",
+                    )
+                    dataset_column = None
+                else:
+                    mode_column, dataset_column, question_column = st.columns(
+                        [1.05, 1.35, 2.25],
+                        vertical_alignment="center",
+                        gap="small",
+                    )
+                with mode_column:
+                    _, pure_mode = _select_pure_mode()
+                if dataset_column is not None:
+                    with dataset_column:
+                        if datasets:
+                            dataset_options = [
+                                item["id"] for item in datasets
+                            ]
+                            if (
+                                st.session_state.get(DATASET_KEY)
+                                not in dataset_options
+                            ):
+                                st.session_state[DATASET_KEY] = (
+                                    dataset_options[0]
+                                )
+                            st.selectbox(
+                                "学情数据集",
+                                dataset_options,
+                                key=DATASET_KEY,
+                                format_func=lambda value: next(
+                                    item["name"]
+                                    for item in datasets
+                                    if item["id"] == value
+                                ),
+                                label_visibility="collapsed",
+                                persist_state="page",
+                            )
+                        else:
+                            st.caption("尚无学情数据集")
+                with question_column:
                     question_options = [
                         "__choose__",
                         *[item["id"] for item in suggestions],
@@ -379,35 +534,50 @@ def _render_composer(
                         not in question_options
                     ):
                         st.session_state[COMMON_QUESTION_KEY] = "__choose__"
-                    st.selectbox(
-                        "常用问题",
-                        question_options,
-                        key=COMMON_QUESTION_KEY,
-                        format_func=lambda value: (
-                            "选择常用问题"
-                            if value == "__choose__"
-                            else next(
-                                item["text"]
-                                for item in suggestions
-                                if item["id"] == value
-                            )
-                        ),
-                        on_change=_fill_common_question,
-                        args=(suggestions,),
-                    )
-                with st.popover(
-                    "管理问题",
-                    icon=":material/edit_note:",
-                ):
-                    _render_question_manager(service)
-            prompt = st.chat_input(
-                placeholder,
-                key=CHAT_INPUT_KEY,
-                submit_mode="disable",
-                disabled=not chat_available,
-            )
-            if not chat_available:
-                st.caption("请先在“AI 参数设置”中启用 AI 接入")
+                    with st.container(
+                        horizontal=True,
+                        vertical_alignment="center",
+                        gap="xsmall",
+                        key="teaching_question_combo",
+                    ):
+                        st.selectbox(
+                            "常用问题",
+                            question_options,
+                            key=COMMON_QUESTION_KEY,
+                            format_func=lambda value: (
+                                "选择常用问题"
+                                if value == "__choose__"
+                                else next(
+                                    (
+                                        (
+                                            ":violet-badge[预设] "
+                                            if item["is_preset"]
+                                            else ":blue-badge[自定义] "
+                                        )
+                                        + item["text"]
+                                        for item in suggestions
+                                        if item["id"] == value
+                                    ),
+                                    value,
+                                )
+                            ),
+                            label_visibility="collapsed",
+                            on_change=_fill_common_question,
+                            args=(suggestions,),
+                        )
+                        _render_common_question_actions(suggestions)
+            if submission:
+                if isinstance(submission, str):
+                    prompt = submission.strip()
+                else:
+                    submitted_files = list(submission.files)
+                    if submitted_files:
+                        _merge_temporary_files(submitted_files)
+                    prompt = str(submission.text or "").strip()
+                    if not prompt and submitted_files:
+                        prompt = (
+                            "请阅读我刚上传的临时素材，并结合当前对话继续分析。"
+                        )
     if prompt:
         return str(prompt)
     return None
@@ -420,7 +590,7 @@ def render_teaching_recommendations_page(
 ) -> None:
     st.session_state.setdefault(HISTORY_LIMIT_KEY, HISTORY_PAGE_SIZE)
     st.session_state.setdefault(TEMP_FILES_KEY, [])
-    st.session_state.setdefault(TEMP_IGNORED_FILES_KEY, [])
+    _render_question_dialog(service)
     _render_messages(service)
     _render_pending_action(service, profile)
     turn_slot = st.container()
@@ -428,7 +598,7 @@ def render_teaching_recommendations_page(
     if not prompt:
         return
 
-    pure_mode = bool(st.session_state.get(PURE_MODE_KEY, False))
+    pure_mode = st.session_state.get(PURE_MODE_KEY) == "纯净模式"
     dataset_id = None
     if not pure_mode:
         dataset_id = st.session_state.get(DATASET_KEY)
@@ -465,5 +635,6 @@ def render_teaching_recommendations_page(
     st.session_state[PLACEHOLDER_INDEX_KEY] = (
         int(st.session_state.get(PLACEHOLDER_INDEX_KEY, 0)) + 1
     )
+    st.session_state[RESET_COMMON_QUESTION_KEY] = True
     st.session_state[HISTORY_LIMIT_KEY] = HISTORY_PAGE_SIZE
     st.rerun()
