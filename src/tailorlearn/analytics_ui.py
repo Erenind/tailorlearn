@@ -16,7 +16,7 @@ from tailorlearn.models import ProviderProfile
 from tailorlearn.student_diagnosis import StudentDiagnosisService
 
 
-ANALYTICS_UI_VERSION = "2026-11-13-student-ranking-drilldown"
+ANALYTICS_UI_VERSION = "2026-11-13-student-ranking-primary-action"
 STUDENT_ANALYSIS_SECTIONS = ("数据概览", "问题分析")
 CLASS_ANALYSIS_SECTIONS = ("班级对比", "具体班级分析")
 STUDENT_RANKING_SORT_OPTIONS = (
@@ -608,7 +608,7 @@ def _render_student_rankings(
                     ),
                     "查看": st.column_config.ButtonColumn(
                         "查看",
-                        type="tertiary",
+                        type="primary",
                         on_click=_open_student_detail,
                         kwargs={
                             "click_key": main_click_key,
@@ -664,7 +664,7 @@ def _render_student_rankings(
                     ),
                     "查看": st.column_config.ButtonColumn(
                         "查看",
-                        type="tertiary",
+                        type="primary",
                         on_click=_open_student_detail,
                         kwargs={
                             "click_key": special_click_key,
