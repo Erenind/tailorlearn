@@ -5,9 +5,23 @@ from pathlib import Path
 import streamlit as st
 from streamlit.testing.v1 import AppTest
 
+from tailorlearn.analytics_ui import _student_code_from_click
 from tailorlearn.db import Repository
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.paths import AppPaths
+
+
+def test_student_code_from_button_column_click() -> None:
+    assert _student_code_from_click(
+        {"row": 1},
+        ["D01", "D02"],
+    ) == "D02"
+    assert _student_code_from_click(None, ["D01"]) is None
+    assert _student_code_from_click({"row": 2}, ["D01"]) is None
+    assert _student_code_from_click(
+        {"row": "invalid"},
+        ["D01"],
+    ) is None
 
 
 def test_streamlit_renders_student_and_class_analysis_navigation(
@@ -134,22 +148,84 @@ def test_streamlit_renders_student_and_class_analysis_navigation(
     at.button(key="nav_student").click().run()
     assert not at.exception
     assert any(item.value == "学生分析" for item in at.title)
-    assert at.button(key="student_analysis_nav_overview").label.endswith("数据概览")
-    assert at.button(key="student_analysis_nav_issues").label.endswith("问题分析")
-    assert any(item.value == "数据统计标签" for item in at.subheader)
-    ranking = at.dataframe(
-        key=f"analytics_student_ranking_table_{dataset_id}"
-    ).value
+    assert at.button(
+        key=f"analytics_student_dataset_open_{dataset_id}"
+    ).label == "进入分析"
+    assert not any(
+        item.key == "student_analysis_nav_overview" for item in at.button
+    )
+    assert not any(item.value == "数据统计标签" for item in at.subheader)
+
+    at.button(key=f"analytics_student_dataset_open_{dataset_id}").click().run()
+    assert not at.exception
+    assert at.button(key="analytics_student_path_datasets").label == "学情数据集"
+    ranking = next(
+        item.value
+        for item in at.dataframe
+        if "综合名次" in item.value.columns
+    )
     assert ranking.loc[0, "综合名次"] == "1"
     assert ranking.loc[0, "学生编号"] == "D01"
     assert ranking.loc[0, "综合得分率"] == 1.0
     assert "D06" not in set(ranking["学生编号"])
-    incomplete = at.dataframe(
-        key=f"analytics_student_incomplete_ranking_table_{dataset_id}"
-    ).value
+    incomplete = next(
+        item.value
+        for item in at.dataframe
+        if "已观察主题得分率" in item.value.columns
+    )
     assert incomplete.loc[0, "学生编号"] == "D06"
     assert incomplete.loc[0, "记录完整度"] == "0/1（0%）"
     assert incomplete.loc[0, "已观察主题"] == "1/1"
+    assert "查看" in ranking.columns
+    assert "查看" in incomplete.columns
+    assert not any(
+        item.key == "student_analysis_nav_overview" for item in at.button
+    )
+    assert at.session_state.get("analytics_student_detail_code") is None
+
+    at.session_state["analytics_student_detail_code"] = "D01"
+    at.run()
+    assert not at.exception
+    assert at.button(key="student_analysis_nav_overview").label.endswith("数据概览")
+    assert at.button(key="student_analysis_nav_issues").label.endswith("问题分析")
+    assert any(item.value == "数据统计标签" for item in at.subheader)
+    assert at.button(
+        key=f"analytics_student_back_to_rankings_{dataset_id}"
+    ).label == "返回榜单"
+
+    at.button(
+        key=f"analytics_student_back_to_rankings_{dataset_id}"
+    ).click().run()
+    assert not at.exception
+    assert next(
+        item.value
+        for item in at.dataframe
+        if "综合名次" in item.value.columns
+    ).loc[0, "学生编号"] == "D01"
+    assert not any(
+        item.key == "student_analysis_nav_overview" for item in at.button
+    )
+
+    at.session_state["analytics_student_detail_code"] = "D06"
+    at.run()
+    assert not at.exception
+    assert any(
+        "学生 D06" in item.value and "暂不参与综合排名" in item.value
+        for item in at.caption
+    )
+    assert at.session_state.get("analytics_student_detail_code") == "D06"
+
+    at.button(
+        key=f"analytics_student_back_to_rankings_{dataset_id}"
+    ).click().run()
+    at.button(key="analytics_student_path_datasets").click().run()
+    assert not at.exception
+    assert at.button(
+        key=f"analytics_student_dataset_open_{dataset_id}"
+    ).label == "进入分析"
+    at.button(key=f"analytics_student_dataset_open_{dataset_id}").click().run()
+    at.session_state["analytics_student_detail_code"] = "D01"
+    at.run()
 
     at.button(key="student_analysis_nav_issues").click().run()
     assert not at.exception
