@@ -20,7 +20,7 @@ from tailorlearn.models import (
     UnitStatus,
 )
 
-REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
+REPOSITORY_API_VERSION = "2026-11-13-teaching-chat-v1"
 
 
 def utc_now() -> str:
@@ -305,6 +305,33 @@ CREATE TABLE IF NOT EXISTS ai_teaching_recommendations (
     updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS teaching_chat_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_teaching_chat_messages_created
+    ON teaching_chat_messages(id);
+
+CREATE TABLE IF NOT EXISTS teaching_chat_memory (
+    id TEXT PRIMARY KEY,
+    summary TEXT NOT NULL DEFAULT '',
+    covered_message_id INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS teaching_chat_suggestions (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    is_preset INTEGER NOT NULL DEFAULT 0,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS learning_students (
     row_id INTEGER PRIMARY KEY AUTOINCREMENT,
     dataset_id TEXT NOT NULL REFERENCES learning_datasets(id),
@@ -583,7 +610,7 @@ class Repository:
                 )
             connection.execute(
                 "INSERT OR REPLACE INTO schema_meta(key, value) VALUES (?, ?)",
-                ("schema_version", "7"),
+                ("schema_version", "8"),
             )
 
     def create_material_set(

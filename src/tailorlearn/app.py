@@ -15,6 +15,8 @@ import tailorlearn.learning_data_ui as learning_data_ui_module
 import tailorlearn.outline as outline_module
 import tailorlearn.outline_ui as outline_ui_module
 import tailorlearn.providers as providers_module
+import tailorlearn.teaching_chat as teaching_chat_module
+import tailorlearn.teaching_recommendations_ui as teaching_ui_module
 from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.extraction import page_as_png
 from tailorlearn.ingest import IngestionService
@@ -22,8 +24,6 @@ from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
 from tailorlearn.paths import AppPaths
 from tailorlearn.student_diagnosis import StudentDiagnosisService
-from tailorlearn.teaching_recommendations import TeachingRecommendationService
-from tailorlearn.teaching_recommendations_ui import render_teaching_recommendations_page
 from tailorlearn.ui import (
     apply_app_style,
     render_page_header,
@@ -31,13 +31,15 @@ from tailorlearn.ui import (
 )
 
 
-_REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
+_REPOSITORY_API_VERSION = "2026-11-13-teaching-chat-v1"
 _ANALYTICS_SERVICE_API_VERSION = "2026-11-12-class-analysis-v2"
 _ANALYTICS_UI_API_VERSION = "2026-11-13-student-ranking-primary-action"
 _LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
 _PROVIDERS_API_VERSION = "2026-11-13-ai-access-presets"
+_TEACHING_CHAT_API_VERSION = "2026-11-13-teaching-chat-agent-v1"
+_TEACHING_CHAT_UI_API_VERSION = "2026-11-13-teaching-chat-ui-v1"
 if (
     getattr(analytics_module, "ANALYTICS_SERVICE_VERSION", None)
     != _ANALYTICS_SERVICE_API_VERSION
@@ -85,6 +87,20 @@ if (
 ProviderStore = providers_module.ProviderStore
 ProviderPreset = providers_module.ProviderPreset
 PROVIDER_PRESETS = providers_module.PROVIDER_PRESETS
+if (
+    getattr(teaching_chat_module, "TEACHING_CHAT_API_VERSION", None)
+    != _TEACHING_CHAT_API_VERSION
+):
+    teaching_chat_module = importlib.reload(teaching_chat_module)
+TeachingAssistantService = teaching_chat_module.TeachingAssistantService
+if (
+    getattr(teaching_ui_module, "TEACHING_CHAT_UI_VERSION", None)
+    != _TEACHING_CHAT_UI_API_VERSION
+):
+    teaching_ui_module = importlib.reload(teaching_ui_module)
+render_teaching_recommendations_page = (
+    teaching_ui_module.render_teaching_recommendations_page
+)
 
 
 st.set_page_config(
@@ -93,7 +109,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-13-student-ranking-drilldown"
+_APP_SERVICES_CACHE_VERSION = "2026-11-13-teaching-chat-agent-v1"
 
 
 @st.cache_resource
@@ -106,23 +122,30 @@ def app_services(cache_version: str) -> tuple[
     OutlineService,
     AnalyticsService,
     StudentDiagnosisService,
-    TeachingRecommendationService,
+    TeachingAssistantService,
 ]:
     paths = AppPaths.default()
     paths.ensure()
     repository = Repository(paths.database_file)
     repository.initialize()
     analytics = AnalyticsService(repository)
+    learning = LearningDataService(repository, paths.db_dir)
+    outline = OutlineService(paths, repository)
     return (
         paths,
         repository,
         IngestionService(paths, repository),
         ProviderStore(paths.provider_file),
-        LearningDataService(repository, paths.db_dir),
-        OutlineService(paths, repository),
+        learning,
+        outline,
         analytics,
         StudentDiagnosisService(repository, analytics),
-        TeachingRecommendationService(repository, analytics),
+        TeachingAssistantService(
+            repository,
+            learning,
+            analytics,
+            outline,
+        ),
     )
 
 
