@@ -39,7 +39,7 @@ _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
 _PROVIDERS_API_VERSION = "2026-11-13-ai-access-presets"
 _TEACHING_CHAT_API_VERSION = "2026-11-13-teaching-chat-agent-v1"
-_TEACHING_CHAT_UI_API_VERSION = "2026-11-13-teaching-chat-ui-v2"
+_TEACHING_CHAT_UI_API_VERSION = "2026-11-13-teaching-chat-ui-v3"
 if (
     getattr(analytics_module, "ANALYTICS_SERVICE_VERSION", None)
     != _ANALYTICS_SERVICE_API_VERSION

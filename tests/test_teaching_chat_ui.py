@@ -61,8 +61,20 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
     at.button(key="nav_teaching").click().run()
     assert not at.exception
     assert at.pills(key="teaching_chat_pure_mode").value is None
-    assert at.selectbox(key="teaching_chat_dataset").value == dataset["id"]
-    assert at.chat_input(key="teaching_chat_input").disabled is False
+    assert at.button(
+        key=f"teaching_dataset_choose_{dataset['id']}"
+    ).label.endswith("当前")
+    assert at.text_area(key="teaching_chat_draft").value == ""
+    assert at.button(key="teaching_chat_send").disabled is False
+    assert at.button(
+        key="teaching_question_use_preset_student"
+    ).label == "具体分析学生D01等"
+    assert at.button(
+        key="teaching_question_edit_preset_student"
+    )
+    assert at.button(
+        key="teaching_question_delete_preset_student"
+    )
     assert not any(
         item.value in {"班级主题证据", "AI 教学建议草稿"}
         for item in at.subheader
@@ -108,24 +120,20 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
     at.pills(key="teaching_chat_pure_mode").set_value("纯净模式").run()
     assert not at.exception
     assert not any(
-        item.key == "teaching_chat_dataset" for item in at.selectbox
+        (item.key or "").startswith("teaching_dataset_choose_")
+        for item in at.button
     )
 
-    question = at.selectbox(key="teaching_chat_common_question")
-    assert at.menu_button(
-        key="teaching_question_combo_actions"
-    ).options == ["新增问题", "编辑当前问题", "删除当前问题"]
-    student_question = next(
-        option
-        for option in question.options
-        if option.endswith("具体分析学生D01等")
-    )
-    assert any("预设" in option for option in question.options)
-    question.select(student_question).run()
+    at.button(key="teaching_question_use_preset_student").click().run()
     assert not at.exception
-    assert at.chat_input(key="teaching_chat_input").value == "具体分析学生D01等"
-    at.chat_input(key="teaching_chat_input").upload(
+    assert at.text_area(key="teaching_chat_draft").value == "具体分析学生D01等"
+    assert at.file_uploader(key="teaching_temporary_upload")
+    at.file_uploader(key="teaching_temporary_upload").upload(
         "临时资料.txt",
         "这是一份临时教学素材".encode(),
-    )
+    ).run()
+    assert not at.exception
+    temporary_files = at.session_state["teaching_chat_temporary_files"]
+    assert temporary_files[0]["name"] == "临时资料.txt"
+    assert not repr(at).count(":violet-badge[预设]")
     st.cache_resource.clear()
