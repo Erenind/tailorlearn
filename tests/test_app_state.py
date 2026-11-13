@@ -118,6 +118,23 @@ def test_streamlit_restores_provider_selects_new_material_and_selects_all(
     assert any("已安全保存" in item.value for item in at.caption)
     assert "test-key" not in repr(at.caption)
 
+    other = provider_store.upsert(
+        profile_id=None,
+        vendor_name="另一厂商",
+        base_url="https://other.example/v1",
+        model="other-model",
+        api_key="other-key",
+    )
+    provider_store.set_active(other.id)
+    at.run()
+    at.selectbox(key="ai_provider_selector").select(other.id).run()
+    at.selectbox(key="ai_provider_selector").select(profile.id).run()
+    assert provider_store.active().id == profile.id
+
+    at.button(key="nav_material_center").click().run()
+    at.button(key="nav_ai_settings").click().run()
+    assert at.selectbox(key="ai_provider_selector").value == profile.id
+    assert provider_store.active().id == profile.id
     at.button(key="nav_material_center").click().run()
     at.button(key="material_nav_textbook").click().run()
     assert not any(item.label == "课本材料库" for item in at.subheader)
@@ -187,6 +204,64 @@ def test_streamlit_restores_provider_selects_new_material_and_selects_all(
     )
     at.button(key="material_trash_doc_test").click().run()
     assert any(item.value == "回收站" for item in at.subheader)
+    st.cache_resource.clear()
+
+
+def test_streamlit_ai_access_presets_prefill_and_save_as_active(
+    tmp_path: Path,
+    monkeypatch,
+):
+    paths = AppPaths(tmp_path)
+    paths.ensure()
+
+    monkeypatch.setattr(
+        AppPaths,
+        "default",
+        classmethod(lambda cls: paths),
+    )
+    st.cache_resource.clear()
+    app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
+    at = AppTest.from_file(str(app_file), default_timeout=20).run()
+
+    assert not at.exception
+    at.button(key="nav_ai_settings").click().run()
+    selector = at.selectbox(key="ai_provider_selector")
+    assert selector.label == "AI 接入"
+    assert {
+        "DeepSeek · 内置预设",
+        "千问 · 内置预设",
+        "智谱 · 内置预设",
+        "豆包 · 内置预设",
+        "Kimi · 内置预设",
+    }.issubset(set(selector.options))
+
+    at.selectbox(key="ai_provider_selector").select("千问 · 内置预设").run()
+    assert not at.exception
+    assert at.text_input(key="provider_vendor_name").value == "千问"
+    assert at.text_input(key="provider_base_url").value == (
+        "https://cn-beijing.maas.qianwenaiapi.com/compatible-mode/v1"
+    )
+    assert at.text_input(key="provider_model").value == "qwen3.8-flash"
+
+    at.text_input(key="provider_api_key").set_value("qwen-key")
+    at.button(key="provider_save").click().run()
+    assert not at.exception
+
+    provider_store = ProviderStore(paths.provider_file)
+    config = provider_store.load()
+    active = provider_store.active()
+    assert config.active_profile_id == active.id
+    assert active.vendor_name == "千问"
+    assert active.base_url == (
+        "https://cn-beijing.maas.qianwenaiapi.com/compatible-mode/v1"
+    )
+    assert active.model == "qwen3.8-flash"
+    assert at.selectbox(key="ai_provider_selector").value == active.id
+
+    at.button(key="nav_material_center").click().run()
+    at.button(key="nav_ai_settings").click().run()
+    assert at.selectbox(key="ai_provider_selector").value == active.id
+    assert provider_store.active().id == active.id
     st.cache_resource.clear()
 
 

@@ -4,9 +4,56 @@ import json
 import os
 import tempfile
 import uuid
+from dataclasses import dataclass
 from pathlib import Path
 
 from tailorlearn.models import ProviderConfig, ProviderProfile
+
+PROVIDER_API_VERSION = "2026-11-13-ai-access-presets"
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderPreset:
+    key: str
+    vendor_name: str
+    base_url: str
+    model: str = ""
+
+    @property
+    def option_value(self) -> str:
+        return f"__preset__:{self.key}"
+
+
+PROVIDER_PRESETS = (
+    ProviderPreset(
+        key="deepseek",
+        vendor_name="DeepSeek",
+        base_url="https://api.deepseek.com",
+        model="deepseek-flash",
+    ),
+    ProviderPreset(
+        key="qwen",
+        vendor_name="千问",
+        base_url="https://cn-beijing.maas.qianwenaiapi.com/compatible-mode/v1",
+        model="qwen3.8-flash",
+    ),
+    ProviderPreset(
+        key="zhipu",
+        vendor_name="智谱",
+        base_url="https://open.bigmodel.cn/api/paas/v4",
+        model="glm-4.7-flash",
+    ),
+    ProviderPreset(
+        key="doubao",
+        vendor_name="豆包",
+        base_url="https://ark.cn-beijing.volces.com/api/v3",
+    ),
+    ProviderPreset(
+        key="kimi",
+        vendor_name="Kimi",
+        base_url="https://api.moonshot.cn/v1",
+    ),
+)
 
 
 class ProviderStore:
@@ -126,4 +173,3 @@ class ProviderStore:
         if not found:
             raise ValueError("找不到该厂商配置")
         self.save(config)
-
