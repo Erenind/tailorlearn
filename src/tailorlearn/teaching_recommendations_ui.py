@@ -17,7 +17,7 @@ from tailorlearn.teaching_chat import (
 )
 
 
-TEACHING_CHAT_UI_VERSION = "2026-11-13-teaching-chat-ui-v3"
+TEACHING_CHAT_UI_VERSION = "2026-11-13-teaching-chat-ui-v4"
 HISTORY_PAGE_SIZE = 20
 TEMPORARY_FILE_CHAR_LIMIT = 60_000
 PURE_MODE_KEY = "teaching_chat_pure_mode"
@@ -339,7 +339,6 @@ def _apply_composer_style() -> None:
         }
         .st-key-teaching_chat_input_area {
             padding: 0.45rem 0.65rem 0.15rem;
-            border-bottom: 1px solid #E1E5EB;
         }
         .st-key-teaching_chat_draft,
         .st-key-teaching_chat_draft > div,
@@ -354,6 +353,9 @@ def _apply_composer_style() -> None:
             box-shadow: none !important;
             background: transparent !important;
             padding-left: 0.05rem;
+            max-height: 240px;
+            overflow-y: auto;
+            resize: none !important;
         }
         .st-key-teaching_chat_toolbar {
             padding: 0.25rem 0.3rem 0.1rem;
@@ -381,9 +383,46 @@ def _apply_composer_style() -> None:
             height: 2.55rem;
             padding: 0;
             border-radius: 999px !important;
+            border-color: #1D2939 !important;
+            background: #1D2939 !important;
+            color: #FFFFFF !important;
+            box-shadow: none !important;
         }
         .st-key-teaching_chat_send button p {
             display: none;
+        }
+        .st-key-teaching_chat_send button svg {
+            fill: #FFFFFF !important;
+        }
+        .st-key-teaching_attachment_popover button {
+            width: 2.55rem;
+            min-width: 2.55rem;
+            height: 2.55rem;
+            padding: 0;
+            border: none !important;
+            background: transparent !important;
+            font-size: 1.55rem !important;
+            box-shadow: none !important;
+        }
+        .st-key-teaching_dataset_popover button[aria-haspopup] svg:last-of-type,
+        .st-key-teaching_dataset_popover button[aria-expanded] svg:last-of-type,
+        .st-key-teaching_question_popover button[aria-haspopup] svg:last-of-type,
+        .st-key-teaching_question_popover button[aria-expanded] svg:last-of-type,
+        .st-key-teaching_attachment_popover button[aria-haspopup] svg:last-of-type,
+        .st-key-teaching_attachment_popover button[aria-expanded] svg:last-of-type {
+            display: none !important;
+        }
+        .st-key-teaching_attachment_popover button svg:first-of-type {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        .st-key-teaching_dataset_popover button p,
+        .st-key-teaching_question_popover button p {
+            justify-content: flex-start;
+            text-align: left;
+        }
+        .st-key-teaching_dataset_popover > div > div {
+            gap: 0.1rem;
         }
         [class*="st-key-teaching_question_edit_"] button,
         [class*="st-key-teaching_question_delete_"] button {
@@ -437,16 +476,8 @@ def _render_dataset_popover(
     if current_id not in dataset_ids and dataset_ids:
         current_id = dataset_ids[0]
         st.session_state[DATASET_KEY] = current_id
-    current_name = next(
-        (
-            str(item["name"])
-            for item in datasets
-            if str(item["id"]) == current_id
-        ),
-        "选择数据集",
-    )
     with st.popover(
-        current_name,
+        "数据集",
         icon=":material/database:",
         key=DATASET_POPOVER_KEY,
         width="content",
@@ -455,16 +486,17 @@ def _render_dataset_popover(
         if not datasets:
             st.caption("尚无学情数据集")
             return
-        for item in datasets:
-            selected = str(item["id"]) == str(current_id)
-            st.button(
-                str(item["name"]) + (" · 当前" if selected else ""),
-                key=f"teaching_dataset_choose_{item['id']}",
-                type="tertiary",
-                width="stretch",
-                on_click=_select_dataset,
-                args=(str(item["id"]),),
-            )
+        with st.container(gap="xxsmall"):
+            for item in datasets:
+                selected = str(item["id"]) == str(current_id)
+                st.button(
+                    str(item["name"]) + (" · 当前" if selected else ""),
+                    key=f"teaching_dataset_choose_{item['id']}",
+                    type="tertiary",
+                    width="stretch",
+                    on_click=_select_dataset,
+                    args=(str(item["id"]),),
+                )
 
 
 def _render_question_popover(
@@ -477,53 +509,58 @@ def _render_question_popover(
         width="content",
         on_change="rerun",
     ):
-        with st.container(height=320, gap="xsmall"):
-            for item in suggestions:
-                with st.container(
-                    horizontal=True,
-                    vertical_alignment="center",
-                    gap="xsmall",
-                    key=f"teaching_question_row_{item['id']}",
-                ):
-                    st.button(
-                        str(item["text"]),
-                        key=f"teaching_question_use_{item['id']}",
-                        type="tertiary",
-                        width="stretch",
-                        on_click=_use_common_question,
-                        args=(str(item["text"]),),
-                    )
-                    st.badge(
-                        "预设" if item["is_preset"] else "自定义",
-                        color="violet" if item["is_preset"] else "blue",
-                    )
-                    st.button(
-                        "编辑",
-                        icon=":material/edit:",
-                        key=f"teaching_question_edit_{item['id']}",
-                        type="tertiary",
-                        help="编辑该问题",
-                        on_click=_queue_question_action,
-                        args=("edit", str(item["id"])),
-                    )
-                    st.button(
-                        "删除",
-                        icon=":material/delete:",
-                        key=f"teaching_question_delete_{item['id']}",
-                        type="tertiary",
-                        help="删除该问题",
-                        on_click=_queue_question_action,
-                        args=("delete", str(item["id"])),
-                    )
-        st.button(
-            "新增问题",
-            icon=":material/add:",
-            key="teaching_question_add_open",
-            type="primary",
-            width="stretch",
-            on_click=_queue_question_action,
-            args=("add",),
-        )
+        with st.container(
+            border=True,
+            key="teaching_question_block",
+            gap="xsmall",
+        ):
+            with st.container(height=300, gap="xxsmall"):
+                for item in suggestions:
+                    with st.container(
+                        horizontal=True,
+                        vertical_alignment="center",
+                        gap="xxsmall",
+                        key=f"teaching_question_row_{item['id']}",
+                    ):
+                        st.button(
+                            str(item["text"]),
+                            key=f"teaching_question_use_{item['id']}",
+                            type="tertiary",
+                            width="stretch",
+                            on_click=_use_common_question,
+                            args=(str(item["text"]),),
+                        )
+                        st.badge(
+                            "预设" if item["is_preset"] else "自定义",
+                            color="violet" if item["is_preset"] else "blue",
+                        )
+                        st.button(
+                            "编辑",
+                            icon=":material/edit:",
+                            key=f"teaching_question_edit_{item['id']}",
+                            type="tertiary",
+                            help="编辑该问题",
+                            on_click=_queue_question_action,
+                            args=("edit", str(item["id"])),
+                        )
+                        st.button(
+                            "删除",
+                            icon=":material/delete:",
+                            key=f"teaching_question_delete_{item['id']}",
+                            type="tertiary",
+                            help="删除该问题",
+                            on_click=_queue_question_action,
+                            args=("delete", str(item["id"])),
+                        )
+            st.button(
+                "新建常用问题",
+                icon=":material/add:",
+                key="teaching_question_add_open",
+                type="primary",
+                width="stretch",
+                on_click=_queue_question_action,
+                args=("add",),
+            )
 
 
 def _render_attachment_popover() -> None:
@@ -588,7 +625,7 @@ def _render_composer(
                     "问题",
                     key=DRAFT_KEY,
                     placeholder=placeholder,
-                    height=92,
+                    height="content",
                     label_visibility="collapsed",
                 )
             with st.container(
@@ -619,7 +656,7 @@ def _render_composer(
                         _render_attachment_popover()
                         send_clicked = st.button(
                             "发送",
-                            icon=":material/send:",
+                            icon=":material/arrow_upward:",
                             key="teaching_chat_send",
                             type="primary",
                             help="发送",
