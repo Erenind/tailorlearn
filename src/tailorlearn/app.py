@@ -37,9 +37,9 @@ _ANALYTICS_UI_API_VERSION = "2026-11-12-class-analysis-v2"
 _LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
-_HOME_UI_API_VERSION = "2026-11-14-dashboard-v3"
-_HOME_DASHBOARD_API_VERSION = "2026-11-14-evidence-overview-v1"
-_TEACHING_CHAT_UI_API_VERSION = "2026-11-14-teaching-chat-ui-v15"
+_HOME_UI_API_VERSION = "2026-11-14-dashboard-v4"
+_HOME_DASHBOARD_API_VERSION = "2026-11-14-evidence-overview-v2"
+_TEACHING_CHAT_UI_API_VERSION = "2026-11-14-teaching-chat-ui-v16"
 _TEACHER_WORKBENCH_API_VERSION = "2026-11-14-without-teaching-recommendations"
 _UI_API_VERSION = "2026-11-14-navigation-without-teaching-page"
 if (
@@ -115,7 +115,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-14-home-dashboard-v3"
+_APP_SERVICES_CACHE_VERSION = "2026-11-14-home-dashboard-v4"
 
 
 @st.cache_resource

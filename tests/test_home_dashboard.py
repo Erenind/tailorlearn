@@ -145,6 +145,16 @@ def test_home_dashboard_reports_data_states_without_mastery_claims(tmp_path: Pat
         "themes": [
             {"theme_name": "代数式", "evidence_status": "sufficient"},
         ],
+        "class_coverage": [
+            {
+                "class_code": "DC01",
+                "sufficient": 1,
+                "needs_observation": 0,
+                "scored_records": 10,
+            }
+        ],
     }
+    assert summary["todos_by_page"] == {"材料与数据": 1}
+    assert sum(summary["todos_by_page"].values()) == len(summary["todos"])
     assert "未掌握" not in str(summary)
     assert "敏感作答" not in str(summary)

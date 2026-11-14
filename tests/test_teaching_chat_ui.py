@@ -74,12 +74,21 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
     assert at.button(
         key="teaching_question_use_preset_student"
     ).label == "具体分析学生D01"
-    assert at.button(key="teaching_action_layered")
-    assert at.button(key="teaching_action_gaps")
-    assert at.button(key="teaching_action_materials")
+    assert at.button(
+        key="teaching_question_use_preset_action_layered"
+    ).label == "生成分层教学建议"
+    assert at.button(
+        key="teaching_question_use_preset_action_gaps"
+    ).label == "梳理信息缺口"
+    assert at.button(
+        key="teaching_question_use_preset_action_materials"
+    ).label == "推荐材料与活动"
+    assert not any(
+        getattr(item, "key", None) == "teaching_quick_actions"
+        for item in at.container
+    )
     at.pills(key="teaching_chat_pure_mode").set_value("纯净模式").run()
-    at.button(key="teaching_action_layered").click().run()
-    assert at.pills(key="teaching_chat_pure_mode").value is None
+    at.button(key="teaching_question_use_preset_action_layered").click().run()
     draft = at.chat_input(key="teaching_chat_draft").value
     assert "分层教学建议" in draft
     assert "证据不足" in draft

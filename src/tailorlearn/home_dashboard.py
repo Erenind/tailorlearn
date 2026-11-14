@@ -6,7 +6,7 @@ from tailorlearn.analytics import AnalyticsService
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.teacher_workbench import TeacherWorkbenchService
 
-HOME_DASHBOARD_SERVICE_VERSION = "2026-11-14-evidence-overview-v1"
+HOME_DASHBOARD_SERVICE_VERSION = "2026-11-14-evidence-overview-v2"
 
 
 class HomeDashboardService:
@@ -37,6 +37,25 @@ class HomeDashboardService:
             )
             if item["evidence_status"] != "sufficient":
                 current["evidence_status"] = "needs_observation"
+        class_evidence: dict[str, dict[str, Any]] = {}
+        for item in themes:
+            class_code = str(item.get("class_code") or "")
+            if not class_code:
+                continue
+            current_class = class_evidence.setdefault(
+                class_code,
+                {
+                    "class_code": class_code,
+                    "sufficient": 0,
+                    "needs_observation": 0,
+                    "scored_records": 0,
+                },
+            )
+            current_class["scored_records"] += int(item["scored_records"])
+            if item["evidence_status"] == "sufficient":
+                current_class["sufficient"] += 1
+            else:
+                current_class["needs_observation"] += 1
         evidence_overview = {
             "total_themes": len(theme_evidence),
             "sufficient": sum(
@@ -48,7 +67,14 @@ class HomeDashboardService:
                 for item in theme_evidence.values()
             ),
             "themes": list(theme_evidence.values()),
+            "class_coverage": [
+                class_evidence[code] for code in sorted(class_evidence)
+            ],
         }
+        todos_by_page: dict[str, int] = {}
+        for todo in board["todos"]:
+            target = str(todo["target_page"])
+            todos_by_page[target] = todos_by_page.get(target, 0) + 1
         follow_up = (
             int(board["summary"]["supplemental_observation"])
             + int(board["summary"]["ai_review"])
@@ -74,4 +100,5 @@ class HomeDashboardService:
             ],
             "evidence_overview": evidence_overview,
             "todos": list(board["todos"]),
+            "todos_by_page": todos_by_page,
         }
