@@ -74,6 +74,15 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
     assert at.button(
         key="teaching_question_use_preset_student"
     ).label == "具体分析学生D01"
+    assert at.button(key="teaching_action_layered")
+    assert at.button(key="teaching_action_gaps")
+    assert at.button(key="teaching_action_materials")
+    at.pills(key="teaching_chat_pure_mode").set_value("纯净模式").run()
+    at.button(key="teaching_action_layered").click().run()
+    assert at.pills(key="teaching_chat_pure_mode").value is None
+    draft = at.chat_input(key="teaching_chat_draft").value
+    assert "分层教学建议" in draft
+    assert "证据不足" in draft
     assert at.button(
         key="teaching_question_edit_preset_student"
     )
