@@ -34,7 +34,7 @@ from tailorlearn.ui import (
 _REPOSITORY_API_VERSION = "2026-11-14-teaching-chat-v2"
 _ANALYTICS_SERVICE_API_VERSION = "2026-11-12-class-analysis-v2"
 _ANALYTICS_UI_API_VERSION = "2026-11-13-student-ranking-primary-action"
-_LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
+_LEARNING_DATA_UI_API_VERSION = "2026-11-14-import-direct-create-v2"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
 _PROVIDERS_API_VERSION = "2026-11-13-ai-access-presets"

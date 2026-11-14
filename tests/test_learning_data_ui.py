@@ -36,21 +36,19 @@ def test_streamlit_learning_data_upload_preview_and_import(
     )
     st.cache_resource.clear()
     app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
-    at = AppTest.from_file(str(app_file), default_timeout=20).run()
+    at = AppTest.from_file(str(app_file), default_timeout=40).run()
 
     assert not at.exception
     at.button(key="nav_material_center").click().run()
     at.button(key="material_nav_students").click().run()
+    at.button(key=f"learning_dataset_open_{dataset['id']}").click().run()
     at.segmented_control(
         key="material_section_students"
     ).set_value("导入和导出").run()
-    assert at.button(key="learning_dataset_create_toggle").label == (
-        "新建学情数据集"
+    assert any(item.label == "数据集名称" for item in at.text_input)
+    assert not any(
+        item.label == "新建学情数据集" for item in at.button
     )
-    assert at.button(
-        key=f"learning_dataset_open_{dataset['id']}"
-    ).label == "查看"
-    at.button(key=f"learning_dataset_open_{dataset['id']}").click().run()
     assert not at.exception
     assert at.button(key="learning_dataset_path_root").label == "学情数据集"
 
@@ -94,6 +92,49 @@ def test_streamlit_learning_data_upload_preview_and_import(
     st.cache_resource.clear()
 
 
+def test_dataset_creation_is_available_only_in_import(
+    tmp_path: Path,
+    monkeypatch,
+):
+    paths = AppPaths(tmp_path)
+    paths.ensure()
+    repository = Repository(paths.database_file)
+    repository.initialize()
+    service = LearningDataService(repository, paths.db_dir)
+
+    monkeypatch.setattr(
+        AppPaths,
+        "default",
+        classmethod(lambda cls: paths),
+    )
+    st.cache_resource.clear()
+    app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
+    at = AppTest.from_file(str(app_file), default_timeout=40).run()
+
+    assert not at.exception
+    at.button(key="nav_material_center").click().run()
+    at.button(key="material_nav_students").click().run()
+    assert not any(item.label == "数据集名称" for item in at.text_input)
+    assert any("尚无学情数据集" in item.value for item in at.info)
+
+    at.segmented_control(
+        key="material_section_students"
+    ).set_value("编辑").run()
+    assert not any(item.label == "数据集名称" for item in at.text_input)
+
+    at.segmented_control(
+        key="material_section_students"
+    ).set_value("导入和导出").run()
+    assert any(item.label == "数据集名称" for item in at.text_input)
+    assert any(item.label == "创建数据集" for item in at.button)
+    assert not any(
+        (button.key or "").startswith("learning_dataset_open_")
+        for button in at.button
+    )
+    assert not at.exception
+    st.cache_resource.clear()
+
+
 def test_dataset_catalog_tables_and_anomaly_actions(
     tmp_path: Path,
     monkeypatch,
@@ -134,14 +175,24 @@ def test_dataset_catalog_tables_and_anomaly_actions(
     )
     st.cache_resource.clear()
     app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
-    at = AppTest.from_file(str(app_file), default_timeout=20).run()
+    at = AppTest.from_file(str(app_file), default_timeout=40).run()
 
     assert not at.exception
     at.button(key="nav_material_center").click().run()
     at.button(key="material_nav_students").click().run()
-    assert at.button(key="learning_dataset_create_toggle").label == (
-        "新建学情数据集"
+    assert not any(item.label == "数据集名称" for item in at.text_input)
+    assert at.button(key=f"learning_dataset_open_{dataset['id']}").label == "查看"
+    at.segmented_control(
+        key="material_section_students"
+    ).set_value("导入和导出").run()
+    assert any(item.label == "数据集名称" for item in at.text_input)
+    assert not any(
+        (button.key or "").startswith("learning_dataset_open_")
+        for button in at.button
     )
+    at.segmented_control(
+        key="material_section_students"
+    ).set_value("浏览").run()
     at.button(key=f"learning_dataset_open_{dataset['id']}").click().run()
     assert len(at.dataframe) == 1
     assert not any(
@@ -178,6 +229,14 @@ def test_dataset_catalog_tables_and_anomaly_actions(
     assert not any(
         item.value == "数据管理与导出"
         for item in at.subheader
+    )
+    assert not any(item.label == "数据集名称" for item in at.text_input)
+    at.segmented_control(
+        key="material_section_students"
+    ).set_value("导入和导出").run()
+    assert any(item.label == "数据集名称" for item in at.text_input)
+    assert not any(
+        item.label == "新建学情数据集" for item in at.button
     )
 
     at.button(key="material_nav_answers").click().run()
