@@ -6,6 +6,8 @@ from tailorlearn.analytics import AnalyticsService
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.teacher_workbench import TeacherWorkbenchService
 
+HOME_DASHBOARD_SERVICE_VERSION = "2026-11-14-evidence-overview-v1"
+
 
 class HomeDashboardService:
     """Build a compact, evidence-safe overview for the navigation home."""
@@ -26,6 +28,27 @@ class HomeDashboardService:
         sufficient = sum(
             item["evidence_status"] == "sufficient" for item in themes
         )
+        theme_evidence: dict[str, dict[str, str]] = {}
+        for item in themes:
+            theme_name = str(item["theme_name"])
+            current = theme_evidence.setdefault(
+                theme_name,
+                {"theme_name": theme_name, "evidence_status": "sufficient"},
+            )
+            if item["evidence_status"] != "sufficient":
+                current["evidence_status"] = "needs_observation"
+        evidence_overview = {
+            "total_themes": len(theme_evidence),
+            "sufficient": sum(
+                item["evidence_status"] == "sufficient"
+                for item in theme_evidence.values()
+            ),
+            "needs_observation": sum(
+                item["evidence_status"] == "needs_observation"
+                for item in theme_evidence.values()
+            ),
+            "themes": list(theme_evidence.values()),
+        }
         follow_up = (
             int(board["summary"]["supplemental_observation"])
             + int(board["summary"]["ai_review"])
@@ -49,5 +72,6 @@ class HomeDashboardService:
                 {"label": "证据充分", "count": sufficient},
                 {"label": "待补充观察", "count": len(themes) - sufficient},
             ],
+            "evidence_overview": evidence_overview,
             "todos": list(board["todos"]),
         }

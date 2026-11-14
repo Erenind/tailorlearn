@@ -11,6 +11,7 @@ import streamlit as st
 import tailorlearn.analytics as analytics_module
 import tailorlearn.analytics_ui as analytics_ui_module
 import tailorlearn.db as database_module
+import tailorlearn.home_dashboard as home_dashboard_module
 import tailorlearn.home_ui as home_ui_module
 import tailorlearn.learning_data_ui as learning_data_ui_module
 import tailorlearn.outline as outline_module
@@ -20,7 +21,6 @@ import tailorlearn.teaching_chat_ui as teaching_chat_ui_module
 import tailorlearn.ui as ui_module
 from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.extraction import page_as_png
-from tailorlearn.home_dashboard import HomeDashboardService
 from tailorlearn.ingest import IngestionService
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
@@ -37,7 +37,8 @@ _ANALYTICS_UI_API_VERSION = "2026-11-12-class-analysis-v2"
 _LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
-_HOME_UI_API_VERSION = "2026-11-14-dashboard-v2"
+_HOME_UI_API_VERSION = "2026-11-14-dashboard-v3"
+_HOME_DASHBOARD_API_VERSION = "2026-11-14-evidence-overview-v1"
 _TEACHING_CHAT_UI_API_VERSION = "2026-11-14-teaching-chat-ui-v15"
 _TEACHER_WORKBENCH_API_VERSION = "2026-11-14-without-teaching-recommendations"
 _UI_API_VERSION = "2026-11-14-navigation-without-teaching-page"
@@ -84,6 +85,12 @@ if getattr(home_ui_module, "HOME_UI_VERSION", None) != _HOME_UI_API_VERSION:
     home_ui_module = importlib.reload(home_ui_module)
 render_navigation_home = home_ui_module.render_navigation_home
 if (
+    getattr(home_dashboard_module, "HOME_DASHBOARD_SERVICE_VERSION", None)
+    != _HOME_DASHBOARD_API_VERSION
+):
+    home_dashboard_module = importlib.reload(home_dashboard_module)
+HomeDashboardService = home_dashboard_module.HomeDashboardService
+if (
     getattr(teaching_chat_ui_module, "TEACHING_CHAT_UI_VERSION", None)
     != _TEACHING_CHAT_UI_API_VERSION
 ):
@@ -108,7 +115,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-14-home-dashboard-v2"
+_APP_SERVICES_CACHE_VERSION = "2026-11-14-home-dashboard-v3"
 
 
 @st.cache_resource
