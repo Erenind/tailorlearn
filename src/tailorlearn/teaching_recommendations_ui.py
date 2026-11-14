@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import base64
 import hashlib
+import json
 from pathlib import Path
 from typing import Any
 
@@ -13,11 +15,16 @@ from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import ProviderProfile
 from tailorlearn.teaching_chat import (
     OpenAICompatibleAssistantClient,
+    TeachingContentDelta,
     TeachingAssistantService,
+    TeachingToolFinished,
+    TeachingToolStarted,
+    TeachingTurnComplete,
+    TeachingTurnResult,
 )
 
 
-TEACHING_CHAT_UI_VERSION = "2026-11-13-teaching-chat-ui-v4"
+TEACHING_CHAT_UI_VERSION = "2026-11-14-teaching-chat-ui-v14"
 HISTORY_PAGE_SIZE = 20
 TEMPORARY_FILE_CHAR_LIMIT = 60_000
 PURE_MODE_KEY = "teaching_chat_pure_mode"
@@ -29,6 +36,7 @@ TEMP_FILES_KEY = "teaching_chat_temporary_files"
 PENDING_ACTION_KEY = "teaching_chat_pending_action"
 QUESTION_ACTION_KEY = "teaching_chat_question_action"
 RESET_DRAFT_KEY = "teaching_chat_reset_draft"
+RETRY_PROMPT_KEY = "teaching_chat_retry_prompt"
 QUESTION_POPOVER_KEY = "teaching_question_popover"
 DATASET_POPOVER_KEY = "teaching_dataset_popover"
 
@@ -293,7 +301,23 @@ def _render_pending_action(
             st.rerun()
 
 
-def _render_messages(service: TeachingAssistantService) -> None:
+def _message_turns(
+    messages: list[dict[str, Any]],
+) -> list[list[dict[str, Any]]]:
+    turns: list[list[dict[str, Any]]] = []
+    for message in messages:
+        if message["role"] == "user" or not turns:
+            turns.append([message])
+        else:
+            turns[-1].append(message)
+    return turns
+
+
+def _render_messages(
+    service: TeachingAssistantService,
+    profile: ProviderProfile | None,
+) -> tuple[dict[str, str], Any]:
+    copy_payload: dict[str, str] = {}
     total = service.count_messages()
     history_limit = max(
         HISTORY_PAGE_SIZE,
@@ -309,7 +333,7 @@ def _render_messages(service: TeachingAssistantService) -> None:
             st.rerun()
     messages = service.list_messages(history_limit)
     with st.container(
-        height=500,
+        height="stretch",
         border=False,
         autoscroll=True,
         key="teaching_chat_messages",
@@ -319,46 +343,305 @@ def _render_messages(service: TeachingAssistantService) -> None:
                 "可以直接提问，也可以从下方选择常用问题。"
                 "AI 会按需读取课本目录、正文和已授权的数据。"
             )
-        for message in messages:
-            with st.chat_message(
-                message["role"],
-                avatar=":material/robot:" if message["role"] == "assistant" else None,
+        for turn in _message_turns(messages):
+            user_message = next(
+                (
+                    message
+                    for message in turn
+                    if message["role"] == "user"
+                ),
+                None,
+            )
+            turn_key = str(
+                user_message["id"] if user_message is not None else turn[0]["id"]
+            )
+            with st.container(
+                gap="xsmall",
+                key=f"teaching_chat_turn_{turn_key}",
             ):
-                st.markdown(message["content"])
+                assistant_message = next(
+                    (
+                        message
+                        for message in reversed(turn)
+                        if message["role"] == "assistant"
+                    ),
+                    None,
+                )
+                assistant_content = (
+                    str(assistant_message["content"])
+                    if assistant_message is not None
+                    else ""
+                )
+                if user_message is not None and assistant_content:
+                    copy_payload[turn_key] = assistant_content
+                for message in turn:
+                    with st.chat_message(
+                        message["role"],
+                        avatar=(
+                            ":material/robot:"
+                            if message["role"] == "assistant"
+                            else None
+                        ),
+                    ):
+                        tool_trace = message.get("tool_trace")
+                        if (
+                            message["role"] == "assistant"
+                            and isinstance(tool_trace, list)
+                            and tool_trace
+                        ):
+                            failed = sum(
+                                item.get("status") == "error"
+                                for item in tool_trace
+                                if isinstance(item, dict)
+                            )
+                            label = (
+                                f"资料调用完成，{failed} 项失败"
+                                if failed
+                                else f"已完成 {len(tool_trace)} 项资料调用"
+                            )
+                            with st.status(
+                                label,
+                                expanded=False,
+                                state="error" if failed else "complete",
+                                type="compact",
+                            ):
+                                for item in tool_trace:
+                                    if not isinstance(item, dict):
+                                        continue
+                                    item_label = str(
+                                        item.get("label")
+                                        or item.get("tool_name")
+                                        or "调用工具"
+                                    )
+                                    icon = (
+                                        ":material/error:"
+                                        if item.get("status") == "error"
+                                        else ":material/check_circle:"
+                                    )
+                                    st.markdown(f"{icon} {item_label}")
+                                    trace_detail = (
+                                        item.get("detail")
+                                        or item.get("progress")
+                                    )
+                                    if trace_detail:
+                                        st.caption(str(trace_detail))
+                        st.markdown(message["content"])
+                        if (
+                            message is assistant_message
+                            and user_message is not None
+                        ):
+                            with st.container(
+                                horizontal=True,
+                                horizontal_alignment="left",
+                                vertical_alignment="center",
+                                gap="xxsmall",
+                                key=f"teaching_chat_actions_{turn_key}",
+                            ):
+                                st.button(
+                                    "复制",
+                                    icon=":material/content_copy:",
+                                    key=f"teaching_chat_copy_turn_{turn_key}",
+                                    type="tertiary",
+                                    help="复制结果",
+                                )
+                                if st.button(
+                                    "重试",
+                                    icon=":material/refresh:",
+                                    key=f"teaching_chat_retry_turn_{turn_key}",
+                                    type="tertiary",
+                                    help="使用原问题重新生成结果",
+                                    disabled=(
+                                        profile is None or not profile.api_key
+                                    ),
+                                ):
+                                    st.session_state[RETRY_PROMPT_KEY] = str(
+                                        user_message["content"]
+                                    )
+                                    st.rerun()
+                                if st.button(
+                                    "删除",
+                                    icon=":material/delete_outline:",
+                                    key=f"teaching_chat_delete_turn_{turn_key}",
+                                    type="tertiary",
+                                    help="删除此问题及对应回复，无法恢复",
+                                ):
+                                    service.delete_conversation_turn(
+                                        int(user_message["id"])
+                                    )
+                                    st.session_state.pop(
+                                        PENDING_ACTION_KEY,
+                                        None,
+                                    )
+                                    st.session_state[
+                                        HISTORY_LIMIT_KEY
+                                    ] = HISTORY_PAGE_SIZE
+                                    st.session_state[RESET_DRAFT_KEY] = True
+                                    st.toast("已删除此次对话")
+                                    st.rerun()
+        live_turn_slot = st.container(key="teaching_live_turn")
+    return copy_payload, live_turn_slot
 
 
-def _apply_composer_style() -> None:
+def _apply_composer_style(copy_payload: dict[str, str]) -> None:
+    encoded_payload = {
+        turn_key: base64.b64encode(content.encode("utf-8")).decode("ascii")
+        for turn_key, content in copy_payload.items()
+    }
     st.html(
         """
         <style>
-        .st-key-teaching_chat_composer {
-            padding: 0.1rem 0.15rem;
-            border: 1px solid #D8DEE8 !important;
-            border-radius: 14px !important;
+        #Bottom > div:first-child {
+            display: none !important;
+        }
+        .stMainBlockContainer:has(.st-key-teaching_page_shell) {
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            min-height: 0;
+            overflow: hidden;
+            padding-bottom: 0.75rem !important;
+        }
+        .stMainBlockContainer:has(.st-key-teaching_page_shell)
+        > [data-testid="stVerticalBlock"] {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .stMainBlockContainer:has(.st-key-teaching_page_shell)
+        > [data-testid="stVerticalBlock"]
+        > [data-testid="stLayoutWrapper"]:has(.st-key-teaching_page_shell) {
+            flex: 1 1 auto;
+            display: flex;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .st-key-teaching_page_shell {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            gap: 0.35rem;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .st-key-teaching_page_shell
+        > [data-testid="stLayoutWrapper"]:has(.st-key-teaching_chat_messages) {
+            flex: 1 1 auto;
+            display: flex;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .st-key-teaching_chat_messages {
+            flex: 1 1 auto;
+            height: 100% !important;
+            min-height: 0;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+        [data-testid="stBottom"] {
             background: #FFFFFF !important;
         }
-        .st-key-teaching_chat_input_area {
-            padding: 0.45rem 0.65rem 0.15rem;
+        [data-testid="stBottomBlockContainer"] {
+            padding-top: 0 !important;
+            padding-bottom: 0.75rem !important;
         }
-        .st-key-teaching_chat_draft,
-        .st-key-teaching_chat_draft > div,
-        .st-key-teaching_chat_draft > div > div {
-            width: 100%;
+        .st-key-teaching_chat_composer {
+            position: relative;
+            gap: 0;
+        }
+        .st-key-teaching_chat_draft [data-testid="stChatInput"] > div {
+            border-width: 2px !important;
+            border-radius: 1.8rem !important;
+            min-height: 5.6rem;
+            padding: 0.9rem 1rem 3.1rem !important;
+        }
+        .st-key-teaching_chat_draft [data-testid="stChatInputTextArea"] {
+            font-size: 16px !important;
+            line-height: 1.6 !important;
+        }
+        .st-key-teaching_chat_draft [data-testid="stChatInputSubmitButton"] {
+            position: absolute !important;
+            right: 0.9rem !important;
+            bottom: 0.65rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 2.9rem !important;
+            height: 2.9rem !important;
+            padding: 0 !important;
+            border-radius: 999px !important;
+            z-index: 5 !important;
+        }
+        .st-key-teaching_chat_draft
+        [data-testid="stChatInputFileUploadButton"] {
+            position: absolute !important;
+            right: 4.2rem !important;
+            bottom: 0.65rem !important;
+            z-index: 5 !important;
+        }
+        .st-key-teaching_chat_draft
+        [data-testid="stChatInputFileUploadButton"] button {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 2.55rem !important;
+            height: 2.55rem !important;
+            padding: 0 !important;
             border: none !important;
-            box-shadow: none !important;
+            border-radius: 999px !important;
             background: transparent !important;
         }
-        .st-key-teaching_chat_draft textarea {
-            border: none !important;
-            box-shadow: none !important;
-            background: transparent !important;
-            padding-left: 0.05rem;
-            max-height: 240px;
-            overflow-y: auto;
-            resize: none !important;
+        .st-key-teaching_chat_draft
+        [data-testid="stChatInputFileUploadButton"] svg {
+            width: 1.35rem !important;
+            height: 1.35rem !important;
+        }
+        .st-key-teaching_chat_draft
+        [data-testid="stChatInputSubmitButton"]:not([disabled]) {
+            background: #2F5BEA !important;
+        }
+        .st-key-teaching_chat_draft
+        [data-testid="stChatInputSubmitButton"]:not([disabled]):hover {
+            background: #2449C9 !important;
+        }
+        .st-key-teaching_chat_draft
+        [data-testid="stChatInputSubmitButton"] svg {
+            display: block !important;
+            width: 1.42rem !important;
+            height: 1.42rem !important;
+            margin: auto !important;
+        }
+        .st-key-teaching_chat_draft
+        [data-testid="stChatInputSubmitButton"] svg path {
+            stroke: currentColor;
+            stroke-width: 0.55;
+            paint-order: stroke;
+        }
+        .st-key-teaching_chat_draft
+        [data-testid="stChatInputSubmitButton"] svg path[fill="none"] {
+            stroke: none !important;
         }
         .st-key-teaching_chat_toolbar {
-            padding: 0.25rem 0.3rem 0.1rem;
+            position: absolute;
+            left: 1.05rem;
+            bottom: 0.63rem;
+            z-index: 4;
+            width: auto;
+            max-width: calc(100% - 9.5rem);
+            padding: 0;
+            flex-wrap: nowrap;
+            overflow: visible;
+        }
+        .st-key-teaching_chat_toolbar [data-testid="stPopoverButton"] {
+            min-height: 2rem;
+            padding: 0.3rem 0.58rem;
+        }
+        .st-key-teaching_dataset_popover [data-testid="stPopoverButton"] {
+            min-width: 5.25rem;
+        }
+        .st-key-teaching_question_popover [data-testid="stPopoverButton"] {
+            min-width: 6.6rem;
         }
         .st-key-teaching_chat_pure_mode button {
             min-height: 2rem;
@@ -377,65 +660,273 @@ def _apply_composer_style() -> None:
             color: #2F5BEA !important;
             fill: #2F5BEA !important;
         }
-        .st-key-teaching_chat_send button {
-            width: 2.55rem;
-            min-width: 2.55rem;
-            height: 2.55rem;
-            padding: 0;
-            border-radius: 999px !important;
-            border-color: #1D2939 !important;
-            background: #1D2939 !important;
-            color: #FFFFFF !important;
-            box-shadow: none !important;
-        }
-        .st-key-teaching_chat_send button p {
-            display: none;
-        }
-        .st-key-teaching_chat_send button svg {
-            fill: #FFFFFF !important;
-        }
-        .st-key-teaching_attachment_popover button {
-            width: 2.55rem;
-            min-width: 2.55rem;
-            height: 2.55rem;
-            padding: 0;
-            border: none !important;
-            background: transparent !important;
-            font-size: 1.55rem !important;
-            box-shadow: none !important;
-        }
-        .st-key-teaching_dataset_popover button[aria-haspopup] svg:last-of-type,
-        .st-key-teaching_dataset_popover button[aria-expanded] svg:last-of-type,
-        .st-key-teaching_question_popover button[aria-haspopup] svg:last-of-type,
-        .st-key-teaching_question_popover button[aria-expanded] svg:last-of-type,
-        .st-key-teaching_attachment_popover button[aria-haspopup] svg:last-of-type,
-        .st-key-teaching_attachment_popover button[aria-expanded] svg:last-of-type {
+        .st-key-teaching_dataset_popover
+        [data-testid="stPopoverButton"] svg:last-of-type,
+        .st-key-teaching_question_popover
+        [data-testid="stPopoverButton"] svg:last-of-type {
             display: none !important;
         }
-        .st-key-teaching_attachment_popover button svg:first-of-type {
-            width: 1.5rem;
-            height: 1.5rem;
+        [data-testid="stPopoverBody"] {
+            padding: 0.45rem !important;
         }
-        .st-key-teaching_dataset_popover button p,
-        .st-key-teaching_question_popover button p {
-            justify-content: flex-start;
+        .st-key-teaching_dataset_list button,
+        .st-key-teaching_question_list button {
+            justify-content: flex-start !important;
+            min-height: 1.9rem !important;
+            padding: 0.2rem 0.42rem !important;
+            text-align: left !important;
+        }
+        .st-key-teaching_dataset_list button > div,
+        .st-key-teaching_question_list button > div,
+        .st-key-teaching_dataset_list button p,
+        .st-key-teaching_question_list button p {
+            justify-content: flex-start !important;
             text-align: left;
+            line-height: 1.35 !important;
         }
-        .st-key-teaching_dataset_popover > div > div {
-            gap: 0.1rem;
+        .st-key-teaching_dataset_list button p,
+        .st-key-teaching_question_list button p {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+        }
+        [class*="st-key-teaching_question_row_"] {
+            min-height: 1.95rem;
+            gap: 0.15rem !important;
         }
         [class*="st-key-teaching_question_edit_"] button,
         [class*="st-key-teaching_question_delete_"] button {
-            min-height: 2rem;
-            width: 2rem;
-            padding: 0.15rem;
+            min-height: 1.7rem;
+            width: 1.7rem;
+            padding: 0.1rem;
         }
         [class*="st-key-teaching_question_edit_"] button p,
         [class*="st-key-teaching_question_delete_"] button p {
             display: none;
         }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageAvatarUser"] {
+            background: #2F5BEA !important;
+            color: #FFFFFF !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageAvatarUser"] svg {
+            fill: #FFFFFF !important;
+        }
+        [class*="st-key-teaching_chat_copy_turn_"] button,
+        [class*="st-key-teaching_chat_retry_turn_"] button,
+        [class*="st-key-teaching_chat_delete_turn_"] button {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 1.5rem !important;
+            min-width: 1.5rem !important;
+            min-height: 1.5rem !important;
+            padding: 0 !important;
+            border: none !important;
+            border-radius: 0.4rem !important;
+            background: transparent !important;
+            color: #7A8496 !important;
+            box-shadow: none !important;
+        }
+        [class*="st-key-teaching_chat_copy_turn_"] button svg,
+        [class*="st-key-teaching_chat_retry_turn_"] button svg,
+        [class*="st-key-teaching_chat_delete_turn_"] button svg {
+            width: 1rem !important;
+            height: 1rem !important;
+        }
+        [class*="st-key-teaching_chat_copy_turn_"] button p,
+        [class*="st-key-teaching_chat_retry_turn_"] button p,
+        [class*="st-key-teaching_chat_delete_turn_"] button p {
+            display: none !important;
+        }
+        [class*="st-key-teaching_chat_copy_turn_"] button:hover,
+        [class*="st-key-teaching_chat_retry_turn_"] button:hover {
+            background: #F4F7FF !important;
+            color: #2F5BEA !important;
+        }
+        [class*="st-key-teaching_chat_delete_turn_"] button:hover {
+            background: #FFF1F2 !important;
+            color: #C2415B !important;
+        }
         </style>
-        """
+        <script>
+        (() => {
+            const payload = __COPY_PAYLOAD__;
+            const decode = (value) => new TextDecoder().decode(
+                Uint8Array.from(atob(value), (char) => char.charCodeAt(0))
+            );
+            const fallbackCopy = (text) => {
+                const textarea = document.createElement("textarea");
+                textarea.value = text;
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                textarea.remove();
+            };
+            Object.entries(payload).forEach(([turnKey, encoded]) => {
+                const button = document.querySelector(
+                    `.st-key-teaching_chat_copy_turn_${turnKey} button`
+                );
+                if (!button || button.dataset.teachingCopyBound === "true") return;
+                button.dataset.teachingCopyBound = "true";
+                button.addEventListener("click", async () => {
+                    const text = decode(encoded);
+                    try {
+                        await navigator.clipboard.writeText(text);
+                    } catch (error) {
+                        fallbackCopy(text);
+                    }
+                    button.title = "已复制";
+                });
+            });
+            const messageBox = document.querySelector(
+                ".st-key-teaching_chat_messages"
+            );
+            if (messageBox) {
+                if (window.__teachingChatScrollObserver) {
+                    window.__teachingChatScrollObserver.disconnect();
+                }
+                const autoFollowKey = "teachingChatAutoFollow";
+                const scrollTopKey = "teachingChatScrollTop";
+                const bottomThreshold = 24;
+                let autoFollow = (
+                    sessionStorage.getItem(autoFollowKey) !== "false"
+                );
+                const savedScrollTop = Number(
+                    sessionStorage.getItem(scrollTopKey)
+                );
+                let anchoredLiveTurn = false;
+                let scheduled = false;
+                let suppressScrollEvent = false;
+                const setScrollTop = (value) => {
+                    const maxTop = Math.max(
+                        0,
+                        messageBox.scrollHeight - messageBox.clientHeight
+                    );
+                    suppressScrollEvent = true;
+                    messageBox.scrollTop = Math.min(
+                        Math.max(0, value),
+                        maxTop
+                    );
+                    requestAnimationFrame(() => {
+                        suppressScrollEvent = false;
+                    });
+                };
+                const rememberScrollIntent = () => {
+                    if (suppressScrollEvent) return;
+                    const maxTop = Math.max(
+                        0,
+                        messageBox.scrollHeight - messageBox.clientHeight
+                    );
+                    autoFollow = (
+                        maxTop - messageBox.scrollTop <= bottomThreshold
+                    );
+                    sessionStorage.setItem(
+                        autoFollowKey,
+                        autoFollow ? "true" : "false"
+                    );
+                    if (!autoFollow) {
+                        sessionStorage.setItem(
+                            scrollTopKey,
+                            String(messageBox.scrollTop)
+                        );
+                    }
+                };
+                messageBox.addEventListener(
+                    "scroll",
+                    rememberScrollIntent,
+                    { passive: true }
+                );
+                const scrollToLatest = () => {
+                    if (!autoFollow) return;
+                    const liveTurn = messageBox.querySelector(
+                        ".st-key-teaching_live_turn"
+                    );
+                    const liveRect = liveTurn?.getBoundingClientRect();
+                    const boxRect = messageBox.getBoundingClientRect();
+                    if (liveRect && liveRect.height > 0 && !anchoredLiveTurn) {
+                        setScrollTop(
+                            messageBox.scrollTop + liveRect.top - boxRect.top
+                        );
+                        anchoredLiveTurn = true;
+                        return;
+                    }
+                    setScrollTop(messageBox.scrollHeight);
+                };
+                const scheduleScroll = () => {
+                    if (scheduled) return;
+                    scheduled = true;
+                    requestAnimationFrame(() => {
+                        scheduled = false;
+                        scrollToLatest();
+                    });
+                };
+                const observer = new MutationObserver(scheduleScroll);
+                const liveTurn = messageBox.querySelector(
+                    ".st-key-teaching_live_turn"
+                );
+                if (liveTurn) {
+                    observer.observe(liveTurn, {
+                        childList: true,
+                        subtree: true,
+                        characterData: true,
+                    });
+                }
+                window.__teachingChatScrollObserver = observer;
+                const resumeFollowing = () => {
+                    autoFollow = true;
+                    sessionStorage.setItem(autoFollowKey, "true");
+                };
+                const submitButton = document.querySelector(
+                    '[data-testid="stChatInputSubmitButton"]'
+                );
+                if (
+                    submitButton
+                    && submitButton.dataset.teachingScrollBound !== "true"
+                ) {
+                    submitButton.dataset.teachingScrollBound = "true";
+                    submitButton.addEventListener("click", resumeFollowing);
+                }
+                const textInput = document.querySelector(
+                    '[data-testid="stChatInputTextArea"]'
+                );
+                if (
+                    textInput
+                    && textInput.dataset.teachingScrollBound !== "true"
+                ) {
+                    textInput.dataset.teachingScrollBound = "true";
+                    textInput.addEventListener("keydown", (event) => {
+                        if (
+                            event.key === "Enter"
+                            && !event.shiftKey
+                            && !event.isComposing
+                        ) {
+                            resumeFollowing();
+                        }
+                    });
+                }
+                const restoreInitialPosition = () => {
+                    if (autoFollow) {
+                        scrollToLatest();
+                    } else if (Number.isFinite(savedScrollTop)) {
+                        setScrollTop(savedScrollTop);
+                    }
+                };
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(restoreInitialPosition);
+                });
+                setTimeout(restoreInitialPosition, 120);
+            }
+        })();
+        </script>
+        """.replace(
+            "__COPY_PAYLOAD__",
+            json.dumps(encoded_payload, ensure_ascii=True),
+        ),
+        unsafe_allow_javascript=True,
     )
 
 
@@ -481,18 +972,29 @@ def _render_dataset_popover(
         icon=":material/database:",
         key=DATASET_POPOVER_KEY,
         width="content",
+        wrap=True,
         on_change="rerun",
     ):
         if not datasets:
             st.caption("尚无学情数据集")
             return
-        with st.container(gap="xxsmall"):
+        list_height: int | str = 300 if len(datasets) > 8 else "content"
+        with st.container(
+            height=list_height,
+            gap=0,
+            key="teaching_dataset_list",
+        ):
             for item in datasets:
                 selected = str(item["id"]) == str(current_id)
                 st.button(
                     str(item["name"]) + (" · 当前" if selected else ""),
                     key=f"teaching_dataset_choose_{item['id']}",
-                    type="tertiary",
+                    icon=(
+                        ":material/check_circle:"
+                        if selected
+                        else ":material/database:"
+                    ),
+                    type="primary" if selected else "tertiary",
                     width="stretch",
                     on_click=_select_dataset,
                     args=(str(item["id"]),),
@@ -507,100 +1009,70 @@ def _render_question_popover(
         icon=":material/quiz:",
         key=QUESTION_POPOVER_KEY,
         width="content",
+        wrap=True,
         on_change="rerun",
     ):
+        list_height: int | str = 300 if len(suggestions) > 8 else "content"
         with st.container(
-            border=True,
-            key="teaching_question_block",
-            gap="xsmall",
+            height=list_height,
+            gap=0,
+            key="teaching_question_list",
         ):
-            with st.container(height=300, gap="xxsmall"):
-                for item in suggestions:
-                    with st.container(
-                        horizontal=True,
-                        vertical_alignment="center",
-                        gap="xxsmall",
-                        key=f"teaching_question_row_{item['id']}",
-                    ):
-                        st.button(
-                            str(item["text"]),
-                            key=f"teaching_question_use_{item['id']}",
-                            type="tertiary",
-                            width="stretch",
-                            on_click=_use_common_question,
-                            args=(str(item["text"]),),
-                        )
-                        st.badge(
-                            "预设" if item["is_preset"] else "自定义",
-                            color="violet" if item["is_preset"] else "blue",
-                        )
-                        st.button(
-                            "编辑",
-                            icon=":material/edit:",
-                            key=f"teaching_question_edit_{item['id']}",
-                            type="tertiary",
-                            help="编辑该问题",
-                            on_click=_queue_question_action,
-                            args=("edit", str(item["id"])),
-                        )
-                        st.button(
-                            "删除",
-                            icon=":material/delete:",
-                            key=f"teaching_question_delete_{item['id']}",
-                            type="tertiary",
-                            help="删除该问题",
-                            on_click=_queue_question_action,
-                            args=("delete", str(item["id"])),
-                        )
-            st.button(
-                "新建常用问题",
-                icon=":material/add:",
-                key="teaching_question_add_open",
-                type="primary",
-                width="stretch",
-                on_click=_queue_question_action,
-                args=("add",),
-            )
-
-
-def _render_attachment_popover() -> None:
-    with st.popover(
-        ":material/attach_file:",
-        help="添加临时素材",
-        key="teaching_attachment_popover",
-        width="content",
-    ):
-        files = st.file_uploader(
-            "上传临时素材",
-            type=["pdf", "txt", "md", "csv", "json"],
-            accept_multiple_files=True,
-            key="teaching_temporary_upload",
+            for item in suggestions:
+                with st.container(
+                    horizontal=True,
+                    vertical_alignment="center",
+                    gap="xxsmall",
+                    key=f"teaching_question_row_{item['id']}",
+                ):
+                    st.button(
+                        str(item["text"]),
+                        key=f"teaching_question_use_{item['id']}",
+                        type="tertiary",
+                        width="stretch",
+                        on_click=_use_common_question,
+                        args=(str(item["text"]),),
+                    )
+                    st.badge(
+                        "预设" if item["is_preset"] else "自定义",
+                        color="violet" if item["is_preset"] else "blue",
+                    )
+                    st.button(
+                        "编辑",
+                        icon=":material/edit:",
+                        key=f"teaching_question_edit_{item['id']}",
+                        type="tertiary",
+                        help="编辑该问题",
+                        on_click=_queue_question_action,
+                        args=("edit", str(item["id"])),
+                    )
+                    st.button(
+                        "删除",
+                        icon=":material/delete:",
+                        key=f"teaching_question_delete_{item['id']}",
+                        type="tertiary",
+                        help="删除该问题",
+                        on_click=_queue_question_action,
+                        args=("delete", str(item["id"])),
+                    )
+        st.button(
+            "新建常用问题",
+            icon=":material/add:",
+            key="teaching_question_add_open",
+            type="primary",
+            width="stretch",
+            on_click=_queue_question_action,
+            args=("add",),
         )
-        if files:
-            _merge_temporary_files(files)
-        temporary_files = st.session_state.get(TEMP_FILES_KEY, [])
-        if temporary_files:
-            st.caption(
-                "已附加："
-                + "、".join(str(item["name"]) for item in temporary_files)
-            )
-            if st.button(
-                "清除临时素材",
-                icon=":material/delete_sweep:",
-                key="teaching_temporary_clear",
-                width="stretch",
-            ):
-                st.session_state[TEMP_FILES_KEY] = []
-                st.rerun()
-        st.caption("仅用于当前对话，不写入数据库。")
 
 
 def _render_composer(
     service: TeachingAssistantService,
     learning: LearningDataService,
     profile: ProviderProfile | None,
+    copy_payload: dict[str, str],
 ) -> str | None:
-    _apply_composer_style()
+    _apply_composer_style(copy_payload)
     suggestions = service.list_suggestions()
     datasets = _dataset_options(learning)
     if st.session_state.pop(RESET_DRAFT_KEY, False):
@@ -609,72 +1081,166 @@ def _render_composer(
     placeholder_index = int(st.session_state.get(PLACEHOLDER_INDEX_KEY, 0))
     if suggestions:
         showcase = suggestions[placeholder_index % len(suggestions)]["text"]
-        placeholder = f"从下方选择并编辑 · {showcase}"
+        placeholder = (
+            "直接提问，公式用 $...$ 或 $$...$$，"
+            f"也可以从下方选择常用问题，比如： {showcase}"
+        )
     else:
-        placeholder = "从下方选择并编辑问题"
+        placeholder = (
+            "直接提问，公式用 $...$ 或 $$...$$，"
+            "也可以从下方选择常用问题"
+        )
 
-    prompt: str | None = None
     chat_available = profile is not None and bool(profile.api_key)
     with st.bottom:
         with st.container(
-            border=True,
+            gap=0,
             key="teaching_chat_composer",
         ):
-            with st.container(key="teaching_chat_input_area"):
-                st.text_area(
-                    "问题",
-                    key=DRAFT_KEY,
-                    placeholder=placeholder,
-                    height="content",
-                    label_visibility="collapsed",
-                )
             with st.container(
+                horizontal=True,
+                vertical_alignment="center",
+                gap="xsmall",
+                wrap=False,
                 key="teaching_chat_toolbar",
             ):
-                left_tools, right_actions = st.columns(
-                    [6.5, 1.0],
-                    vertical_alignment="center",
-                    gap="small",
-                )
-                with left_tools:
-                    with st.container(
-                        horizontal=True,
-                        vertical_alignment="center",
-                        gap="xsmall",
+                _, pure_mode = _select_pure_mode()
+                if not pure_mode:
+                    _render_dataset_popover(datasets)
+                _render_question_popover(suggestions)
+                temporary_files = st.session_state.get(TEMP_FILES_KEY, [])
+                if temporary_files:
+                    if st.button(
+                        "清除素材",
+                        icon=":material/delete_sweep:",
+                        key="teaching_temporary_clear",
+                        type="tertiary",
+                        help="清除当前对话附加的临时素材",
                     ):
-                        _, pure_mode = _select_pure_mode()
-                        if not pure_mode:
-                            _render_dataset_popover(datasets)
-                        _render_question_popover(suggestions)
-                with right_actions:
-                    with st.container(
-                        horizontal=True,
-                        vertical_alignment="center",
-                        horizontal_alignment="right",
-                        gap="xsmall",
-                    ):
-                        _render_attachment_popover()
-                        send_clicked = st.button(
-                            "发送",
-                            icon=":material/arrow_upward:",
-                            key="teaching_chat_send",
-                            type="primary",
-                            help="发送",
-                            disabled=not chat_available,
-                        )
+                        st.session_state[TEMP_FILES_KEY] = []
+                        st.rerun()
+            submission = st.chat_input(
+                placeholder,
+                accept_file="multiple",
+                file_type=["pdf", "txt", "md", "csv", "json"],
+                key=DRAFT_KEY,
+                disabled=not chat_available,
+                height=92,
+            )
             if not chat_available:
                 st.caption("请先在“AI 参数设置”中启用 AI 接入")
-            if send_clicked:
-                draft = str(st.session_state.get(DRAFT_KEY) or "").strip()
-                if not draft and not st.session_state.get(TEMP_FILES_KEY):
-                    st.toast("请输入问题或添加临时素材")
-                else:
-                    prompt = draft or (
-                        "请阅读我已附加的临时素材，并结合当前对话继续分析。"
+
+    if submission is None:
+        return None
+    files = getattr(submission, "files", None)
+    if files:
+        _merge_temporary_files(list(files))
+    draft = str(getattr(submission, "text", "") or "").strip()
+    if not draft and not st.session_state.get(TEMP_FILES_KEY):
+        st.toast("请输入问题或添加临时素材")
+        return None
+    return draft or "请阅读我已附加的临时素材，并结合当前对话继续分析。"
+
+
+def _render_streaming_assistant_turn(
+    service: TeachingAssistantService,
+    *,
+    prompt: str,
+    profile: ProviderProfile,
+    dataset_id: str | None,
+    pure_mode: bool,
+    temporary_materials: list[dict[str, Any]],
+) -> TeachingTurnResult:
+    tool_status = st.status(
+        "正在分析问题并调用资料",
+        expanded=True,
+        type="compact",
+    )
+    steps_host = tool_status.container()
+    content_slot = st.empty()
+    content_parts: list[str] = []
+    active_steps: dict[str, Any] = {}
+    completed_tools = 0
+    tools_collapsed = False
+    result: TeachingTurnResult | None = None
+
+    def collapse_tools() -> None:
+        nonlocal tools_collapsed
+        if tools_collapsed:
+            return
+        label = (
+            f"已完成 {completed_tools} 项资料调用"
+            if completed_tools
+            else "分析完成"
+        )
+        tool_status.update(
+            label=label,
+            state="complete",
+            expanded=False,
+        )
+        tools_collapsed = True
+
+    try:
+        for event in service.run_turn_stream(
+            prompt=prompt,
+            profile=profile,
+            client=OpenAICompatibleAssistantClient(profile),
+            dataset_id=dataset_id,
+            pure_mode=pure_mode,
+            temporary_materials=temporary_materials,
+        ):
+            if isinstance(event, TeachingToolStarted):
+                tool_status.update(
+                    label=f"正在调用：{event.label}",
+                    state="running",
+                    expanded=True,
+                )
+                with steps_host:
+                    step = st.status(
+                        event.label,
+                        expanded=True,
+                        state="running",
+                        type="step",
                     )
-    if prompt:
-        return str(prompt)
-    return None
+                    active_steps[event.call_id] = step
+                    if event.detail:
+                        step.caption(event.detail)
+            elif isinstance(event, TeachingToolFinished):
+                step = active_steps.pop(event.call_id, None)
+                if step is not None:
+                    if event.success:
+                        completed_tools += 1
+                        step.update(
+                            label=event.label,
+                            state="complete",
+                        )
+                        if event.detail:
+                            step.caption(event.detail)
+                    else:
+                        step.update(
+                            label=f"{event.label}失败",
+                            state="error",
+                        )
+            elif isinstance(event, TeachingContentDelta):
+                collapse_tools()
+                content_parts.append(event.text)
+                content_slot.markdown("".join(content_parts))
+            elif isinstance(event, TeachingTurnComplete):
+                result = event.result
+    except Exception:
+        tool_status.update(
+            label="生成失败",
+            state="error",
+            expanded=True,
+        )
+        raise
+
+    collapse_tools()
+    if result is None:
+        raise AIRequestError("教学建议没有生成最终结果")
+    if not content_parts:
+        content_slot.markdown(result.message["content"])
+    return result
 
 
 def render_teaching_recommendations_page(
@@ -684,11 +1250,19 @@ def render_teaching_recommendations_page(
 ) -> None:
     st.session_state.setdefault(HISTORY_LIMIT_KEY, HISTORY_PAGE_SIZE)
     st.session_state.setdefault(TEMP_FILES_KEY, [])
-    _render_question_dialog(service)
-    _render_messages(service)
-    _render_pending_action(service, profile)
-    turn_slot = st.container()
-    prompt = _render_composer(service, learning, profile)
+    with st.container(key="teaching_page_shell"):
+        _render_question_dialog(service)
+        copy_payload, live_turn_slot = _render_messages(service, profile)
+        _render_pending_action(service, profile)
+    retry_prompt = st.session_state.pop(RETRY_PROMPT_KEY, None)
+    prompt = _render_composer(
+        service,
+        learning,
+        profile,
+        copy_payload,
+    )
+    if not prompt and isinstance(retry_prompt, str):
+        prompt = retry_prompt
     if not prompt:
         return
 
@@ -698,29 +1272,22 @@ def render_teaching_recommendations_page(
         dataset_id = st.session_state.get(DATASET_KEY)
     temporary_files = list(st.session_state.get(TEMP_FILES_KEY, []))
     result = None
-    with turn_slot:
+    with live_turn_slot:
         with st.chat_message("user"):
             st.markdown(prompt)
         with st.chat_message("assistant", avatar=":material/robot:"):
             try:
                 assert profile is not None
-                with st.status(
-                    "正在结合教学资料生成建议",
-                    expanded=False,
-                ) as status:
-                    result = service.run_turn(
-                        prompt=prompt,
-                        profile=profile,
-                        client=OpenAICompatibleAssistantClient(profile),
-                        dataset_id=dataset_id if isinstance(dataset_id, str) else None,
-                        pure_mode=pure_mode,
-                        temporary_materials=temporary_files,
-                    )
-                    status.update(
-                        label="教学建议已生成",
-                        state="complete",
-                    )
-                st.markdown(result.message["content"])
+                result = _render_streaming_assistant_turn(
+                    service,
+                    prompt=prompt,
+                    profile=profile,
+                    dataset_id=(
+                        dataset_id if isinstance(dataset_id, str) else None
+                    ),
+                    pure_mode=pure_mode,
+                    temporary_materials=temporary_files,
+                )
             except (AIRequestError, ValueError) as exc:
                 service.append_message("assistant", f"请求失败：{exc}")
                 st.error(str(exc))

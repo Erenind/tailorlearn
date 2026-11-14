@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -13,7 +15,14 @@ from tailorlearn.outline import OutlineService
 from tailorlearn.paths import AppPaths
 from tailorlearn.teaching_chat import (
     AssistantCompletion,
+    AssistantStreamCompletion,
+    AssistantTextDelta,
+    OpenAICompatibleAssistantClient,
+    TeachingContentDelta,
     TeachingAssistantService,
+    TeachingToolFinished,
+    TeachingToolStarted,
+    TeachingTurnComplete,
     TeachingToolContext,
     ToolCall,
 )
@@ -91,6 +100,35 @@ def test_teaching_chat_suggestions_include_editable_presets(tmp_path: Path) -> N
     assert added["text"] == "根据本周错题设计讲评课"
 
 
+def test_teaching_chat_database_migrates_tool_trace_column(
+    tmp_path: Path,
+) -> None:
+    database_file = tmp_path / "legacy.sqlite3"
+    with sqlite3.connect(database_file) as connection:
+        connection.execute(
+            """
+            CREATE TABLE teaching_chat_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+
+    repository = Repository(database_file)
+    repository.initialize()
+
+    with repository.connect() as connection:
+        columns = {
+            row["name"]
+            for row in connection.execute(
+                "PRAGMA table_info(teaching_chat_messages)"
+            )
+        }
+    assert "tool_trace_json" in columns
+
+
 def test_teaching_chat_keeps_history_pages_and_compresses_old_messages(
     tmp_path: Path,
 ) -> None:
@@ -115,6 +153,40 @@ def test_teaching_chat_keeps_history_pages_and_compresses_old_messages(
         ).fetchone()
     assert "实践教学" in memory["summary"]
     assert memory["covered_message_id"] == 8
+
+
+def test_teaching_chat_deletes_a_whole_turn_and_invalidates_memory(
+    tmp_path: Path,
+) -> None:
+    _repository, _learning, service = _service(tmp_path)
+    user_message_ids: list[int] = []
+    for index in range(1, 8):
+        user_message_ids.append(
+            service.append_message("user", f"第 {index} 轮问题")["id"]
+        )
+        service.append_message("assistant", f"第 {index} 轮回复")
+
+    client = _ScriptedClient(
+        [AssistantCompletion(content="保留了前面的教学偏好。")]
+    )
+    assert service.maybe_compress(_profile(), client) is not None
+
+    deleted = service.delete_conversation_turn(user_message_ids[1])
+
+    assert deleted == 2
+    remaining = service.list_messages(limit=20)
+    assert [message["content"] for message in remaining] == [
+        content
+        for index in range(1, 8)
+        if index != 2
+        for content in (f"第 {index} 轮问题", f"第 {index} 轮回复")
+    ]
+    with service.repo.connect() as connection:
+        memory = connection.execute(
+            "SELECT * FROM teaching_chat_memory WHERE id='default'"
+        ).fetchone()
+    assert memory["summary"] == ""
+    assert memory["covered_message_id"] == 0
 
 
 def test_teaching_chat_tools_respect_pure_mode_and_write_confirmation(
@@ -230,6 +302,264 @@ def test_teaching_chat_agent_executes_read_tool_then_answers(
         "test-key" in json.dumps(snapshot, ensure_ascii=False)
         for snapshot in client.message_snapshots
     )
+    system_prompt = str(client.message_snapshots[0][0]["content"])
+    assert "行内公式写成 $...$" in system_prompt
+    assert "Markdown 表格" in system_prompt
+
+
+def test_teaching_chat_stream_emits_tool_events_and_content_deltas(
+    tmp_path: Path,
+) -> None:
+    _repository, learning, service = _service(tmp_path)
+    dataset = learning.create_dataset("流式对话数据")
+    learning.create_record(
+        dataset["id"],
+        "student",
+        {"student_code": "D01", "class_code": "DC01", "grade": 7},
+    )
+    client = _ScriptedClient(
+        [
+            AssistantCompletion(
+                content=None,
+                tool_calls=[
+                    ToolCall(
+                        id="call_stream",
+                        name="read-data",
+                        arguments={"data_type": "students"},
+                    )
+                ],
+            ),
+            AssistantCompletion(
+                content="结论：$x^2+1>0$。\n\n| 学生 | 班级 |\n|---|---|\n| D01 | DC01 |"
+            ),
+        ]
+    )
+
+    events = list(
+        service.run_turn_stream(
+            prompt="读取学生数据并用公式说明",
+            profile=_profile(),
+            client=client,
+            dataset_id=dataset["id"],
+            pure_mode=False,
+            temporary_materials=[],
+        )
+    )
+
+    started = next(
+        event for event in events if isinstance(event, TeachingToolStarted)
+    )
+    finished = next(
+        event for event in events if isinstance(event, TeachingToolFinished)
+    )
+    content = "".join(
+        event.text
+        for event in events
+        if isinstance(event, TeachingContentDelta)
+    )
+    completed = next(
+        event for event in events if isinstance(event, TeachingTurnComplete)
+    )
+
+    assert started.label == "读取学情数据"
+    assert started.detail is not None
+    assert "读取数据：学生" in started.detail
+    assert "数据集：流式对话数据" in started.detail
+    assert "最多返回：50 条" in started.detail
+    assert finished.success is True
+    assert finished.detail is not None
+    assert "读取数据：学生" in finished.detail
+    assert "数据集：流式对话数据" in finished.detail
+    assert "记录数：1" in finished.detail
+    assert "字段：学生编号、模拟班级编号、年级" in finished.detail
+    assert "$x^2+1>0$" in content
+    assert "| 学生 | 班级 |" in content
+    assert content == completed.result.message["content"]
+    assert completed.result.tool_trace[0]["label"] == "读取学情数据"
+    assert completed.result.tool_trace[0]["progress"] == started.detail
+    assert completed.result.tool_trace[0]["detail"] == finished.detail
+    stored_assistant = service.list_messages(limit=10)[-1]
+    assert stored_assistant["tool_trace"][0]["status"] == "complete"
+    assert stored_assistant["tool_trace"][0]["detail"] == finished.detail
+
+
+def test_ai_tool_progress_and_result_summaries_cover_all_tool_types(
+    tmp_path: Path,
+) -> None:
+    _repository, learning, service = _service(tmp_path)
+    dataset = learning.create_dataset("工具摘要数据")
+    context = TeachingToolContext(
+        dataset_id=dataset["id"],
+        pure_mode=False,
+        temporary_materials=[],
+    )
+
+    index_progress = service._tool_progress_detail(
+        "get-book-index",
+        {
+            "query": "实数",
+            "material_type": "textbook",
+            "limit": 5,
+        },
+        context,
+    )
+    index_result = service._tool_trace_detail(
+        "get-book-index",
+        {"query": "实数"},
+        {"matches": [{"title": "实数"}], "truncated": True},
+    )
+    book_progress = service._tool_progress_detail(
+        "read-book",
+        {"section_ids": ["S1", "S2"], "max_chars": 8000},
+        context,
+    )
+    book_result = service._tool_trace_detail(
+        "read-book",
+        {},
+        {
+            "sections": [
+                {
+                    "title": "实数",
+                    "page_start": 1,
+                    "page_end": 2,
+                    "content": "正文",
+                    "truncated": False,
+                }
+            ]
+        },
+    )
+    write_progress = service._tool_progress_detail(
+        "write-data",
+        {
+            "data_type": "student",
+            "action": "create",
+            "dataset_id": dataset["id"],
+            "fields": {"student_code": "D01"},
+        },
+        context,
+    )
+    write_result = service._tool_trace_detail(
+        "write-data",
+        {},
+        {
+            "status": "pending_confirmation",
+            "preview": {"summary": "将新增 1 条学生记录"},
+        },
+    )
+    compress_result = service._tool_trace_detail(
+        "compress-record",
+        {},
+        {"compressed_messages": 8, "covered_message_id": 12},
+    )
+
+    assert index_progress is not None and "检索范围：课本" in index_progress
+    assert index_result is not None
+    assert "匹配章节：1 条" in index_result
+    assert "结果已截断" in index_result
+    assert book_progress is not None and "读取章节：2 个" in book_progress
+    assert book_result is not None
+    assert "实数（第 1-2 页）" in book_result
+    assert write_progress is not None
+    assert "操作：新增模拟学生" in write_progress
+    assert "数据集：工具摘要数据" in write_progress
+    assert "字段：学生编号" in write_progress
+    assert write_result is not None
+    assert "等待用户确认" in write_result
+    assert compress_result == "压缩消息：8 条；覆盖至消息 12"
+
+
+def test_openai_compatible_stream_accumulates_text_and_tool_calls() -> None:
+    class _Completions:
+        def create(self, **kwargs: object) -> list[SimpleNamespace]:
+            assert kwargs["stream"] is True
+            if kwargs.get("tools"):
+                return [
+                    SimpleNamespace(
+                        choices=[
+                            SimpleNamespace(
+                                delta=SimpleNamespace(
+                                    content=None,
+                                    tool_calls=[
+                                        SimpleNamespace(
+                                            index=0,
+                                            id="call_1",
+                                            function=SimpleNamespace(
+                                                name="read-data",
+                                                arguments='{"data_type":',
+                                            ),
+                                        )
+                                    ],
+                                )
+                            )
+                        ]
+                    ),
+                    SimpleNamespace(
+                        choices=[
+                            SimpleNamespace(
+                                delta=SimpleNamespace(
+                                    content=None,
+                                    tool_calls=[
+                                        SimpleNamespace(
+                                            index=0,
+                                            id=None,
+                                            function=SimpleNamespace(
+                                                name=None,
+                                                arguments='"students"}',
+                                            ),
+                                        )
+                                    ],
+                                )
+                            )
+                        ]
+                    ),
+                ]
+            return [
+                SimpleNamespace(
+                    choices=[
+                        SimpleNamespace(
+                            delta=SimpleNamespace(
+                                content="结论：",
+                                tool_calls=[],
+                            )
+                        )
+                    ]
+                ),
+                SimpleNamespace(
+                    choices=[
+                        SimpleNamespace(
+                            delta=SimpleNamespace(
+                                content="$x^2$。",
+                                tool_calls=[],
+                            )
+                        )
+                    ]
+                ),
+            ]
+
+    client = OpenAICompatibleAssistantClient(_profile())
+    client.client = SimpleNamespace(
+        chat=SimpleNamespace(completions=_Completions())
+    )
+
+    text_events = list(client.stream([{"role": "user", "content": "问题"}]))
+    assert "".join(
+        event.text for event in text_events if isinstance(event, AssistantTextDelta)
+    ) == "结论：$x^2$。"
+    text_completion = text_events[-1]
+    assert isinstance(text_completion, AssistantStreamCompletion)
+    assert text_completion.completion.content == "结论：$x^2$。"
+
+    tool_events = list(
+        client.stream(
+            [{"role": "user", "content": "读取数据"}],
+            [{"type": "function"}],
+        )
+    )
+    tool_completion = tool_events[-1]
+    assert isinstance(tool_completion, AssistantStreamCompletion)
+    assert tool_completion.completion.tool_calls[0].arguments == {
+        "data_type": "students"
+    }
 
 
 def test_teaching_chat_read_data_includes_raw_answer_and_uses_memory(

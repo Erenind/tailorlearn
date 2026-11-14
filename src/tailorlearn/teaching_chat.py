@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import json
-from typing import Any, Protocol
+from typing import Any, Iterator, Protocol
 import uuid
 
 from openai import OpenAI
@@ -15,11 +15,11 @@ from tailorlearn.models import ProviderProfile
 from tailorlearn.outline import OutlineService
 
 
-TEACHING_CHAT_API_VERSION = "2026-11-13-teaching-chat-agent-v1"
+TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v5"
 TEACHING_SUGGESTION_PRESETS = (
     ("preset_socratic", "根据苏格拉底教学方式提教学方案"),
     ("preset_practice", "以实践为重点提个教学建议"),
-    ("preset_student", "具体分析学生D01等"),
+    ("preset_student", "具体分析学生D01"),
     ("preset_class", "给班级DC01提建议"),
     ("preset_ebbinghaus", "根据艾宾浩斯遗忘曲线分析今天需要复习哪些内容"),
     ("preset_operations", "根据实数的运算这一章提供教学建议"),
@@ -28,6 +28,26 @@ MEMORY_MESSAGE_LIMIT = 12
 MEMORY_CHAR_LIMIT = 24_000
 MEMORY_KEEP_RECENT = 6
 MAX_TOOL_ROUNDS = 8
+TEACHING_TOOL_LABELS = {
+    "get-book-index": "检索课本目录",
+    "read-book": "读取课本正文",
+    "read-data": "读取学情数据",
+    "compress-record": "压缩对话记忆",
+    "create-learning-list": "创建学习内容清单",
+    "write-data": "更新学情数据",
+}
+READ_DATA_TRACE_LABELS = {
+    "students": ("学生", "student"),
+    "classes": ("班级", None),
+    "themes": ("学习主题", "requirement"),
+    "requirements": ("课程要求与指标", "requirement"),
+    "materials": ("题目与材料", "material"),
+    "nodes": ("测验节点", "node"),
+    "answers": ("作答记录", "answer"),
+    "quality": ("数据质量报告", None),
+    "outline_runs": ("学习内容清单", None),
+    "outline_items": ("学习内容条目", None),
+}
 
 
 @dataclass(frozen=True)
@@ -41,6 +61,16 @@ class ToolCall:
 class AssistantCompletion:
     content: str | None
     tool_calls: list[ToolCall] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class AssistantTextDelta:
+    text: str
+
+
+@dataclass(frozen=True)
+class AssistantStreamCompletion:
+    completion: AssistantCompletion
 
 
 class TeachingAssistantClient(Protocol):
@@ -102,6 +132,69 @@ class OpenAICompatibleAssistantClient:
             tool_calls=calls,
         )
 
+    def stream(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+    ) -> Iterator[AssistantTextDelta | AssistantStreamCompletion]:
+        kwargs: dict[str, Any] = {
+            "model": self.profile.model,
+            "messages": messages,
+            "stream": True,
+        }
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
+        content_parts: list[str] = []
+        tool_buffers: dict[int, dict[str, Any]] = {}
+        try:
+            response = self.client.chat.completions.create(**kwargs)
+            for chunk in response:
+                if not chunk.choices:
+                    continue
+                delta = chunk.choices[0].delta
+                text = delta.content or ""
+                if text:
+                    content_parts.append(text)
+                    yield AssistantTextDelta(text)
+                for item in delta.tool_calls or []:
+                    index = int(item.index or 0)
+                    buffer = tool_buffers.setdefault(
+                        index,
+                        {"id": "", "name": "", "arguments": ""},
+                    )
+                    if item.id:
+                        buffer["id"] = item.id
+                    if item.function is not None:
+                        if item.function.name:
+                            buffer["name"] = item.function.name
+                        if item.function.arguments:
+                            buffer["arguments"] += item.function.arguments
+        except Exception as exc:
+            raise AIRequestError(str(exc)) from exc
+        calls: list[ToolCall] = []
+        for index in sorted(tool_buffers):
+            buffer = tool_buffers[index]
+            try:
+                arguments = json.loads(buffer["arguments"] or "{}")
+            except json.JSONDecodeError as exc:
+                raise AIRequestError("AI 工具参数不是合法 JSON") from exc
+            if not isinstance(arguments, dict):
+                raise AIRequestError("AI 工具参数必须是 JSON 对象")
+            calls.append(
+                ToolCall(
+                    id=str(buffer["id"] or f"tool_{index}"),
+                    name=str(buffer["name"]),
+                    arguments=arguments,
+                )
+            )
+        yield AssistantStreamCompletion(
+            AssistantCompletion(
+                content="".join(content_parts) or None,
+                tool_calls=calls,
+            )
+        )
+
 
 @dataclass
 class TeachingToolContext:
@@ -116,6 +209,35 @@ class TeachingTurnResult:
     message: dict[str, Any]
     pending_action: dict[str, Any] | None
     compression: dict[str, Any] | None
+    tool_trace: list[dict[str, Any]] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class TeachingToolStarted:
+    call_id: str
+    tool_name: str
+    label: str
+    detail: str | None = None
+
+
+@dataclass(frozen=True)
+class TeachingToolFinished:
+    call_id: str
+    tool_name: str
+    label: str
+    success: bool
+    error: str | None = None
+    detail: str | None = None
+
+
+@dataclass(frozen=True)
+class TeachingContentDelta:
+    text: str
+
+
+@dataclass(frozen=True)
+class TeachingTurnComplete:
+    result: TeachingTurnResult
 
 
 class TeachingAssistantService:
@@ -135,26 +257,40 @@ class TeachingAssistantService:
     # ------------------------------------------------------------------
     # conversation and memory persistence
     # ------------------------------------------------------------------
-    def append_message(self, role: str, content: str) -> dict[str, Any]:
+    def append_message(
+        self,
+        role: str,
+        content: str,
+        *,
+        tool_trace: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
         content = content.strip()
         if role not in {"user", "assistant"}:
             raise ValueError("未知消息角色")
         if not content:
             raise ValueError("消息内容不能为空")
+        trace = list(tool_trace or [])
         created_at = utc_now()
         with self.repo.connect() as connection:
             cursor = connection.execute(
                 """
-                INSERT INTO teaching_chat_messages(role, content, created_at)
-                VALUES (?, ?, ?)
+                INSERT INTO teaching_chat_messages
+                (role, content, tool_trace_json, created_at)
+                VALUES (?, ?, ?, ?)
                 """,
-                (role, content, created_at),
+                (
+                    role,
+                    content,
+                    json.dumps(trace, ensure_ascii=False),
+                    created_at,
+                ),
             )
             message_id = int(cursor.lastrowid)
         return {
             "id": message_id,
             "role": role,
             "content": content,
+            "tool_trace": trace,
             "created_at": created_at,
         }
 
@@ -164,7 +300,7 @@ class TeachingAssistantService:
             rows = connection.execute(
                 """
                 SELECT * FROM (
-                    SELECT id, role, content, created_at
+                    SELECT id, role, content, tool_trace_json, created_at
                     FROM teaching_chat_messages
                     ORDER BY id DESC
                     LIMIT ?
@@ -173,7 +309,16 @@ class TeachingAssistantService:
                 """,
                 (limit,),
             ).fetchall()
-        return [dict(row) for row in rows]
+        messages: list[dict[str, Any]] = []
+        for row in rows:
+            message = dict(row)
+            try:
+                trace = json.loads(message.pop("tool_trace_json", "[]"))
+            except json.JSONDecodeError:
+                trace = []
+            message["tool_trace"] = trace if isinstance(trace, list) else []
+            messages.append(message)
+        return messages
 
     def count_messages(self) -> int:
         with self.repo.connect() as connection:
@@ -182,6 +327,74 @@ class TeachingAssistantService:
                     "SELECT COUNT(*) FROM teaching_chat_messages"
                 ).fetchone()[0]
             )
+
+    def delete_conversation_turn(self, user_message_id: int) -> int:
+        """Delete one user turn and every reply before the next user turn."""
+        try:
+            anchor_id = int(user_message_id)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("对话轮次编号无效") from exc
+        now = utc_now()
+        with self.repo.connect() as connection:
+            anchor = connection.execute(
+                "SELECT id, role FROM teaching_chat_messages WHERE id=?",
+                (anchor_id,),
+            ).fetchone()
+            if anchor is None:
+                raise ValueError("找不到要删除的对话")
+            turn_start_id = anchor_id
+            if anchor["role"] != "user":
+                row = connection.execute(
+                    """
+                    SELECT MAX(id)
+                    FROM teaching_chat_messages
+                    WHERE role='user' AND id<?
+                    """,
+                    (anchor_id,),
+                ).fetchone()
+                if row is None or row[0] is None:
+                    raise ValueError("找不到此次对话的起始消息")
+                turn_start_id = int(row[0])
+            next_user = connection.execute(
+                """
+                SELECT MIN(id)
+                FROM teaching_chat_messages
+                WHERE role='user' AND id>?
+                """,
+                (turn_start_id,),
+            ).fetchone()
+            next_user_id = int(next_user[0]) if next_user[0] is not None else None
+            if next_user_id is None:
+                deleted = connection.execute(
+                    "DELETE FROM teaching_chat_messages WHERE id>=?",
+                    (turn_start_id,),
+                ).rowcount
+            else:
+                deleted = connection.execute(
+                    """
+                    DELETE FROM teaching_chat_messages
+                    WHERE id>=? AND id<?
+                    """,
+                    (turn_start_id, next_user_id),
+                ).rowcount
+
+            memory = connection.execute(
+                """
+                SELECT covered_message_id
+                FROM teaching_chat_memory
+                WHERE id='default'
+                """
+            ).fetchone()
+            if memory is not None and int(memory["covered_message_id"]) >= turn_start_id:
+                connection.execute(
+                    """
+                    UPDATE teaching_chat_memory
+                    SET summary='', covered_message_id=0, updated_at=?
+                    WHERE id='default'
+                    """,
+                    (now,),
+                )
+        return int(deleted)
 
     def _memory(self) -> dict[str, Any]:
         with self.repo.connect() as connection:
@@ -771,6 +984,207 @@ class TeachingAssistantService:
             "truncated": len(rows) > limit,
         }
 
+    def _dataset_display_name(self, dataset_id: str) -> str:
+        if not dataset_id:
+            return ""
+        dataset = self.learning.get_dataset(dataset_id)
+        return str(dataset["name"]) if dataset else dataset_id
+
+    def _tool_progress_detail(
+        self,
+        tool_name: str,
+        arguments: dict[str, Any],
+        context: TeachingToolContext,
+    ) -> str | None:
+        if tool_name == "get-book-index":
+            material_type = {
+                "textbook": "课本",
+                "curriculum_standard": "课程标准",
+            }.get(str(arguments.get("material_type") or ""), "全部材料")
+            parts = [f"检索范围：{material_type}"]
+            if arguments.get("query"):
+                parts.append(f"关键词：{arguments['query']}")
+            parts.append(f"最多返回：{arguments.get('limit') or 100} 条")
+            return "；".join(parts)
+        if tool_name == "read-book":
+            sections = arguments.get("section_ids") or []
+            return (
+                f"读取章节：{len(sections)} 个；"
+                f"最多返回：{arguments.get('max_chars') or 16000} 字"
+            )
+        if tool_name == "read-data":
+            data_type = str(arguments.get("data_type") or "")
+            data_label, _ = READ_DATA_TRACE_LABELS.get(
+                data_type,
+                (data_type or "学情数据", None),
+            )
+            dataset_id = str(
+                arguments.get("dataset_id") or context.dataset_id or ""
+            )
+            parts = [f"读取数据：{data_label}"]
+            dataset_name = self._dataset_display_name(dataset_id)
+            if dataset_name:
+                parts.append(f"数据集：{dataset_name}")
+            if arguments.get("query"):
+                parts.append(f"筛选：{arguments['query']}")
+            parts.append(f"最多返回：{arguments.get('limit') or 50} 条")
+            return "；".join(parts)
+        if tool_name == "compress-record":
+            return "正在压缩较早的对话记忆，保留关键偏好和未完成事项"
+        if tool_name == "create-learning-list":
+            mode = "主题" if arguments.get("mode") == "theme" else "课本"
+            parts = [f"生成模式：{mode}"]
+            themes = arguments.get("theme_codes") or []
+            if themes:
+                parts.append(f"主题：{'、'.join(str(item) for item in themes)}")
+            requirements = str(
+                arguments.get("specific_requirements") or ""
+            ).strip()
+            if requirements:
+                parts.append(f"要求：{requirements[:80]}")
+            return "；".join(parts)
+        if tool_name == "write-data":
+            data_type = str(arguments.get("data_type") or "")
+            data_label = (
+                DATA_TYPE_SPECS[data_type].label
+                if data_type in DATA_TYPE_SPECS
+                else data_type or "学情数据"
+            )
+            action = "新增" if arguments.get("action") == "create" else "修改"
+            dataset_id = str(
+                arguments.get("dataset_id") or context.dataset_id or ""
+            )
+            parts = [f"操作：{action}{data_label}"]
+            dataset_name = self._dataset_display_name(dataset_id)
+            if dataset_name:
+                parts.append(f"数据集：{dataset_name}")
+            fields = arguments.get("fields")
+            if isinstance(fields, dict) and fields:
+                spec = DATA_TYPE_SPECS.get(data_type)
+                field_labels = [
+                    spec.label_by_key.get(key, key)
+                    if spec is not None
+                    else key
+                    for key in list(fields)[:8]
+                ]
+                parts.append(f"字段：{'、'.join(field_labels)}")
+            return "；".join(parts)
+        return None
+
+    def _tool_trace_detail(
+        self,
+        tool_name: str,
+        arguments: dict[str, Any],
+        output: dict[str, Any],
+    ) -> str | None:
+        if tool_name == "get-book-index":
+            matches = output.get("matches")
+            count = len(matches) if isinstance(matches, list) else 0
+            parts = [f"匹配章节：{count} 条"]
+            if output.get("truncated"):
+                parts.append("结果已截断")
+            if arguments.get("query"):
+                parts.append(f"关键词：{arguments['query']}")
+            return "；".join(parts)
+        if tool_name == "read-book":
+            sections = output.get("sections")
+            sections = sections if isinstance(sections, list) else []
+            titles = [
+                (
+                    f"{item.get('title') or item.get('section_id')}"
+                    f"（第 {item.get('page_start')}-{item.get('page_end')} 页）"
+                )
+                for item in sections
+                if isinstance(item, dict)
+            ]
+            char_count = sum(
+                len(str(item.get("content") or ""))
+                for item in sections
+                if isinstance(item, dict)
+            )
+            parts = [
+                f"读取章节：{len(sections)} 个",
+                f"正文字符：{char_count}",
+            ]
+            if titles:
+                parts.append(f"章节：{'、'.join(titles[:4])}")
+            if any(item.get("truncated") for item in sections):
+                parts.append("内容已截断")
+            return "；".join(parts)
+        if tool_name == "compress-record":
+            if output.get("compressed_messages"):
+                return (
+                    f"压缩消息：{output['compressed_messages']} 条；"
+                    f"覆盖至消息 {output.get('covered_message_id')}"
+                )
+            return str(output.get("status") or "没有可压缩的较早记录")
+        if tool_name in {"create-learning-list", "write-data"}:
+            preview = output.get("preview")
+            summary = (
+                str(preview.get("summary") or "")
+                if isinstance(preview, dict)
+                else ""
+            )
+            if output.get("status") == "pending_confirmation":
+                return (
+                    f"已生成操作预览：{summary or '等待确认'}"
+                    "；尚未写入，等待用户确认"
+                )
+            return summary or str(output.get("status") or "操作已完成")
+        if tool_name != "read-data":
+            return None
+        data_type = str(arguments.get("data_type") or "")
+        data_label, spec_key = READ_DATA_TRACE_LABELS.get(
+            data_type,
+            (data_type or "学情数据", None),
+        )
+        parts = [f"读取数据：{data_label}"]
+        dataset_id = str(
+            output.get("dataset_id")
+            or arguments.get("dataset_id")
+            or arguments.get("_active_dataset_id")
+            or ""
+        )
+        if dataset_id:
+            parts.append(f"数据集：{self._dataset_display_name(dataset_id)}")
+        if "rows" in output:
+            rows = output.get("rows")
+            count = len(rows) if isinstance(rows, list) else 0
+            parts.append(f"记录数：{count}")
+            if output.get("truncated"):
+                parts.append("结果已截断")
+            if (
+                spec_key
+                and isinstance(rows, list)
+                and rows
+                and isinstance(rows[0], dict)
+            ):
+                spec = DATA_TYPE_SPECS[spec_key]
+                labels = [
+                    spec.label_by_key.get(key, key)
+                    for key, value in rows[0].items()
+                    if key in spec.label_by_key and value not in (None, "", {})
+                ]
+                if labels:
+                    parts.append(f"字段：{'、'.join(labels[:8])}")
+        elif "items" in output:
+            items = output.get("items")
+            parts.append(
+                f"条目数：{len(items) if isinstance(items, list) else 0}"
+            )
+            run = output.get("run")
+            if isinstance(run, dict) and run.get("name"):
+                parts.append(f"清单：{run['name']}")
+        elif "issues" in output:
+            issues = output.get("issues")
+            parts.append(
+                f"问题数：{len(issues) if isinstance(issues, list) else 0}"
+            )
+        query = str(arguments.get("query") or "").strip()
+        if query:
+            parts.append(f"筛选：{query}")
+        return "；".join(parts)
+
     def _preview_create_learning_list(
         self,
         arguments: dict[str, Any],
@@ -1083,6 +1497,9 @@ class TeachingAssistantService:
 7. 班级当前由学生的 class_code 归属派生；学习主题与指标存储在 requirement 数据中。
 8. 教学建议不是审核草稿，直接以清晰的 Markdown 回答。
 9. 不要输出思考过程或工具内部推理；可以用简短步骤说明使用了哪些资料。
+10. 数学公式必须使用 LaTeX：行内公式写成 $...$，独立公式写成 $$...$$。
+    公式中可使用 \\frac、\\sqrt、\\sum、\\int、\\times、\\le 等标准写法。
+11. 涉及多维数据对比时优先使用 Markdown 表格；不要输出原始 HTML。
 
 材料目录：
 {json.dumps(catalog, ensure_ascii=False)}
@@ -1101,6 +1518,55 @@ class TeachingAssistantService:
         pure_mode: bool,
         temporary_materials: list[dict[str, Any]],
     ) -> TeachingTurnResult:
+        result: TeachingTurnResult | None = None
+        for event in self.run_turn_stream(
+            prompt=prompt,
+            profile=profile,
+            client=client,
+            dataset_id=dataset_id,
+            pure_mode=pure_mode,
+            temporary_materials=temporary_materials,
+        ):
+            if isinstance(event, TeachingTurnComplete):
+                result = event.result
+        if result is None:
+            raise AIRequestError("教学建议没有生成最终结果")
+        return result
+
+    def _stream_completion(
+        self,
+        client: TeachingAssistantClient,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+    ) -> Iterator[AssistantTextDelta | AssistantStreamCompletion]:
+        stream = getattr(client, "stream", None)
+        if callable(stream):
+            yield from stream(messages, tools)
+            return
+        completion = client.complete(messages, tools)
+        if completion.tool_calls:
+            yield AssistantStreamCompletion(completion)
+            return
+        content = completion.content or ""
+        for start in range(0, len(content), 32):
+            yield AssistantTextDelta(content[start : start + 32])
+        yield AssistantStreamCompletion(completion)
+
+    def run_turn_stream(
+        self,
+        *,
+        prompt: str,
+        profile: ProviderProfile,
+        client: TeachingAssistantClient,
+        dataset_id: str | None,
+        pure_mode: bool,
+        temporary_materials: list[dict[str, Any]],
+    ) -> Iterator[
+        TeachingToolStarted
+        | TeachingToolFinished
+        | TeachingContentDelta
+        | TeachingTurnComplete
+    ]:
         prompt = prompt.strip()
         if not prompt:
             raise ValueError("问题不能为空")
@@ -1122,11 +1588,22 @@ class TeachingAssistantService:
             *self._model_history(),
         ]
         final_content = ""
+        tool_trace: list[dict[str, Any]] = []
         for _ in range(MAX_TOOL_ROUNDS):
-            completion = client.complete(
+            completion: AssistantCompletion | None = None
+            streamed_content: list[str] = []
+            for event in self._stream_completion(
+                client,
                 messages,
                 self.tool_definitions(),
-            )
+            ):
+                if isinstance(event, AssistantTextDelta):
+                    streamed_content.append(event.text)
+                    yield TeachingContentDelta(event.text)
+                else:
+                    completion = event.completion
+            if completion is None:
+                raise AIRequestError("AI 服务没有返回完整结果")
             if completion.tool_calls:
                 messages.append(
                     {
@@ -1149,6 +1626,31 @@ class TeachingAssistantService:
                     }
                 )
                 for call in completion.tool_calls:
+                    label = TEACHING_TOOL_LABELS.get(
+                        call.name,
+                        f"调用工具 {call.name}",
+                    )
+                    progress_detail = self._tool_progress_detail(
+                        call.name,
+                        call.arguments,
+                        context,
+                    )
+                    yield TeachingToolStarted(
+                        call_id=call.id,
+                        tool_name=call.name,
+                        label=label,
+                        detail=progress_detail,
+                    )
+                    trace_item = {
+                        "call_id": call.id,
+                        "tool_name": call.name,
+                        "label": label,
+                        "status": "running",
+                        "error": None,
+                        "progress": progress_detail,
+                    }
+                    tool_trace.append(trace_item)
+                    error: str | None = None
                     try:
                         output = self.execute_tool(
                             call.name,
@@ -1162,10 +1664,31 @@ class TeachingAssistantService:
                             ensure_ascii=False,
                         )
                     except Exception as exc:
+                        error = str(exc)
                         tool_content = json.dumps(
-                            {"error": str(exc)},
+                            {"error": error},
                             ensure_ascii=False,
                         )
+                    detail = (
+                        self._tool_trace_detail(
+                            call.name,
+                            call.arguments,
+                            output,
+                        )
+                        if error is None
+                        else None
+                    )
+                    yield TeachingToolFinished(
+                        call_id=call.id,
+                        tool_name=call.name,
+                        label=label,
+                        success=error is None,
+                        error=error,
+                        detail=detail,
+                    )
+                    trace_item["status"] = "error" if error else "complete"
+                    trace_item["error"] = error
+                    trace_item["detail"] = detail
                     messages.append(
                         {
                             "role": "tool",
@@ -1175,19 +1698,28 @@ class TeachingAssistantService:
                         }
                     )
                 continue
-            final_content = (completion.content or "").strip()
+            final_content = (
+                completion.content or "".join(streamed_content)
+            ).strip()
             if final_content:
                 break
         if not final_content:
             final_content = "本次请求未得到有效回复，请稍后重试。"
-        message = self.append_message("assistant", final_content)
+        message = self.append_message(
+            "assistant",
+            final_content,
+            tool_trace=tool_trace,
+        )
         compression: dict[str, Any] | None = None
         try:
             compression = self.maybe_compress(profile, client)
         except Exception:
             compression = None
-        return TeachingTurnResult(
-            message=message,
-            pending_action=context.pending_action,
-            compression=compression,
+        yield TeachingTurnComplete(
+            TeachingTurnResult(
+                message=message,
+                pending_action=context.pending_action,
+                compression=compression,
+                tool_trace=tool_trace,
+            )
         )

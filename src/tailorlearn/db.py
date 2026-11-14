@@ -20,7 +20,7 @@ from tailorlearn.models import (
     UnitStatus,
 )
 
-REPOSITORY_API_VERSION = "2026-11-13-teaching-chat-v1"
+REPOSITORY_API_VERSION = "2026-11-14-teaching-chat-v2"
 
 
 def utc_now() -> str:
@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS teaching_chat_messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     role TEXT NOT NULL,
     content TEXT NOT NULL,
+    tool_trace_json TEXT NOT NULL DEFAULT '[]',
     created_at TEXT NOT NULL
 );
 
@@ -608,9 +609,20 @@ class Repository:
                     "ALTER TABLE material_sets "
                     "ADD COLUMN metadata_sources_json TEXT NOT NULL DEFAULT '{}'"
                 )
+            chat_columns = {
+                row["name"]
+                for row in connection.execute(
+                    "PRAGMA table_info(teaching_chat_messages)"
+                ).fetchall()
+            }
+            if "tool_trace_json" not in chat_columns:
+                connection.execute(
+                    "ALTER TABLE teaching_chat_messages "
+                    "ADD COLUMN tool_trace_json TEXT NOT NULL DEFAULT '[]'"
+                )
             connection.execute(
                 "INSERT OR REPLACE INTO schema_meta(key, value) VALUES (?, ?)",
-                ("schema_version", "8"),
+                ("schema_version", "9"),
             )
 
     def create_material_set(
