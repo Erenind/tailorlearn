@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 import streamlit as st
 
+UI_VERSION = "2026-11-14-navigation-without-teaching-page"
+
 
 @dataclass(frozen=True)
 class PageMeta:
@@ -12,6 +14,10 @@ class PageMeta:
 
 
 PAGE_META: dict[str, PageMeta] = {
+    "导航首页": PageMeta(
+        label="导航首页",
+        icon="logo.svg",
+    ),
     "学习内容梳理": PageMeta(
         label="学习内容梳理",
         icon="outline.svg",
@@ -28,9 +34,13 @@ PAGE_META: dict[str, PageMeta] = {
         label="班级分析",
         icon="class.svg",
     ),
-    "教学建议": PageMeta(
-        label="教学建议",
+    "教学智能体": PageMeta(
+        label="教学智能体",
         icon="teaching.svg",
+    ),
+    "教师工作台": PageMeta(
+        label="教师工作台",
+        icon="database.svg",
     ),
     "AI 参数设置": PageMeta(
         label="AI 参数设置",
@@ -38,13 +48,22 @@ PAGE_META: dict[str, PageMeta] = {
     ),
 }
 
-NAV_ORDER = list(PAGE_META)
+NAV_GROUPS: dict[str, tuple[str, ...]] = {
+    "开始使用": ("导航首页",),
+    "学习准备": ("学习内容梳理",),
+    "材料与管理": ("材料与数据", "教师工作台"),
+    "学情分析": ("学生分析", "班级分析"),
+    "教学支持": ("教学智能体", "AI 参数设置"),
+}
+NAV_ORDER = [page for pages in NAV_GROUPS.values() for page in pages]
 PAGE_SLUGS = {
+    "导航首页": "home",
     "学习内容梳理": "outline",
     "材料与数据": "material_center",
     "学生分析": "student",
     "班级分析": "class",
-    "教学建议": "teaching",
+    "教学智能体": "teaching_agent",
+    "教师工作台": "workbench",
     "AI 参数设置": "ai_settings",
 }
 
@@ -225,6 +244,10 @@ def navigation_key(page: str) -> str:
     return f"nav_{PAGE_SLUGS[page]}"
 
 
+def default_page() -> str:
+    return NAV_ORDER[0]
+
+
 def navigation_label(page: str, *, active: bool) -> str:
     meta = PAGE_META[page]
     title = f"**{page}**" if active else page
@@ -235,7 +258,7 @@ def render_sidebar_navigation() -> str:
     active_page = st.session_state.get("active_page")
     if active_page not in NAV_ORDER:
         legacy_page = st.session_state.get("main_navigation")
-        active_page = legacy_page if legacy_page in NAV_ORDER else NAV_ORDER[0]
+        active_page = legacy_page if legacy_page in NAV_ORDER else default_page()
         st.session_state["active_page"] = active_page
 
     with st.sidebar:
@@ -251,15 +274,17 @@ def render_sidebar_navigation() -> str:
             """
         )
         with st.container(key="app_nav"):
-            for page in NAV_ORDER:
-                if st.button(
-                    navigation_label(page, active=page == active_page),
-                    key=navigation_key(page),
-                    type="secondary",
-                    width="stretch",
-                ):
-                    st.session_state["active_page"] = page
-                    st.rerun()
+            for group_label, pages in NAV_GROUPS.items():
+                st.caption(group_label)
+                for page in pages:
+                    if st.button(
+                        navigation_label(page, active=page == active_page),
+                        key=navigation_key(page),
+                        type="secondary",
+                        width="stretch",
+                    ):
+                        st.session_state["active_page"] = page
+                        st.rerun()
         active_key = navigation_key(str(active_page))
         st.html(
             f"""

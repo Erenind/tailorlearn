@@ -63,7 +63,7 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
     app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
     at = AppTest.from_file(str(app_file), default_timeout=20).run()
 
-    at.button(key="nav_teaching").click().run()
+    at.button(key="nav_teaching_agent").click().run()
     assert not at.exception
     assert at.pills(key="teaching_chat_pure_mode").value is None
     assert at.button(
@@ -74,6 +74,24 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
     assert at.button(
         key="teaching_question_use_preset_student"
     ).label == "具体分析学生D01"
+    assert at.button(
+        key="teaching_question_use_preset_action_layered"
+    ).label == "生成分层教学建议"
+    assert at.button(
+        key="teaching_question_use_preset_action_gaps"
+    ).label == "梳理信息缺口"
+    assert at.button(
+        key="teaching_question_use_preset_action_materials"
+    ).label == "推荐材料与活动"
+    assert not any(
+        getattr(item, "key", None) == "teaching_quick_actions"
+        for item in at.container
+    )
+    at.pills(key="teaching_chat_pure_mode").set_value("纯净模式").run()
+    at.button(key="teaching_question_use_preset_action_layered").click().run()
+    draft = at.chat_input(key="teaching_chat_draft").value
+    assert "分层教学建议" in draft
+    assert "证据不足" in draft
     assert at.button(
         key="teaching_question_edit_preset_student"
     )
@@ -252,7 +270,7 @@ def test_streamlit_retry_button_resubmits_original_prompt(
     st.cache_resource.clear()
     app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
     at = AppTest.from_file(str(app_file), default_timeout=20).run()
-    at.button(key="nav_teaching").click().run()
+    at.button(key="nav_teaching_agent").click().run()
 
     action_keys = [
         item.key

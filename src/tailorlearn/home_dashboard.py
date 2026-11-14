@@ -1,0 +1,104 @@
+from __future__ import annotations
+
+from typing import Any
+
+from tailorlearn.analytics import AnalyticsService
+from tailorlearn.learning_data import LearningDataService
+from tailorlearn.teacher_workbench import TeacherWorkbenchService
+
+HOME_DASHBOARD_SERVICE_VERSION = "2026-11-14-evidence-overview-v2"
+
+
+class HomeDashboardService:
+    """Build a compact, evidence-safe overview for the navigation home."""
+
+    def __init__(
+        self,
+        learning: LearningDataService,
+        analytics: AnalyticsService,
+        workbench: TeacherWorkbenchService,
+    ):
+        self.learning = learning
+        self.analytics = analytics
+        self.workbench = workbench
+
+    def build(self, dataset_id: str) -> dict[str, Any]:
+        board = self.workbench.build_todos(dataset_id)
+        themes = self.analytics.class_theme_metrics(dataset_id)
+        sufficient = sum(
+            item["evidence_status"] == "sufficient" for item in themes
+        )
+        theme_evidence: dict[str, dict[str, str]] = {}
+        for item in themes:
+            theme_name = str(item["theme_name"])
+            current = theme_evidence.setdefault(
+                theme_name,
+                {"theme_name": theme_name, "evidence_status": "sufficient"},
+            )
+            if item["evidence_status"] != "sufficient":
+                current["evidence_status"] = "needs_observation"
+        class_evidence: dict[str, dict[str, Any]] = {}
+        for item in themes:
+            class_code = str(item.get("class_code") or "")
+            if not class_code:
+                continue
+            current_class = class_evidence.setdefault(
+                class_code,
+                {
+                    "class_code": class_code,
+                    "sufficient": 0,
+                    "needs_observation": 0,
+                    "scored_records": 0,
+                },
+            )
+            current_class["scored_records"] += int(item["scored_records"])
+            if item["evidence_status"] == "sufficient":
+                current_class["sufficient"] += 1
+            else:
+                current_class["needs_observation"] += 1
+        evidence_overview = {
+            "total_themes": len(theme_evidence),
+            "sufficient": sum(
+                item["evidence_status"] == "sufficient"
+                for item in theme_evidence.values()
+            ),
+            "needs_observation": sum(
+                item["evidence_status"] == "needs_observation"
+                for item in theme_evidence.values()
+            ),
+            "themes": list(theme_evidence.values()),
+            "class_coverage": [
+                class_evidence[code] for code in sorted(class_evidence)
+            ],
+        }
+        todos_by_page: dict[str, int] = {}
+        for todo in board["todos"]:
+            target = str(todo["target_page"])
+            todos_by_page[target] = todos_by_page.get(target, 0) + 1
+        follow_up = (
+            int(board["summary"]["supplemental_observation"])
+            + int(board["summary"]["ai_review"])
+            + int(board["summary"]["needs_update"])
+        )
+        return {
+            "dataset_id": dataset_id,
+            "metrics": {
+                "student_count": len(
+                    self.learning.list_records(dataset_id, "student")
+                ),
+                "valid_scored_answers": sum(
+                    int(item["scored_records"]) for item in themes
+                ),
+                "data_processing_todos": int(
+                    board["summary"]["data_processing"]
+                ),
+                "follow_up_todos": follow_up,
+            },
+            "evidence_snapshot": [
+                {"label": "证据充分", "count": sufficient},
+                {"label": "待补充观察", "count": len(themes) - sufficient},
+            ],
+            "evidence_overview": evidence_overview,
+            "todos": list(board["todos"]),
+            "todos_by_page": todos_by_page,
+        }

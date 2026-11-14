@@ -15,7 +15,7 @@ from tailorlearn.models import ProviderProfile
 from tailorlearn.outline import OutlineService
 
 
-TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v5"
+TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v6"
 TEACHING_SUGGESTION_PRESETS = (
     ("preset_socratic", "根据苏格拉底教学方式提教学方案"),
     ("preset_practice", "以实践为重点提个教学建议"),
@@ -23,7 +23,31 @@ TEACHING_SUGGESTION_PRESETS = (
     ("preset_class", "给班级DC01提建议"),
     ("preset_ebbinghaus", "根据艾宾浩斯遗忘曲线分析今天需要复习哪些内容"),
     ("preset_operations", "根据实数的运算这一章提供教学建议"),
+    ("preset_action_layered", "生成分层教学建议"),
+    ("preset_action_gaps", "梳理信息缺口"),
+    ("preset_action_materials", "推荐材料与活动"),
 )
+"""快捷教学动作的完整提示词。
+
+这三条由原顶部快捷按钮并入“常用问题”，弹层里只显示简短标题（即
+TEACHING_SUGGESTION_PRESETS 中的文本），点击后展开为下列完整提示词再提交。
+键为预设 id，与 TEACHING_SUGGESTION_PRESETS 的 id 一一对应。
+"""
+TEACHING_ACTION_PROMPTS: dict[str, str] = {
+    "preset_action_layered": (
+        "请基于当前数据集的已有证据，提出可执行的分层教学建议。"
+        "待评分、未作答、异常或证据不足只能说明信息缺口，"
+        "并给出补充观察或记录建议，不得作出能力结论。"
+    ),
+    "preset_action_gaps": (
+        "请梳理当前数据集中的信息缺口，并说明需要补充哪些观察、"
+        "评分或记录。不要把数据不足解释为未掌握。"
+    ),
+    "preset_action_materials": (
+        "请基于当前数据集中已有的材料和学习要求，推荐后续教学活动。"
+        "仅引用已有材料；证据不足时给出补充练习与后续记录建议。"
+    ),
+}
 MEMORY_MESSAGE_LIMIT = 12
 MEMORY_CHAR_LIMIT = 24_000
 MEMORY_KEEP_RECENT = 6

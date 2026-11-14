@@ -11,12 +11,17 @@ import streamlit as st
 import tailorlearn.analytics as analytics_module
 import tailorlearn.analytics_ui as analytics_ui_module
 import tailorlearn.db as database_module
+import tailorlearn.home_dashboard as home_dashboard_module
+import tailorlearn.home_ui as home_ui_module
 import tailorlearn.learning_data_ui as learning_data_ui_module
 import tailorlearn.outline as outline_module
 import tailorlearn.outline_ui as outline_ui_module
 import tailorlearn.providers as providers_module
+import tailorlearn.teacher_workbench as teacher_workbench_module
 import tailorlearn.teaching_chat as teaching_chat_module
+import tailorlearn.teaching_chat_ui as teaching_chat_ui_module
 import tailorlearn.teaching_recommendations_ui as teaching_ui_module
+import tailorlearn.ui as ui_module
 from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.extraction import page_as_png
 from tailorlearn.ingest import IngestionService
@@ -24,6 +29,8 @@ from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
 from tailorlearn.paths import AppPaths
 from tailorlearn.student_diagnosis import StudentDiagnosisService
+from tailorlearn.teaching_chat import TeachingAssistantService
+from tailorlearn.teacher_workbench_ui import render_teacher_workbench_page
 from tailorlearn.ui import (
     apply_app_style,
     render_page_header,
@@ -38,8 +45,12 @@ _LEARNING_DATA_UI_API_VERSION = "2026-11-14-import-direct-create-v2"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
 _PROVIDERS_API_VERSION = "2026-11-13-ai-access-presets"
-_TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v5"
-_TEACHING_CHAT_UI_API_VERSION = "2026-11-14-teaching-chat-ui-v14"
+_HOME_UI_API_VERSION = "2026-11-14-dashboard-v4"
+_HOME_DASHBOARD_API_VERSION = "2026-11-14-evidence-overview-v2"
+_TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v6"
+_TEACHING_CHAT_UI_API_VERSION = "2026-11-14-teaching-chat-ui-v16"
+_TEACHER_WORKBENCH_API_VERSION = "2026-11-14-without-teaching-recommendations"
+_UI_API_VERSION = "2026-11-14-navigation-without-teaching-page"
 if (
     getattr(analytics_module, "ANALYTICS_SERVICE_VERSION", None)
     != _ANALYTICS_SERVICE_API_VERSION
@@ -93,6 +104,21 @@ if (
 ):
     teaching_chat_module = importlib.reload(teaching_chat_module)
 TeachingAssistantService = teaching_chat_module.TeachingAssistantService
+if getattr(home_ui_module, "HOME_UI_VERSION", None) != _HOME_UI_API_VERSION:
+    home_ui_module = importlib.reload(home_ui_module)
+render_navigation_home = home_ui_module.render_navigation_home
+if (
+    getattr(home_dashboard_module, "HOME_DASHBOARD_SERVICE_VERSION", None)
+    != _HOME_DASHBOARD_API_VERSION
+):
+    home_dashboard_module = importlib.reload(home_dashboard_module)
+HomeDashboardService = home_dashboard_module.HomeDashboardService
+if (
+    getattr(teaching_chat_ui_module, "TEACHING_CHAT_UI_VERSION", None)
+    != _TEACHING_CHAT_UI_API_VERSION
+):
+    teaching_chat_ui_module = importlib.reload(teaching_chat_ui_module)
+render_teaching_chat_page = teaching_chat_ui_module.render_teaching_recommendations_page
 if (
     getattr(teaching_ui_module, "TEACHING_CHAT_UI_VERSION", None)
     != _TEACHING_CHAT_UI_API_VERSION
@@ -101,6 +127,17 @@ if (
 render_teaching_recommendations_page = (
     teaching_ui_module.render_teaching_recommendations_page
 )
+if (
+    getattr(teacher_workbench_module, "TEACHER_WORKBENCH_SERVICE_VERSION", None)
+    != _TEACHER_WORKBENCH_API_VERSION
+):
+    teacher_workbench_module = importlib.reload(teacher_workbench_module)
+TeacherWorkbenchService = teacher_workbench_module.TeacherWorkbenchService
+if getattr(ui_module, "UI_VERSION", None) != _UI_API_VERSION:
+    ui_module = importlib.reload(ui_module)
+apply_app_style = ui_module.apply_app_style
+render_page_header = ui_module.render_page_header
+render_sidebar_navigation = ui_module.render_sidebar_navigation
 
 
 st.set_page_config(
@@ -109,7 +146,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-14-teaching-chat-agent-v5"
+_APP_SERVICES_CACHE_VERSION = "2026-11-14-home-dashboard-v4"
 
 
 @st.cache_resource
@@ -123,6 +160,8 @@ def app_services(cache_version: str) -> tuple[
     AnalyticsService,
     StudentDiagnosisService,
     TeachingAssistantService,
+    TeacherWorkbenchService,
+    HomeDashboardService,
 ]:
     paths = AppPaths.default()
     paths.ensure()
@@ -131,6 +170,13 @@ def app_services(cache_version: str) -> tuple[
     analytics = AnalyticsService(repository)
     learning = LearningDataService(repository, paths.db_dir)
     outline = OutlineService(paths, repository)
+    diagnoses = StudentDiagnosisService(repository, analytics)
+    workbench = TeacherWorkbenchService(
+        repository,
+        learning,
+        analytics,
+        diagnoses,
+    )
     return (
         paths,
         repository,
@@ -139,13 +185,10 @@ def app_services(cache_version: str) -> tuple[
         learning,
         outline,
         analytics,
-        StudentDiagnosisService(repository, analytics),
-        TeachingAssistantService(
-            repository,
-            learning,
-            analytics,
-            outline,
-        ),
+        diagnoses,
+        TeachingAssistantService(repository, learning, analytics, outline),
+        workbench,
+        HomeDashboardService(learning, analytics, workbench),
     )
 
 
@@ -158,7 +201,9 @@ def app_services(cache_version: str) -> tuple[
     OUTLINES,
     ANALYTICS,
     DIAGNOSES,
-    TEACHING_RECOMMENDATIONS,
+    TEACHING_ASSISTANT,
+    TEACHER_WORKBENCH,
+    HOME_DASHBOARD,
 ) = app_services(_APP_SERVICES_CACHE_VERSION)
 
 MATERIAL_LABELS = {
@@ -2859,11 +2904,59 @@ def render_material_center() -> None:
     )
 
 
+def _apply_workbench_route(page: str) -> None:
+    """Apply a workbench handoff before a destination page renders widgets."""
+    route = st.session_state.pop("workbench_pending_route", None)
+    if not isinstance(route, dict) or route.get("target_page") != page:
+        return
+    context = route.get("context")
+    if not isinstance(context, dict):
+        return
+    dataset_id = context.get("dataset_id")
+    node_code = context.get("node_code")
+    student_code = context.get("student_code")
+    class_code = context.get("class_code")
+    focus = context.get("focus")
+
+    if page == "材料与数据":
+        st.session_state["material_center_item"] = "answers"
+        st.session_state["learning_dataset_selector"] = dataset_id
+        st.session_state["_pending_material_section"] = {
+            "item": "answers",
+            "section": "异常检测" if focus == "answer_anomalies" else "编辑",
+        }
+        if focus == "pending_answers":
+            st.session_state[f"learning_latest_{dataset_id}_answer"] = True
+            st.session_state[f"learning_status_{dataset_id}_answer"] = "待评分"
+            if node_code:
+                st.session_state[f"learning_node_filter_{dataset_id}_answer"] = node_code
+    elif page == "学生分析":
+        st.session_state["student_analysis_section"] = "问题分析"
+        st.session_state["analytics_student_dataset"] = dataset_id
+        if dataset_id and student_code:
+            st.session_state[f"analytics_student_selected_{dataset_id}"] = student_code
+        if dataset_id and node_code:
+            st.session_state[f"analytics_student_node_{dataset_id}"] = node_code
+    elif page == "班级分析":
+        st.session_state["class_analysis_section"] = "具体班级分析"
+        st.session_state["analytics_class_dataset"] = dataset_id
+        if dataset_id and node_code:
+            st.session_state[f"analytics_class_node_{dataset_id}"] = node_code
+        if dataset_id and class_code:
+            scope = node_code or "all"
+            st.session_state[
+                f"analytics_specific_class_{dataset_id}_{scope}"
+            ] = class_code
+
+
 def main() -> None:
     apply_app_style()
     page = render_sidebar_navigation()
     render_page_header(page)
-    if page == "AI 参数设置":
+    _apply_workbench_route(page)
+    if page == "导航首页":
+        render_navigation_home(LEARNING_DATA, HOME_DASHBOARD)
+    elif page == "AI 参数设置":
         render_ai_settings()
     elif page == "材料与数据":
         render_material_center()
@@ -2878,12 +2971,14 @@ def main() -> None:
         )
     elif page == "班级分析":
         render_class_analysis_page(ANALYTICS, LEARNING_DATA)
-    elif page == "教学建议":
-        render_teaching_recommendations_page(
-            TEACHING_RECOMMENDATIONS,
+    elif page == "教学智能体":
+        render_teaching_chat_page(
+            TEACHING_ASSISTANT,
             LEARNING_DATA,
             _active_profile(),
         )
+    elif page == "教师工作台":
+        render_teacher_workbench_page(TEACHER_WORKBENCH, LEARNING_DATA)
 
 
 main()
