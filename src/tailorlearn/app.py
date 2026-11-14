@@ -16,12 +16,17 @@ import tailorlearn.outline as outline_module
 import tailorlearn.outline_ui as outline_ui_module
 from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.extraction import page_as_png
+from tailorlearn.home_ui import render_navigation_home
 from tailorlearn.ingest import IngestionService
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
 from tailorlearn.paths import AppPaths
 from tailorlearn.providers import ProviderStore
 from tailorlearn.student_diagnosis import StudentDiagnosisService
+from tailorlearn.teaching_chat import TeachingAssistantService
+from tailorlearn.teaching_chat_ui import (
+    render_teaching_recommendations_page as render_teaching_chat_page,
+)
 from tailorlearn.teaching_recommendations import TeachingRecommendationService
 from tailorlearn.teaching_recommendations_ui import render_teaching_recommendations_page
 from tailorlearn.teacher_workbench import TeacherWorkbenchService
@@ -86,7 +91,7 @@ st.set_page_config(
     layout="wide",
 )
 
-_APP_SERVICES_CACHE_VERSION = "2026-11-12-teacher-workbench-v1"
+_APP_SERVICES_CACHE_VERSION = "2026-11-14-teaching-chat-and-home-v1"
 
 
 @st.cache_resource
@@ -100,6 +105,7 @@ def app_services(cache_version: str) -> tuple[
     AnalyticsService,
     StudentDiagnosisService,
     TeachingRecommendationService,
+    TeachingAssistantService,
     TeacherWorkbenchService,
 ]:
     paths = AppPaths.default()
@@ -108,6 +114,7 @@ def app_services(cache_version: str) -> tuple[
     repository.initialize()
     analytics = AnalyticsService(repository)
     learning = LearningDataService(repository, paths.db_dir)
+    outline = OutlineService(paths, repository)
     diagnoses = StudentDiagnosisService(repository, analytics)
     recommendations = TeachingRecommendationService(repository, analytics)
     return (
@@ -116,10 +123,11 @@ def app_services(cache_version: str) -> tuple[
         IngestionService(paths, repository),
         ProviderStore(paths.provider_file),
         learning,
-        OutlineService(paths, repository),
+        outline,
         analytics,
         diagnoses,
         recommendations,
+        TeachingAssistantService(repository, learning, analytics, outline),
         TeacherWorkbenchService(
             repository,
             learning,
@@ -140,6 +148,7 @@ def app_services(cache_version: str) -> tuple[
     ANALYTICS,
     DIAGNOSES,
     TEACHING_RECOMMENDATIONS,
+    TEACHING_ASSISTANT,
     TEACHER_WORKBENCH,
 ) = app_services(_APP_SERVICES_CACHE_VERSION)
 
@@ -2810,7 +2819,9 @@ def main() -> None:
     page = render_sidebar_navigation()
     render_page_header(page)
     _apply_workbench_route(page)
-    if page == "AI 参数设置":
+    if page == "导航首页":
+        render_navigation_home()
+    elif page == "AI 参数设置":
         render_ai_settings()
     elif page == "材料与数据":
         render_material_center()
@@ -2828,6 +2839,12 @@ def main() -> None:
     elif page == "教学建议":
         render_teaching_recommendations_page(
             TEACHING_RECOMMENDATIONS,
+            LEARNING_DATA,
+            _active_profile(),
+        )
+    elif page == "教学智能体":
+        render_teaching_chat_page(
+            TEACHING_ASSISTANT,
             LEARNING_DATA,
             _active_profile(),
         )
