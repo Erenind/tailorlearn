@@ -5,7 +5,7 @@ import streamlit as st
 from tailorlearn.home_dashboard import HomeDashboardService
 from tailorlearn.learning_data import LearningDataService
 
-HOME_UI_VERSION = "2026-11-14-dashboard-v3"
+HOME_UI_VERSION = "2026-11-14-dashboard-v4"
 
 
 NAVIGATION_CARDS: tuple[dict[str, str], ...] = (
@@ -133,6 +133,34 @@ def render_navigation_home(
                     else "待补充观察"
                 )
                 st.markdown(f"{item['theme_name']}　:{'blue' if status == '证据充分' else 'gray'}-badge[{status}]")
+
+        st.subheader("班级证据覆盖")
+        class_coverage = coverage.get("class_coverage") or []
+        if not class_coverage:
+            st.caption("当前数据集暂无班级维度的证据记录。")
+        else:
+            with st.container(border=True):
+                for item in class_coverage:
+                    st.markdown(
+                        f"{item['class_code']}　"
+                        f":blue-badge[充分 {item['sufficient']}] "
+                        f":gray-badge[待观察 {item['needs_observation']}] "
+                        f"<span style='opacity:.65'>· {item['scored_records']} 条有效评分</span>",
+                        unsafe_allow_html=True,
+                    )
+
+        st.subheader("待办分布")
+        todos_by_page = summary.get("todos_by_page") or {}
+        if not todos_by_page:
+            st.caption("当前没有需要处理的聚合待办。")
+        else:
+            with st.container(border=True):
+                for page, count in sorted(
+                    todos_by_page.items(), key=lambda pair: (-pair[1], pair[0])
+                ):
+                    st.markdown(
+                        f"{page}　:blue-badge[{count} 项]",
+                    )
         st.caption("待补充观察表示当前证据不足，不构成学习掌握结论。")
 
     st.subheader("常用功能")

@@ -80,8 +80,10 @@ def test_teaching_chat_suggestions_include_editable_presets(tmp_path: Path) -> N
     repository, _learning, service = _service(tmp_path)
 
     suggestions = service.list_suggestions()
-    assert len(suggestions) == 6
+    assert len(suggestions) == 9
     assert suggestions[0]["text"] == "根据苏格拉底教学方式提教学方案"
+    preset_texts = {item["text"] for item in suggestions if item["is_preset"]}
+    assert {"生成分层教学建议", "梳理信息缺口", "推荐材料与活动"} <= preset_texts
 
     service.update_suggestion("preset_socratic", "用苏格拉底式提问设计教学")
     service.delete_suggestion("preset_practice")

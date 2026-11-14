@@ -14,6 +14,7 @@ from tailorlearn.ai import AIRequestError
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import ProviderProfile
 from tailorlearn.teaching_chat import (
+    TEACHING_ACTION_PROMPTS,
     OpenAICompatibleAssistantClient,
     TeachingContentDelta,
     TeachingAssistantService,
@@ -24,7 +25,7 @@ from tailorlearn.teaching_chat import (
 )
 
 
-TEACHING_CHAT_UI_VERSION = "2026-11-14-teaching-chat-ui-v15"
+TEACHING_CHAT_UI_VERSION = "2026-11-14-teaching-chat-ui-v16"
 HISTORY_PAGE_SIZE = 20
 TEMPORARY_FILE_CHAR_LIMIT = 60_000
 PURE_MODE_KEY = "teaching_chat_pure_mode"
@@ -39,27 +40,6 @@ RESET_DRAFT_KEY = "teaching_chat_reset_draft"
 RETRY_PROMPT_KEY = "teaching_chat_retry_prompt"
 QUESTION_POPOVER_KEY = "teaching_question_popover"
 DATASET_POPOVER_KEY = "teaching_dataset_popover"
-TEACHING_ACTIONS: tuple[tuple[str, str, str], ...] = (
-    (
-        "teaching_action_layered",
-        "生成分层教学建议",
-        "请基于当前数据集的已有证据，提出可执行的分层教学建议。"
-        "待评分、未作答、异常或证据不足只能说明信息缺口，"
-        "并给出补充观察或记录建议，不得作出能力结论。",
-    ),
-    (
-        "teaching_action_gaps",
-        "梳理信息缺口",
-        "请梳理当前数据集中的信息缺口，并说明需要补充哪些观察、"
-        "评分或记录。不要把数据不足解释为未掌握。",
-    ),
-    (
-        "teaching_action_materials",
-        "推荐材料与活动",
-        "请基于当前数据集中已有的材料和学习要求，推荐后续教学活动。"
-        "仅引用已有材料；证据不足时给出补充练习与后续记录建议。",
-    ),
-)
 
 
 def _temporary_file_text(uploaded_file: Any) -> tuple[str, str]:
@@ -126,25 +106,9 @@ def _use_common_question(text: str) -> None:
     )
 
 
-def _use_teaching_action(text: str) -> None:
-    st.session_state[PURE_MODE_KEY] = None
-    _use_common_question(text)
-
-
-def _render_teaching_actions() -> None:
-    with st.container(border=True, key="teaching_quick_actions"):
-        st.caption("快捷教学建议")
-        columns = st.columns(len(TEACHING_ACTIONS))
-        for column, (key, label, prompt) in zip(columns, TEACHING_ACTIONS, strict=True):
-            with column:
-                st.button(
-                    label,
-                    icon=":material/auto_awesome:",
-                    key=key,
-                    width="stretch",
-                    on_click=_use_teaching_action,
-                    args=(prompt,),
-                )
+def _suggestion_prompt(suggestion_id: str, text: str) -> str:
+    """Expand a preset suggestion into its full teaching prompt."""
+    return TEACHING_ACTION_PROMPTS.get(suggestion_id, text)
 
 
 @st.dialog("新增常用问题", width="small")
@@ -1072,8 +1036,11 @@ def _render_question_popover(
                         key=f"teaching_question_use_{item['id']}",
                         type="tertiary",
                         width="stretch",
+                        help=_suggestion_prompt(str(item["id"]), str(item["text"])),
                         on_click=_use_common_question,
-                        args=(str(item["text"]),),
+                        args=(
+                            _suggestion_prompt(str(item["id"]), str(item["text"])),
+                        ),
                     )
                     st.badge(
                         "预设" if item["is_preset"] else "自定义",
@@ -1294,7 +1261,6 @@ def render_teaching_recommendations_page(
     st.session_state.setdefault(TEMP_FILES_KEY, [])
     with st.container(key="teaching_page_shell"):
         _render_question_dialog(service)
-        _render_teaching_actions()
         copy_payload, live_turn_slot = _render_messages(service, profile)
         _render_pending_action(service, profile)
     retry_prompt = st.session_state.pop(RETRY_PROMPT_KEY, None)
