@@ -18,6 +18,5 @@ def test_navigation_home_exposes_all_primary_workflows() -> None:
         "教师工作台",
         "学生分析",
         "班级分析",
-        "教学建议",
         "教学智能体",
     ]

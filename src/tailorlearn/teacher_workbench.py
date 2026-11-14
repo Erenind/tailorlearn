@@ -6,7 +6,8 @@ from tailorlearn.analytics import AnalyticsService
 from tailorlearn.db import Repository
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.student_diagnosis import StudentDiagnosisService
-from tailorlearn.teaching_recommendations import TeachingRecommendationService
+
+TEACHER_WORKBENCH_SERVICE_VERSION = "2026-11-14-without-teaching-recommendations"
 
 
 WORKBENCH_CATEGORIES = (
@@ -26,13 +27,11 @@ class TeacherWorkbenchService:
         learning: LearningDataService,
         analytics: AnalyticsService,
         diagnoses: StudentDiagnosisService,
-        recommendations: TeachingRecommendationService,
     ):
         self.repo = repository
         self.learning = learning
         self.analytics = analytics
         self.diagnoses = diagnoses
-        self.recommendations = recommendations
 
     @staticmethod
     def _todo(
@@ -85,42 +84,9 @@ class TeacherWorkbenchService:
             ).fetchall()
         return [dict(row) for row in rows]
 
-    def _latest_recommendation_rows(
-        self,
-        dataset_id: str,
-    ) -> list[dict[str, Any]]:
-        with self.repo.connect() as connection:
-            rows = connection.execute(
-                """
-                SELECT current.id, current.class_code, current.node_code,
-                       current.status
-                FROM ai_teaching_recommendations AS current
-                WHERE current.dataset_id=?
-                  AND current.status IN ('needs_review', 'stale')
-                  AND NOT EXISTS (
-                      SELECT 1
-                      FROM ai_teaching_recommendations AS newer
-                      WHERE newer.dataset_id=current.dataset_id
-                        AND newer.class_code=current.class_code
-                        AND newer.node_code=current.node_code
-                        AND (
-                            newer.created_at > current.created_at
-                            OR (
-                                newer.created_at=current.created_at
-                                AND newer.id > current.id
-                            )
-                        )
-                  )
-                ORDER BY current.class_code, current.node_code
-                """,
-                (dataset_id,),
-            ).fetchall()
-        return [dict(row) for row in rows]
-
     def build_todos(self, dataset_id: str) -> dict[str, Any]:
         """Return only actionable metadata, never raw answers or mastery labels."""
         self.diagnoses.refresh_stale_diagnoses(dataset_id)
-        self.recommendations.refresh_stale_recommendations(dataset_id)
         todos: list[dict[str, Any]] = []
 
         latest_answers = self.learning.list_records(
@@ -216,30 +182,6 @@ class TeacherWorkbenchService:
                         "student_code": str(row["student_code"]),
                         "class_code": None,
                         "focus": "diagnosis_review",
-                    },
-                    priority=3 if category == "ai_review" else 4,
-                )
-            )
-
-        for row in self._latest_recommendation_rows(dataset_id):
-            category = "ai_review" if row["status"] == "needs_review" else "needs_update"
-            status_reason = (
-                "AI 教学建议草稿已生成，需由教师复核后使用。"
-                if category == "ai_review"
-                else "数据已更新，原 AI 教学建议已失效，需重新核验或生成。"
-            )
-            todos.append(
-                self._todo(
-                    category=category,
-                    title=f"教学建议 · {row['class_code']} · {row['node_code']}",
-                    reason=status_reason,
-                    target_page="教学建议",
-                    context={
-                        "dataset_id": dataset_id,
-                        "node_code": str(row["node_code"]),
-                        "student_code": None,
-                        "class_code": str(row["class_code"]),
-                        "focus": "recommendation_review",
                     },
                     priority=3 if category == "ai_review" else 4,
                 )

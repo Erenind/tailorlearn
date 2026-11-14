@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 import streamlit as st
 
+UI_VERSION = "2026-11-14-navigation-without-teaching-page"
+
 
 @dataclass(frozen=True)
 class PageMeta:
@@ -32,10 +34,6 @@ PAGE_META: dict[str, PageMeta] = {
         label="班级分析",
         icon="class.svg",
     ),
-    "教学建议": PageMeta(
-        label="教学建议",
-        icon="teaching.svg",
-    ),
     "教学智能体": PageMeta(
         label="教学智能体",
         icon="teaching.svg",
@@ -55,7 +53,7 @@ NAV_GROUPS: dict[str, tuple[str, ...]] = {
     "学习准备": ("学习内容梳理",),
     "材料与管理": ("材料与数据", "教师工作台"),
     "学情分析": ("学生分析", "班级分析"),
-    "教学支持": ("教学建议", "教学智能体", "AI 参数设置"),
+    "教学支持": ("教学智能体", "AI 参数设置"),
 }
 NAV_ORDER = [page for pages in NAV_GROUPS.values() for page in pages]
 PAGE_SLUGS = {
@@ -64,7 +62,6 @@ PAGE_SLUGS = {
     "材料与数据": "material_center",
     "学生分析": "student",
     "班级分析": "class",
-    "教学建议": "teaching",
     "教学智能体": "teaching_agent",
     "教师工作台": "workbench",
     "AI 参数设置": "ai_settings",

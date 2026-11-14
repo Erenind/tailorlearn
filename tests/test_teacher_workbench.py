@@ -7,7 +7,6 @@ from tailorlearn.analytics import AnalyticsService
 from tailorlearn.db import Repository
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.student_diagnosis import StudentDiagnosisService
-from tailorlearn.teaching_recommendations import TeachingRecommendationService
 
 
 def _services(tmp_path: Path) -> tuple[
@@ -132,7 +131,6 @@ def test_workbench_aggregates_actionable_items_without_exposing_answers(
         learning,
         analytics,
         StudentDiagnosisService(repository, analytics),
-        TeachingRecommendationService(repository, analytics),
     )
     board = service.build_todos(dataset_id)
 
@@ -202,11 +200,10 @@ def test_workbench_marks_latest_ai_drafts_for_review_then_refreshes_them(
         learning,
         analytics,
         StudentDiagnosisService(repository, analytics),
-        TeachingRecommendationService(repository, analytics),
     )
 
     initial = service.build_todos(dataset_id)
-    assert initial["summary"]["ai_review"] == 2
+    assert initial["summary"]["ai_review"] == 1
     assert initial["summary"]["needs_update"] == 0
 
     _answer(
@@ -220,5 +217,5 @@ def test_workbench_marks_latest_ai_drafts_for_review_then_refreshes_them(
     )
     refreshed = service.build_todos(dataset_id)
     assert refreshed["summary"]["ai_review"] == 0
-    assert refreshed["summary"]["needs_update"] == 2
+    assert refreshed["summary"]["needs_update"] == 1
 

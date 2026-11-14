@@ -130,7 +130,7 @@ def test_streamlit_renders_student_and_class_analysis_navigation(
 
     assert "学生分析" in at.button(key="nav_student").label
     assert "班级分析" in at.button(key="nav_class").label
-    assert "教学建议" in at.button(key="nav_teaching").label
+    assert "教学智能体" in at.button(key="nav_teaching_agent").label
     assert "教师工作台" in at.button(key="nav_workbench").label
     at.button(key="nav_workbench").click().run()
     assert not at.exception

@@ -8,6 +8,7 @@ db/**/*.sqlite3-wal
 db/**/*.sqlite3-shm
 db/.upload_tmp/
 db/backups/
+db/materials/
 赛题数据/
 db/learning/
 db/tailorlearn.sqlite3

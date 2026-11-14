@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 import streamlit as st
+import pandas as pd
+
+from tailorlearn.home_dashboard import HomeDashboardService
+from tailorlearn.learning_data import LearningDataService
+
+HOME_UI_VERSION = "2026-11-14-dashboard-v2"
 
 
 NAVIGATION_CARDS: tuple[dict[str, str], ...] = (
@@ -35,12 +41,6 @@ NAVIGATION_CARDS: tuple[dict[str, str], ...] = (
         "icon": ":material/groups:",
     },
     {
-        "page": "教学建议",
-        "title": "教学建议",
-        "description": "基于证据形成分层活动、材料建议和教师复核。",
-        "icon": ":material/lightbulb:",
-    },
-    {
         "page": "教学智能体",
         "title": "教学智能体",
         "description": "在配置 AI 接入后，围绕已有材料与数据进行教学对话。",
@@ -49,9 +49,76 @@ NAVIGATION_CARDS: tuple[dict[str, str], ...] = (
 )
 
 
-def render_navigation_home() -> None:
-    st.subheader("从这里开始")
-    st.caption("选择一个入口开始工作。学习结论始终以已有证据和教师复核为准。")
+def _route_to_todo(todo: dict[str, object]) -> None:
+    st.session_state["workbench_pending_route"] = {
+        "target_page": todo["target_page"],
+        "context": todo["context"],
+    }
+    st.session_state["active_page"] = todo["target_page"]
+    st.rerun()
+
+
+def render_navigation_home(
+    learning: LearningDataService,
+    dashboard: HomeDashboardService,
+) -> None:
+    st.subheader("今日教学总览")
+    st.caption("所有观察均以选定数据集中的有效证据为准；信息不足仅提示补充观察。")
+    datasets = learning.list_datasets()
+    if not datasets:
+        st.info("尚无学情数据集。请先在“材料与数据”导入数据。")
+        return
+    dataset_ids = [str(item["id"]) for item in datasets]
+    current = st.session_state.get("home_dataset")
+    if current not in dataset_ids:
+        current = dataset_ids[0]
+        st.session_state["home_dataset"] = current
+    dataset_id = st.selectbox(
+        "学情数据集",
+        dataset_ids,
+        key="home_dataset",
+        format_func=lambda value: next(
+            (item["name"] for item in datasets if item["id"] == value), value
+        ),
+    )
+    summary = dashboard.build(dataset_id)
+    metrics = summary["metrics"]
+    metric_columns = st.columns(4)
+    metric_columns[0].metric("学生数", metrics["student_count"], border=True)
+    metric_columns[1].metric(
+        "有效已评分作答", metrics["valid_scored_answers"], border=True
+    )
+    metric_columns[2].metric(
+        "数据处理待办", metrics["data_processing_todos"], border=True
+    )
+    metric_columns[3].metric(
+        "补充观察/复核", metrics["follow_up_todos"], border=True
+    )
+
+    overview, evidence = st.columns((3, 2), gap="medium")
+    with overview:
+        st.subheader("优先待办")
+        todos = list(summary["todos"])[:5]
+        if not todos:
+            st.success("当前没有需要处理的聚合待办。")
+        for index, todo in enumerate(todos):
+            with st.container(border=True):
+                st.markdown(f"**{todo['title']}**")
+                st.caption(str(todo["reason"]))
+                if st.button(
+                    "去处理",
+                    icon=":material/arrow_forward:",
+                    key=f"home_todo_{dataset_id}_{index}",
+                    type="tertiary",
+                ):
+                    _route_to_todo(todo)
+    with evidence:
+        st.subheader("证据状态快照")
+        snapshot = pd.DataFrame(summary["evidence_snapshot"]).set_index("label")
+        st.bar_chart(snapshot, horizontal=True, height=220)
+        st.caption("待补充观察表示当前证据不足，不构成学习掌握结论。")
+
+    st.subheader("常用功能")
 
     for start in range(0, len(NAVIGATION_CARDS), 2):
         columns = st.columns(2, gap="medium")
