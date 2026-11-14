@@ -104,6 +104,7 @@ def test_outline_page_uses_center_content_and_right_settings(
     st.cache_resource.clear()
     app_file = Path(__file__).resolve().parents[1] / "src" / "tailorlearn" / "app.py"
     at = AppTest.from_file(str(app_file), default_timeout=20).run()
+    at.button(key="nav_outline").click().run()
 
     assert not at.exception
     assert at.container(key="outline_settings_panel")
