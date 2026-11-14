@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import streamlit as st
-import pandas as pd
 
 from tailorlearn.home_dashboard import HomeDashboardService
 from tailorlearn.learning_data import LearningDataService
 
-HOME_UI_VERSION = "2026-11-14-dashboard-v2"
+HOME_UI_VERSION = "2026-11-14-dashboard-v3"
 
 
 NAVIGATION_CARDS: tuple[dict[str, str], ...] = (
@@ -113,9 +112,27 @@ def render_navigation_home(
                 ):
                     _route_to_todo(todo)
     with evidence:
-        st.subheader("证据状态快照")
-        snapshot = pd.DataFrame(summary["evidence_snapshot"]).set_index("label")
-        st.bar_chart(snapshot, horizontal=True, height=220)
+        st.subheader("证据覆盖概览")
+        coverage = summary["evidence_overview"]
+        sufficient_column, observation_column = st.columns(2)
+        sufficient_column.metric(
+            "证据充分主题",
+            coverage["sufficient"],
+            help="在当前数据集范围内具备充分有效、已评分证据的主题数。",
+        )
+        observation_column.metric(
+            "待补充观察主题",
+            coverage["needs_observation"],
+            help="当前证据不足、待评分、未作答或异常数据只提示补充观察。",
+        )
+        with st.container(border=True):
+            for item in coverage["themes"]:
+                status = (
+                    "证据充分"
+                    if item["evidence_status"] == "sufficient"
+                    else "待补充观察"
+                )
+                st.markdown(f"{item['theme_name']}　:{'blue' if status == '证据充分' else 'gray'}-badge[{status}]")
         st.caption("待补充观察表示当前证据不足，不构成学习掌握结论。")
 
     st.subheader("常用功能")

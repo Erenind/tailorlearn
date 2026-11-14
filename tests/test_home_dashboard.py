@@ -138,5 +138,13 @@ def test_home_dashboard_reports_data_states_without_mastery_claims(tmp_path: Pat
         {"label": "证据充分", "count": 1},
         {"label": "待补充观察", "count": 0},
     ]
+    assert summary["evidence_overview"] == {
+        "total_themes": 1,
+        "sufficient": 1,
+        "needs_observation": 0,
+        "themes": [
+            {"theme_name": "代数式", "evidence_status": "sufficient"},
+        ],
+    }
     assert "未掌握" not in str(summary)
     assert "敏感作答" not in str(summary)
