@@ -16,8 +16,11 @@ import tailorlearn.home_ui as home_ui_module
 import tailorlearn.learning_data_ui as learning_data_ui_module
 import tailorlearn.outline as outline_module
 import tailorlearn.outline_ui as outline_ui_module
+import tailorlearn.providers as providers_module
 import tailorlearn.teacher_workbench as teacher_workbench_module
+import tailorlearn.teaching_chat as teaching_chat_module
 import tailorlearn.teaching_chat_ui as teaching_chat_ui_module
+import tailorlearn.teaching_recommendations_ui as teaching_ui_module
 import tailorlearn.ui as ui_module
 from tailorlearn.ai import AIRequestError, OpenAICompatibleClient
 from tailorlearn.extraction import page_as_png
@@ -25,20 +28,26 @@ from tailorlearn.ingest import IngestionService
 from tailorlearn.learning_data import LearningDataService
 from tailorlearn.models import MaterialType, ProviderProfile, UnitStatus
 from tailorlearn.paths import AppPaths
-from tailorlearn.providers import ProviderStore
 from tailorlearn.student_diagnosis import StudentDiagnosisService
 from tailorlearn.teaching_chat import TeachingAssistantService
 from tailorlearn.teacher_workbench_ui import render_teacher_workbench_page
+from tailorlearn.ui import (
+    apply_app_style,
+    render_page_header,
+    render_sidebar_navigation,
+)
 
 
-_REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
+_REPOSITORY_API_VERSION = "2026-11-14-teaching-chat-v2"
 _ANALYTICS_SERVICE_API_VERSION = "2026-11-12-class-analysis-v2"
-_ANALYTICS_UI_API_VERSION = "2026-11-12-class-analysis-v2"
-_LEARNING_DATA_UI_API_VERSION = "2026-11-11-content-height-data-tables"
+_ANALYTICS_UI_API_VERSION = "2026-11-13-student-ranking-primary-action"
+_LEARNING_DATA_UI_API_VERSION = "2026-11-14-import-direct-create-v2"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
+_PROVIDERS_API_VERSION = "2026-11-13-ai-access-presets"
 _HOME_UI_API_VERSION = "2026-11-14-dashboard-v4"
 _HOME_DASHBOARD_API_VERSION = "2026-11-14-evidence-overview-v2"
+_TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v6"
 _TEACHING_CHAT_UI_API_VERSION = "2026-11-14-teaching-chat-ui-v16"
 _TEACHER_WORKBENCH_API_VERSION = "2026-11-14-without-teaching-recommendations"
 _UI_API_VERSION = "2026-11-14-navigation-without-teaching-page"
@@ -81,6 +90,20 @@ if (
 ):
     outline_ui_module = importlib.reload(outline_ui_module)
 render_outline_page = outline_ui_module.render_outline_page
+if (
+    getattr(providers_module, "PROVIDER_API_VERSION", None)
+    != _PROVIDERS_API_VERSION
+):
+    providers_module = importlib.reload(providers_module)
+ProviderStore = providers_module.ProviderStore
+ProviderPreset = providers_module.ProviderPreset
+PROVIDER_PRESETS = providers_module.PROVIDER_PRESETS
+if (
+    getattr(teaching_chat_module, "TEACHING_CHAT_API_VERSION", None)
+    != _TEACHING_CHAT_API_VERSION
+):
+    teaching_chat_module = importlib.reload(teaching_chat_module)
+TeachingAssistantService = teaching_chat_module.TeachingAssistantService
 if getattr(home_ui_module, "HOME_UI_VERSION", None) != _HOME_UI_API_VERSION:
     home_ui_module = importlib.reload(home_ui_module)
 render_navigation_home = home_ui_module.render_navigation_home
@@ -96,6 +119,14 @@ if (
 ):
     teaching_chat_ui_module = importlib.reload(teaching_chat_ui_module)
 render_teaching_chat_page = teaching_chat_ui_module.render_teaching_recommendations_page
+if (
+    getattr(teaching_ui_module, "TEACHING_CHAT_UI_VERSION", None)
+    != _TEACHING_CHAT_UI_API_VERSION
+):
+    teaching_ui_module = importlib.reload(teaching_ui_module)
+render_teaching_recommendations_page = (
+    teaching_ui_module.render_teaching_recommendations_page
+)
 if (
     getattr(teacher_workbench_module, "TEACHER_WORKBENCH_SERVICE_VERSION", None)
     != _TEACHER_WORKBENCH_API_VERSION
@@ -267,19 +298,27 @@ def _load_provider_into_form(profile: ProviderProfile | None) -> None:
         profile.vendor_name if profile else ""
     )
     st.session_state[PROVIDER_FIELD_KEYS["base_url"]] = (
-        profile.base_url if profile else "https://api.openai.com/v1"
+        profile.base_url if profile else ""
     )
     st.session_state[PROVIDER_FIELD_KEYS["model"]] = profile.model if profile else ""
     st.session_state[PROVIDER_FIELD_KEYS["api_key"]] = ""
 
 
+def _load_provider_preset_into_form(preset: ProviderPreset) -> None:
+    st.session_state[PROVIDER_FIELD_KEYS["vendor_name"]] = preset.vendor_name
+    st.session_state[PROVIDER_FIELD_KEYS["base_url"]] = preset.base_url
+    st.session_state[PROVIDER_FIELD_KEYS["model"]] = preset.model
+    st.session_state[PROVIDER_FIELD_KEYS["api_key"]] = ""
+
+
 def _on_provider_selected() -> None:
-    selected_id = st.session_state[PROVIDER_SELECTOR_KEY]
+    selected_id = str(st.session_state[PROVIDER_SELECTOR_KEY])
+    config = PROVIDERS.load()
     selected = (
         next(
             (
                 profile
-                for profile in PROVIDERS.load().profiles
+                for profile in config.profiles
                 if profile.id == selected_id
             ),
             None,
@@ -287,7 +326,31 @@ def _on_provider_selected() -> None:
         if selected_id != "__new__"
         else None
     )
-    _load_provider_into_form(selected)
+    if selected:
+        _load_provider_into_form(selected)
+        if config.active_profile_id != selected.id:
+            PROVIDERS.set_active(selected.id)
+            st.session_state["_provider_settings_notice"] = (
+                f"已切换至 {selected.vendor_name}"
+            )
+        return
+
+    preset = next(
+        (
+            preset
+            for preset in PROVIDER_PRESETS
+            if preset.option_value == selected_id
+        ),
+        None,
+    )
+    if preset:
+        _load_provider_preset_into_form(preset)
+        st.session_state["_provider_settings_notice"] = (
+            f"已带入 {preset.vendor_name} 预设，保存后将设为当前"
+        )
+        return
+
+    _load_provider_into_form(None)
 
 
 def render_ai_settings() -> None:
@@ -296,8 +359,23 @@ def render_ai_settings() -> None:
         st.success(notice)
     config = PROVIDERS.load()
     profiles = config.profiles
+    saved_vendor_names = {
+        profile.vendor_name.strip().casefold() for profile in profiles
+    }
+    available_presets = [
+        preset
+        for preset in PROVIDER_PRESETS
+        if preset.vendor_name.casefold() not in saved_vendor_names
+    ]
+    preset_by_option = {
+        preset.option_value: preset for preset in available_presets
+    }
 
-    options = ["__new__", *[profile.id for profile in profiles]]
+    options = [
+        *preset_by_option,
+        "__new__",
+        *[profile.id for profile in profiles],
+    ]
     pending_profile_id = st.session_state.pop("_pending_provider_select", None)
     if pending_profile_id in options:
         st.session_state[PROVIDER_SELECTOR_KEY] = pending_profile_id
@@ -308,7 +386,15 @@ def render_ai_settings() -> None:
         st.session_state[PROVIDER_SELECTOR_KEY] = (
             config.active_profile_id
             if config.active_profile_id in options
-            else (profiles[0].id if profiles else "__new__")
+            else (
+                profiles[0].id
+                if profiles
+                else (
+                    available_presets[0].option_value
+                    if available_presets
+                    else "__new__"
+                )
+            )
         )
     if pending_profile_id in options:
         pending_profile = next(
@@ -327,36 +413,58 @@ def render_ai_settings() -> None:
             ),
             None,
         )
-        _load_provider_into_form(selected_for_defaults)
+        if selected_for_defaults:
+            _load_provider_into_form(selected_for_defaults)
+        else:
+            selected_preset = preset_by_option.get(
+                st.session_state[PROVIDER_SELECTOR_KEY]
+            )
+            if selected_preset:
+                _load_provider_preset_into_form(selected_preset)
+            else:
+                _load_provider_into_form(None)
+    labels = {
+        "__new__": "＋ 自定义 AI 接入",
+        **{
+            preset.option_value: f"{preset.vendor_name} · 内置预设"
+            for preset in available_presets
+        },
+        **{
+            profile.id: (
+                f"{profile.vendor_name} · {profile.model}"
+                + (" · 当前" if profile.id == config.active_profile_id else "")
+            )
+            for profile in profiles
+        },
+    }
     selected_id = st.selectbox(
-        "厂商配置",
+        "AI 接入",
         options,
         key=PROVIDER_SELECTOR_KEY,
         on_change=_on_provider_selected,
-        format_func=lambda value: (
-            "＋ 新增厂商"
-            if value == "__new__"
-            else next(
-                (
-                    f"{profile.vendor_name} · {profile.model}"
-                    + (" · 当前" if profile.id == config.active_profile_id else "")
-                    for profile in profiles
-                    if profile.id == value
-                ),
-                value,
-            )
-        ),
+        format_func=lambda value: labels.get(value, value),
     )
     selected = next(
         (profile for profile in profiles if profile.id == selected_id),
         None,
+    )
+    selected_preset = preset_by_option.get(selected_id)
+    draft_vendor_name = (
+        selected.vendor_name
+        if selected
+        else (selected_preset.vendor_name if selected_preset else "")
+    )
+    draft_model = (
+        selected.model
+        if selected
+        else (selected_preset.model if selected_preset else "")
     )
 
     with st.container(key="provider_summary"):
         if selected:
             summary = st.columns(3)
             summary[0].metric(
-                "当前厂商",
+                "AI 接入",
                 selected.vendor_name or "未填写",
                 border=True,
             )
@@ -370,19 +478,36 @@ def render_ai_settings() -> None:
                 "已安全保存" if selected.api_key else "尚未设置",
                 border=True,
             )
+        elif selected_preset:
+            summary = st.columns(3)
+            summary[0].metric(
+                "AI 接入",
+                draft_vendor_name,
+                border=True,
+            )
+            summary[1].metric(
+                "默认模型",
+                draft_model or "保存前补填",
+                border=True,
+            )
+            summary[2].metric(
+                "密钥状态",
+                "保存后配置",
+                border=True,
+            )
         else:
-            st.caption("正在创建新的厂商配置。保存后会在上方显示配置摘要。")
+            st.caption("正在创建自定义 AI 接入。保存后会自动设为当前配置。")
 
     with st.expander(
-        "编辑厂商配置",
+        "编辑 AI 接入",
         expanded=selected is None,
         icon=":material/tune:",
     ):
         with st.form("provider_form"):
             vendor_name = st.text_input(
-                "厂商名称",
+                "接入名称",
                 key=PROVIDER_FIELD_KEYS["vendor_name"],
-                placeholder="例如 OpenAI、DeepSeek、Moonshot",
+                placeholder="例如 DeepSeek、千问、智谱",
             )
             base_url = st.text_input(
                 "Base URL",
@@ -422,11 +547,11 @@ def render_ai_settings() -> None:
                 )
             else:
                 st.caption("当前尚未保存 API Key。")
-            make_active = st.checkbox(
-                "保存后设为当前配置",
-                value=selected is None or selected.id == config.active_profile_id,
+            submitted = st.form_submit_button(
+                "保存并启用",
+                type="primary",
+                key="provider_save",
             )
-            submitted = st.form_submit_button("保存配置", type="primary")
         if submitted:
             try:
                 profile = PROVIDERS.upsert(
@@ -436,26 +561,19 @@ def render_ai_settings() -> None:
                     model=model,
                     api_key=api_key if api_key else None,
                 )
-                if make_active:
-                    PROVIDERS.set_active(profile.id)
+                PROVIDERS.set_active(profile.id)
                 st.session_state["_pending_provider_select"] = profile.id
-                st.session_state["_provider_settings_notice"] = "厂商配置已保存"
+                st.session_state["_provider_settings_notice"] = (
+                    "AI 接入已保存并设为当前"
+                )
                 _rerun()
             except Exception as exc:
                 _show_error(exc)
 
     if selected:
         st.caption(f"接口地址：{selected.base_url}")
-        action_col_1, action_col_2, action_col_3 = st.columns(3)
+        action_col_1, action_col_2 = st.columns(2)
         if action_col_1.button(
-            "设为当前配置",
-            icon=":material/check_circle:",
-            width="stretch",
-        ):
-            PROVIDERS.set_active(selected.id)
-            st.session_state["_provider_settings_notice"] = "当前配置已切换"
-            _rerun()
-        if action_col_2.button(
             "测试连接",
             icon=":material/sync:",
             width="stretch",
@@ -468,7 +586,7 @@ def render_ai_settings() -> None:
                 st.error(str(exc))
             except Exception as exc:
                 _show_error(exc)
-        if action_col_3.button(
+        if action_col_2.button(
             "清除密钥",
             icon=":material/key_off:",
             width="stretch",

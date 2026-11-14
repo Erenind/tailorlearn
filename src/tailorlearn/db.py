@@ -20,7 +20,7 @@ from tailorlearn.models import (
     UnitStatus,
 )
 
-REPOSITORY_API_VERSION = "2026-11-11-rename-material-slices"
+REPOSITORY_API_VERSION = "2026-11-14-teaching-chat-v2"
 
 
 def utc_now() -> str:

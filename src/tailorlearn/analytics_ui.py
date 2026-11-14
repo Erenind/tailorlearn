@@ -16,7 +16,7 @@ from tailorlearn.models import ProviderProfile
 from tailorlearn.student_diagnosis import StudentDiagnosisService
 
 
-ANALYTICS_UI_VERSION = "2026-11-12-class-analysis-v2"
+ANALYTICS_UI_VERSION = "2026-11-13-student-ranking-primary-action"
 STUDENT_ANALYSIS_SECTIONS = ("数据概览", "问题分析")
 CLASS_ANALYSIS_SECTIONS = ("班级对比", "具体班级分析")
 STUDENT_RANKING_SORT_OPTIONS = (
@@ -24,6 +24,8 @@ STUDENT_RANKING_SORT_OPTIONS = (
     "综合得分升序",
     "按学生编号",
 )
+STUDENT_DATASET_STATE_KEY = "analytics_student_dataset_selected"
+STUDENT_DETAIL_STATE_KEY = "analytics_student_detail_code"
 EVIDENCE_LABELS = {
     "sufficient": "证据充分",
     "limited": "证据有限",
@@ -341,6 +343,91 @@ def _render_class_analysis_top_nav() -> str:
     )
 
 
+def _render_student_dataset_context(
+    learning: LearningDataService,
+) -> dict[str, Any] | None:
+    datasets = _datasets(learning)
+    dataset_ids = {str(row["id"]) for row in datasets}
+    selected_id = st.session_state.get(STUDENT_DATASET_STATE_KEY)
+    if selected_id not in dataset_ids:
+        selected_id = None
+        st.session_state.pop(STUDENT_DATASET_STATE_KEY, None)
+        st.session_state.pop(STUDENT_DETAIL_STATE_KEY, None)
+
+    if selected_id is None:
+        st.markdown("**学情数据集**")
+        st.caption("选择要分析的数据集，进入后查看学生排名榜单。")
+        if not datasets:
+            st.info("尚无学情数据集。请先在“材料与数据”导入数据。")
+            return None
+        with st.container(key="analytics_student_dataset_catalog"):
+            with st.grid("auto", min_column_width=260, gap="small"):
+                for dataset in datasets:
+                    student_count = len(
+                        learning.list_records(dataset["id"], "student")
+                    )
+                    answer_count = len(
+                        learning.list_records(dataset["id"], "answer")
+                    )
+                    with st.container(
+                        border=True,
+                        key=f"analytics_student_dataset_card_{dataset['id']}",
+                    ):
+                        st.markdown(f"**{dataset['name']}**")
+                        if dataset.get("description"):
+                            st.caption(dataset["description"])
+                        st.caption(
+                            f"学生 {student_count} · 作答 {answer_count}"
+                        )
+                        if st.button(
+                            "进入分析",
+                            icon=":material/arrow_forward:",
+                            key=(
+                                "analytics_student_dataset_open_"
+                                f"{dataset['id']}"
+                            ),
+                            width="stretch",
+                        ):
+                            st.session_state[STUDENT_DATASET_STATE_KEY] = dataset[
+                                "id"
+                            ]
+                            st.session_state.pop(STUDENT_DETAIL_STATE_KEY, None)
+                            st.rerun()
+        return None
+
+    dataset = next(
+        row for row in datasets if str(row["id"]) == str(selected_id)
+    )
+    detail_code = st.session_state.get(STUDENT_DETAIL_STATE_KEY)
+    with st.container(
+        horizontal=True,
+        vertical_alignment="center",
+        key="analytics_student_dataset_path",
+    ):
+        if st.button(
+            "学情数据集",
+            type="tertiary",
+            key="analytics_student_path_datasets",
+        ):
+            st.session_state.pop(STUDENT_DATASET_STATE_KEY, None)
+            st.session_state.pop(STUDENT_DETAIL_STATE_KEY, None)
+            st.rerun()
+        st.markdown("/")
+        st.markdown(f"**{dataset['name']}**")
+        if detail_code:
+            if st.button(
+                "返回榜单",
+                icon=":material/arrow_back:",
+                type="tertiary",
+                key=f"analytics_student_back_to_rankings_{dataset['id']}",
+            ):
+                st.session_state.pop(STUDENT_DETAIL_STATE_KEY, None)
+                st.rerun()
+            st.markdown("/")
+            st.markdown(f"**{detail_code}**")
+    return dataset
+
+
 def _ranking_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
     return pd.DataFrame(
         [
@@ -362,6 +449,7 @@ def _ranking_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
                     f"（{row['record_completeness']:.0%}）"
                 ),
                 "证据状态": EVIDENCE_LABELS[row["evidence_status"]],
+                "查看": ":material/arrow_forward: 查看",
             }
             for row in rows
         ]
@@ -384,6 +472,7 @@ def _incomplete_ranking_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
                 ),
                 "已观察主题得分率": row["score_rate"],
                 "证据状态": EVIDENCE_LABELS[row["evidence_status"]],
+                "查看": ":material/arrow_forward: 查看",
             }
             for row in rows
         ]
@@ -420,12 +509,42 @@ def _sorted_ranking(
     return [*scored, *unscored]
 
 
-def _render_student_ranking(
+def _student_code_from_click(
+    click: Any,
+    student_codes: list[str],
+) -> str | None:
+    if click is None:
+        return None
+    try:
+        row_position = int(click["row"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not 0 <= row_position < len(student_codes):
+        return None
+    return str(student_codes[row_position])
+
+
+def _open_student_detail(
+    *,
+    click_key: str,
+    dataset_id: str,
+    student_codes: list[str],
+) -> None:
+    student_code = _student_code_from_click(
+        st.session_state.get(click_key),
+        student_codes,
+    )
+    if student_code is None:
+        return
+    st.session_state[STUDENT_DATASET_STATE_KEY] = dataset_id
+    st.session_state[STUDENT_DETAIL_STATE_KEY] = student_code
+
+
+def _render_student_rankings(
     dataset_id: str,
     ranking: list[dict[str, Any]],
-) -> dict[str, Any]:
+) -> None:
     sort_key = f"analytics_student_ranking_sort_{dataset_id}"
-    selection_key = f"analytics_student_selected_{dataset_id}"
     with st.container(
         border=True,
         key=f"analytics_student_ranking_card_{dataset_id}",
@@ -442,6 +561,7 @@ def _render_student_ranking(
             required=True,
             key=sort_key,
             width="stretch",
+            persist_state="page",
         )
         heading.caption(
             "仅展示全部主题均证据充分的学生；综合得分率取各主题得分率的算术平均。"
@@ -457,63 +577,17 @@ def _render_student_ranking(
             ),
         )
         visible = _sorted_ranking(qualified, str(sort_mode))
-        valid_codes = {str(row["student_code"]) for row in ranking}
-        selected_code = str(st.session_state.get(selection_key) or "")
-        if selected_code not in valid_codes:
-            first_row = visible[0] if visible else incomplete[0]
-            selected_code = str(first_row["student_code"])
-            st.session_state[selection_key] = selected_code
-        main_default_row = next(
-            (
-                index
-                for index, row in enumerate(visible)
-                if str(row["student_code"]) == selected_code
-            ),
-            None,
-        )
-        special_default_row = next(
-            (
-                index
-                for index, row in enumerate(incomplete)
-                if str(row["student_code"]) == selected_code
-            ),
-            None,
-        )
         table_key = f"analytics_student_ranking_table_{dataset_id}"
         special_table_key = (
             f"analytics_student_incomplete_ranking_table_{dataset_id}"
         )
-        applied_sort_key = f"{sort_key}_applied"
-        previous_sort = st.session_state.get(applied_sort_key)
-        if previous_sort is not None and previous_sort != sort_mode:
-            st.session_state[table_key] = {
-                "selection": {
-                    "rows": (
-                        [main_default_row]
-                        if main_default_row is not None
-                        else []
-                    )
-                }
-            }
-        st.session_state[applied_sort_key] = str(sort_mode)
-        main_event = None
+        main_click_key = f"analytics_student_ranking_open_{dataset_id}"
         if visible:
-            main_event = st.dataframe(
+            st.dataframe(
                 _ranking_frame(visible),
                 hide_index=True,
                 width="stretch",
                 height=315,
-                on_select="rerun",
-                selection_mode="single-row",
-                selection_default={
-                    "selection": {
-                        "rows": (
-                            [main_default_row]
-                            if main_default_row is not None
-                            else []
-                        )
-                    }
-                },
                 key=table_key,
                 column_config={
                     "综合名次": st.column_config.TextColumn(
@@ -532,13 +606,28 @@ def _render_student_ranking(
                         "记录完整度",
                         width="small",
                     ),
+                    "查看": st.column_config.ButtonColumn(
+                        "查看",
+                        type="primary",
+                        on_click=_open_student_detail,
+                        kwargs={
+                            "click_key": main_click_key,
+                            "dataset_id": dataset_id,
+                            "student_codes": [
+                                str(row["student_code"]) for row in visible
+                            ],
+                        },
+                        key=main_click_key,
+                    ),
                 },
                 alt="记录完整且证据充分的学生综合排名列表",
             )
         else:
             st.info("当前没有记录完整且各主题证据充分的学生。")
 
-        special_event = None
+        special_click_key = (
+            f"analytics_student_incomplete_ranking_open_{dataset_id}"
+        )
         if incomplete:
             special_heading, special_status = st.columns(
                 [3, 1.5],
@@ -554,22 +643,11 @@ def _render_student_ranking(
                 "记录完整度按“证据充分主题数 / 全部主题数”计算；"
                 "特殊榜单单独排列，不影响综合名次。"
             )
-            special_event = st.dataframe(
+            st.dataframe(
                 _incomplete_ranking_frame(incomplete),
                 hide_index=True,
                 width="stretch",
                 height=min(280, 50 + 35 * len(incomplete)),
-                on_select="rerun",
-                selection_mode="single-row",
-                selection_default={
-                    "selection": {
-                        "rows": (
-                            [special_default_row]
-                            if special_default_row is not None
-                            else []
-                        )
-                    }
-                },
                 key=special_table_key,
                 column_config={
                     "记录完整度": st.column_config.TextColumn(
@@ -584,44 +662,23 @@ def _render_student_ranking(
                         "已观察主题得分率",
                         format="percent",
                     ),
+                    "查看": st.column_config.ButtonColumn(
+                        "查看",
+                        type="primary",
+                        on_click=_open_student_detail,
+                        kwargs={
+                            "click_key": special_click_key,
+                            "dataset_id": dataset_id,
+                            "student_codes": [
+                                str(row["student_code"]) for row in incomplete
+                            ],
+                        },
+                        key=special_click_key,
+                    ),
                 },
                 alt="记录不完整、暂不参与综合排名的学生列表",
             )
-
-        candidate_codes: list[str] = []
-        if main_event is not None:
-            main_rows = list(main_event.selection.rows)
-            if main_rows and 0 <= main_rows[0] < len(visible):
-                candidate_codes.append(
-                    str(visible[main_rows[0]]["student_code"])
-                )
-        if special_event is not None:
-            special_rows = list(special_event.selection.rows)
-            if special_rows and 0 <= special_rows[0] < len(incomplete):
-                candidate_codes.append(
-                    str(incomplete[special_rows[0]]["student_code"])
-                )
-        selected_code = next(
-            (code for code in candidate_codes if code != selected_code),
-            candidate_codes[0] if candidate_codes else selected_code,
-        )
-        st.session_state[selection_key] = selected_code
-        selected = next(
-            row for row in ranking if str(row["student_code"]) == selected_code
-        )
-        if selected["ranking_eligible"]:
-            st.caption(
-                f"当前学生：{selected['student_code']} · "
-                f"{selected['class_code']} · "
-                f"综合得分率 {selected['score_rate']:.1%}"
-            )
-        else:
-            st.caption(
-                f"当前学生：{selected['student_code']} · "
-                f"{selected['class_code']} · 暂不参与综合排名 · "
-                f"记录完整度 {selected['record_completeness']:.0%}"
-            )
-    return selected
+        st.caption("点击对应榜单末列的“查看”，进入该学生的数据与分析页面。")
 
 
 def _render_theme_overview(
@@ -1185,16 +1242,40 @@ def render_student_analysis_page(
     diagnosis: StudentDiagnosisService,
     profile: ProviderProfile | None,
 ) -> None:
-    section = _render_student_analysis_top_nav()
-    dataset = _dataset_selector(learning, key="analytics_student_dataset")
+    dataset = _render_student_dataset_context(learning)
     if dataset is None:
         return
     ranking = analytics.student_performance_ranking(dataset["id"])
     if not ranking:
         st.info("该数据集尚未导入学生记录。")
         return
-    selected = _render_student_ranking(dataset["id"], ranking)
+    selected_code = st.session_state.get(STUDENT_DETAIL_STATE_KEY)
+    student_codes = {
+        str(row["student_code"]) for row in ranking
+    }
+    if selected_code not in student_codes:
+        st.session_state.pop(STUDENT_DETAIL_STATE_KEY, None)
+        _render_student_rankings(dataset["id"], ranking)
+        return
+    selected = next(
+        row
+        for row in ranking
+        if str(row["student_code"]) == str(selected_code)
+    )
     student_code = str(selected["student_code"])
+    section = _render_student_analysis_top_nav()
+    if selected["ranking_eligible"]:
+        st.caption(
+            f"学生 {student_code} · {selected['class_code']} · "
+            f"综合名次第 {selected['rank']} 名 · "
+            f"综合得分率 {selected['score_rate']:.1%}"
+        )
+    else:
+        st.caption(
+            f"学生 {student_code} · {selected['class_code']} · "
+            f"暂不参与综合排名 · 记录完整度 "
+            f"{selected['record_completeness']:.0%}"
+        )
     node_code = _node_selector(
         learning,
         dataset["id"],

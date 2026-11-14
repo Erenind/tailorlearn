@@ -1049,7 +1049,7 @@ def _render_outline_settings(
         datasets = service.list_datasets()
         if mode == "textbook":
             st.info(
-                "课本模式不涉及学情数据，仅使用课本目录和课程标准目录。",
+                "课本模式不涉及学情数据，仅使用课本和课程标准。",
                 icon=":material/info:",
             )
             materials = service.materials("textbook")
