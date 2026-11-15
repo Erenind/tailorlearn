@@ -1082,12 +1082,12 @@ def _render_composer(
     if suggestions:
         showcase = suggestions[placeholder_index % len(suggestions)]["text"]
         placeholder = (
-            "直接提问，公式用 $...$ 或 $$...$$，"
+            "直接提问，数学公式Latex用 $...$ 或 $$...$$包含，"
             f"也可以从下方选择常用问题，比如： {showcase}"
         )
     else:
         placeholder = (
-            "直接提问，公式用 $...$ 或 $$...$$，"
+            "直接提问，数学公式Latex用 $...$ 或 $$...$$包含，"
             "也可以从下方选择常用问题"
         )
 
