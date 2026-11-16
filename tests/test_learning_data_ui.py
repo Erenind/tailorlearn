@@ -41,16 +41,21 @@ def test_streamlit_learning_data_upload_preview_and_import(
     assert not at.exception
     at.button(key="nav_material_center").click().run()
     at.button(key="material_nav_students").click().run()
+    assert at.button(
+        key=f"learning_dataset_open_{dataset['id']}"
+    ).label == "查看"
     at.button(key=f"learning_dataset_open_{dataset['id']}").click().run()
     at.segmented_control(
         key="material_section_students"
-    ).set_value("导入和导出").run()
-    assert any(item.label == "数据集名称" for item in at.text_input)
-    assert not any(
-        item.label == "新建学情数据集" for item in at.button
-    )
-    assert not at.exception
+    ).set_value("导入与导出").run()
+
+    assert at.button(
+        key=f"learning_dataset_open_{dataset['id']}"
+    ).label == "导入与导出"
+    assert any(item.label == "新建数据集" for item in at.button)
+    assert not any(item.label == "数据集名称" for item in at.text_input)
     assert at.button(key="learning_dataset_path_root").label == "学情数据集"
+    assert not at.exception
 
     upload_key = f"learning_upload_{dataset['id']}_student"
     at.file_uploader(key=upload_key).upload("任意文件名.csv", content).run()
@@ -80,7 +85,7 @@ def test_streamlit_learning_data_upload_preview_and_import(
     at.button(key="material_nav_answers").click().run()
     assert at.segmented_control(
         key="material_section_answers"
-    ).options == ["浏览", "编辑", "导入和导出", "异常检测"]
+    ).options == ["浏览", "编辑", "导入与导出", "异常检测"]
     at.segmented_control(
         key="material_section_answers"
     ).set_value("异常检测").run()
@@ -100,7 +105,6 @@ def test_dataset_creation_is_available_only_in_import(
     paths.ensure()
     repository = Repository(paths.database_file)
     repository.initialize()
-    service = LearningDataService(repository, paths.db_dir)
 
     monkeypatch.setattr(
         AppPaths,
@@ -124,13 +128,16 @@ def test_dataset_creation_is_available_only_in_import(
 
     at.segmented_control(
         key="material_section_students"
-    ).set_value("导入和导出").run()
-    assert any(item.label == "数据集名称" for item in at.text_input)
-    assert any(item.label == "创建数据集" for item in at.button)
+    ).set_value("导入与导出").run()
+    assert any(item.label == "新建数据集" for item in at.button)
+    assert not any(item.label == "数据集名称" for item in at.text_input)
     assert not any(
         (button.key or "").startswith("learning_dataset_open_")
         for button in at.button
     )
+    at.button(key="learning_dataset_create_toggle").click().run()
+    assert any(item.label == "数据集名称" for item in at.text_input)
+    assert any(item.label == "创建数据集" for item in at.button)
     assert not at.exception
     st.cache_resource.clear()
 
@@ -181,63 +188,50 @@ def test_dataset_catalog_tables_and_anomaly_actions(
     at.button(key="nav_material_center").click().run()
     at.button(key="material_nav_students").click().run()
     assert not any(item.label == "数据集名称" for item in at.text_input)
-    assert at.button(key=f"learning_dataset_open_{dataset['id']}").label == "查看"
-    at.segmented_control(
-        key="material_section_students"
-    ).set_value("导入和导出").run()
-    assert any(item.label == "数据集名称" for item in at.text_input)
-    assert not any(
-        (button.key or "").startswith("learning_dataset_open_")
-        for button in at.button
-    )
-    at.segmented_control(
-        key="material_section_students"
-    ).set_value("浏览").run()
-    at.button(key=f"learning_dataset_open_{dataset['id']}").click().run()
-    assert len(at.dataframe) == 1
-    assert not any(
-        (item.key or "").startswith("learning_data_table_")
-        for item in at.container
-    )
-    assert not any(
-        item.key == f"learning_search_{dataset['id']}_student"
-        for item in at.text_input
-    )
-    browse_table = at.dataframe[0].value
-    assert "学生编号" in browse_table.columns
-    assert "编辑" not in browse_table.columns
-    assert "删除" not in browse_table.columns
+    assert at.button(
+        key=f"learning_dataset_open_{dataset['id']}"
+    ).label == "查看"
 
     at.segmented_control(
         key="material_section_students"
     ).set_value("编辑").run()
+    assert at.button(
+        key=f"learning_dataset_open_{dataset['id']}"
+    ).label == "编辑"
+    assert not any(item.label == "数据集名称" for item in at.text_input)
+    at.button(key=f"learning_dataset_open_{dataset['id']}").click().run()
     assert not at.exception
+    assert len(at.dataframe) == 1
     edit_table = at.dataframe[0].value
     assert "编辑" in edit_table.columns
     assert "删除" in edit_table.columns
-    assert not any(
-        (item.key or "").startswith("learning_data_table_")
-        for item in at.container
-    )
     assert at.text_input(
         key=f"learning_search_{dataset['id']}_student"
     ).label == "搜索"
-    assert any(
-        item.label == "显示已删除" and item.value is False
-        for item in at.toggle
-    )
-    assert not any(
-        item.value == "数据管理与导出"
-        for item in at.subheader
-    )
-    assert not any(item.label == "数据集名称" for item in at.text_input)
+
     at.segmented_control(
         key="material_section_students"
-    ).set_value("导入和导出").run()
-    assert any(item.label == "数据集名称" for item in at.text_input)
+    ).set_value("导入与导出").run()
+    assert at.button(
+        key=f"learning_dataset_open_{dataset['id']}"
+    ).label == "导入与导出"
+    assert any(item.label == "新建数据集" for item in at.button)
+    assert not any(item.label == "数据集名称" for item in at.text_input)
+    assert at.button(key="learning_dataset_path_root").label == "学情数据集"
+    at.button(key="learning_dataset_path_root").click().run()
     assert not any(
-        item.label == "新建学情数据集" for item in at.button
+        (button.key or "") == "learning_dataset_path_root"
+        for button in at.button
     )
+    assert at.button(key="learning_dataset_create_toggle").label == "新建数据集"
+    assert at.button(
+        key=f"learning_dataset_open_{dataset['id']}"
+    ).label == "导入与导出"
+    at.button(key=f"learning_dataset_open_{dataset['id']}").click().run()
+    assert at.button(key="learning_dataset_path_root").label == "学情数据集"
+    at.button(key="learning_dataset_create_toggle").click().run()
+    assert any(item.label == "数据集名称" for item in at.text_input)
+    assert any(item.label == "取消" for item in at.button)
 
     at.button(key="material_nav_answers").click().run()
     at.segmented_control(

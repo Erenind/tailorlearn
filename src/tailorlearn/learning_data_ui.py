@@ -17,7 +17,7 @@ from tailorlearn.learning_data import (
     LearningDataService,
 )
 
-LEARNING_DATA_UI_VERSION = "2026-11-14-import-direct-create-v2"
+LEARNING_DATA_UI_VERSION = "2026-11-16-import-breadcrumb"
 
 
 ACTION_LABELS = {
@@ -907,7 +907,7 @@ def _render_type(
     elif mode == "edit":
         st.caption("编辑模式：可新增、编辑、软删除和恢复当前数据集记录。")
     else:
-        st.caption("导入和导出：新建数据集、导入 CSV 或下载导出文件。")
+        st.caption("导入与导出：新建数据集、导入 CSV 或下载导出文件。")
     if spec.key == "answer":
         if mode != "browse":
             st.caption(
@@ -1190,89 +1190,102 @@ def _render_dataset_create_form(service: LearningDataService) -> None:
             placeholder="可记录数据来源、批次或使用范围",
             height=80,
         )
-        submitted = st.form_submit_button(
+        create_columns = st.columns(2)
+        submitted = create_columns[0].form_submit_button(
             "创建数据集",
             type="primary",
             icon=":material/create_new_folder:",
             width="stretch",
         )
+        cancelled = create_columns[1].form_submit_button(
+            "取消",
+            width="stretch",
+        )
+    if cancelled:
+        st.session_state.pop("learning_dataset_create_open", None)
+        st.rerun()
     if submitted:
         try:
             dataset = service.create_dataset(name, description)
             st.session_state["learning_dataset_selector"] = dataset["id"]
+            st.session_state.pop("learning_dataset_create_open", None)
             _notify("learning_dataset_notice", "学情数据集已创建")
             _rerun()
         except Exception as exc:
             _show_error(exc)
 
 
-def render_dataset_context(
+def _dataset_card_action_label(mode: str) -> str:
+    return {
+        "browse": "查看",
+        "edit": "编辑",
+        "import": "导入与导出",
+    }.get(mode, "查看")
+
+
+def _render_dataset_cards(
     service: LearningDataService,
+    datasets: list[dict[str, Any]],
     *,
-    mode: str = "edit",
-) -> str | None:
-    """Render dataset selection; creating datasets is only available in import."""
-    _show_notice("learning_dataset_notice")
-    datasets = service.list_datasets()
-    dataset_ids = [row["id"] for row in datasets]
-    selector_key = "learning_dataset_selector"
-    selected_id = st.session_state.get(selector_key)
-    if selected_id not in dataset_ids:
-        selected_id = None
-        st.session_state[selector_key] = None
-    allow_create = mode == "import"
-
-    if selected_id is None:
-        if allow_create:
-            st.markdown("**新建学情数据集**")
-            _render_dataset_create_form(service)
-            st.caption(
-                "创建后会自动打开该数据集；向已有数据集导入时，"
-                "请先在“浏览”或“编辑”栏目打开该数据集。"
-            )
-            return None
-        with st.container(
-            horizontal=True,
-            vertical_alignment="center",
-            key="learning_dataset_list_header",
-        ):
-            st.markdown("**学情数据集**")
-        if not datasets:
-            st.info(
-                "尚无学情数据集，请切换到“导入和导出”栏目新建数据集。"
-            )
-            return None
-        with st.container(key="material_browser_files"):
-            with st.grid("auto", min_column_width=240, gap="small"):
-                for dataset in datasets:
-                    counts = {
-                        spec.label: len(
-                            service.list_records(dataset["id"], spec.key)
-                        )
-                        for spec in DATA_TYPE_SPECS.values()
-                    }
-                    with st.container(
-                        border=True,
-                        key=f"learning_dataset_card_{dataset['id']}",
+    mode: str,
+    selector_key: str,
+) -> None:
+    action_label = _dataset_card_action_label(mode)
+    with st.container(key="material_browser_files"):
+        with st.grid("auto", min_column_width=240, gap="small"):
+            for dataset in datasets:
+                counts = {
+                    spec.label: len(
+                        service.list_records(dataset["id"], spec.key)
+                    )
+                    for spec in DATA_TYPE_SPECS.values()
+                }
+                with st.container(
+                    border=True,
+                    key=f"learning_dataset_card_{dataset['id']}",
+                ):
+                    st.markdown(f"**{dataset['name']}**")
+                    if dataset.get("description"):
+                        st.caption(dataset["description"])
+                    st.caption(
+                        f"{sum(counts.values())} 条记录 · "
+                        f"学生 {counts['模拟学生']} · "
+                        f"作答 {counts['作答记录']}"
+                    )
+                    if st.button(
+                        action_label,
+                        key=f"learning_dataset_open_{dataset['id']}",
+                        width="stretch",
                     ):
-                        st.markdown(f"**{dataset['name']}**")
-                        if dataset.get("description"):
-                            st.caption(dataset["description"])
-                        st.caption(
-                            f"{sum(counts.values())} 条记录 · "
-                            f"学生 {counts['模拟学生']} · "
-                            f"作答 {counts['作答记录']}"
+                        st.session_state.pop(
+                            "learning_dataset_create_open",
+                            None,
                         )
-                        if st.button(
-                            "查看",
-                            key=f"learning_dataset_open_{dataset['id']}",
-                            width="stretch",
-                        ):
-                            st.session_state[selector_key] = dataset["id"]
-                            st.rerun()
-        return None
+                        st.session_state[selector_key] = dataset["id"]
+                        st.rerun()
 
-    dataset = next(row for row in datasets if row["id"] == selected_id)
+
+def _render_dataset_create_controls(service: LearningDataService) -> None:
+    create_key = "learning_dataset_create_open"
+    if st.button(
+        "新建数据集",
+        icon=":material/create_new_folder:",
+        key="learning_dataset_create_toggle",
+    ):
+        st.session_state[create_key] = True
+        st.rerun()
+    if st.session_state.get(create_key):
+        st.markdown("**新建学情数据集**")
+        _render_dataset_create_form(service)
+
+
+def _render_dataset_breadcrumb(
+    service: LearningDataService,
+    dataset: dict[str, Any],
+    *,
+    mode: str,
+    selector_key: str,
+) -> None:
     with st.container(
         horizontal=True,
         vertical_alignment="center",
@@ -1290,9 +1303,68 @@ def render_dataset_context(
         st.markdown(f"**{dataset['name']}**")
         if mode == "edit":
             _render_dataset_management(service, dataset)
-    if allow_create:
-        st.markdown("**新建学情数据集**")
-        _render_dataset_create_form(service)
+
+
+def render_dataset_context(
+    service: LearningDataService,
+    *,
+    mode: str = "edit",
+) -> str | None:
+    """Render dataset selection; creating datasets is only available in import."""
+    _show_notice("learning_dataset_notice")
+    datasets = service.list_datasets()
+    dataset_ids = [row["id"] for row in datasets]
+    selector_key = "learning_dataset_selector"
+    selected_id = st.session_state.get(selector_key)
+    if selected_id not in dataset_ids:
+        selected_id = None
+        st.session_state[selector_key] = None
+    allow_create = mode == "import"
+    if not allow_create:
+        st.session_state.pop("learning_dataset_create_open", None)
+
+    if selected_id is None:
+        with st.container(
+            horizontal=True,
+            vertical_alignment="center",
+            key="learning_dataset_list_header",
+        ):
+            st.markdown("**学情数据集**")
+        if allow_create:
+            _render_dataset_create_controls(service)
+        if not datasets:
+            if allow_create:
+                st.info("尚无学情数据集，可点击“新建数据集”创建。")
+            else:
+                st.info(
+                    "尚无学情数据集，请切换到“导入与导出”栏目新建数据集。"
+                )
+            return None
+        _render_dataset_cards(
+            service,
+            datasets,
+            mode=mode,
+            selector_key=selector_key,
+        )
+        return None
+
+    dataset = next(row for row in datasets if row["id"] == selected_id)
+    _render_dataset_breadcrumb(
+        service,
+        dataset,
+        mode=mode,
+        selector_key=selector_key,
+    )
+    if not allow_create:
+        return str(selected_id)
+
+    _render_dataset_create_controls(service)
+    _render_dataset_cards(
+        service,
+        datasets,
+        mode=mode,
+        selector_key=selector_key,
+    )
     return str(selected_id)
 
 

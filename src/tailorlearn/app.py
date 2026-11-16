@@ -41,7 +41,7 @@ from tailorlearn.ui import (
 _REPOSITORY_API_VERSION = "2026-11-14-teaching-chat-v2"
 _ANALYTICS_SERVICE_API_VERSION = "2026-11-12-class-analysis-v2"
 _ANALYTICS_UI_API_VERSION = "2026-11-13-student-ranking-primary-action"
-_LEARNING_DATA_UI_API_VERSION = "2026-11-14-import-direct-create-v2"
+_LEARNING_DATA_UI_API_VERSION = "2026-11-16-import-breadcrumb"
 _OUTLINE_SERVICE_API_VERSION = "2026-11-11-two-stage-outline-v3"
 _OUTLINE_UI_API_VERSION = "2026-11-11-outline-history-state-fix"
 _PROVIDERS_API_VERSION = "2026-11-13-ai-access-presets"
@@ -2845,7 +2845,7 @@ def _render_material_center_section_nav(item: dict[str, Any]) -> str:
             else ["浏览", "AI结构化和管理", "导入和导出"]
         )
     else:
-        options = ["浏览", "编辑", "导入和导出"]
+        options = ["浏览", "编辑", "导入与导出"]
     if item["key"] == "answers":
         options.append("异常检测")
     control_key = f"material_section_{item['key']}"
@@ -2888,7 +2888,7 @@ def render_material_center() -> None:
     mode = {
         "浏览": "browse",
         "编辑": "edit",
-        "导入和导出": "import",
+        "导入与导出": "import",
     }.get(section, "edit")
     dataset_id = render_dataset_context(LEARNING_DATA, mode=mode)
     if dataset_id is None:
