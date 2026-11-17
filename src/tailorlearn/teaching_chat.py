@@ -17,10 +17,9 @@ from tailorlearn.outline import OutlineService
 
 TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v6"
 TEACHING_SUGGESTION_PRESETS = (
-    ("preset_socratic", "根据苏格拉底教学方式提教学方案"),
-    ("preset_practice", "以实践为重点提个教学建议"),
-    ("preset_student", "具体分析学生D01"),
-    ("preset_class", "给班级DC01提建议"),
+    ("preset_socratic", "根据苏格拉底教学方式，为实数第一节写一份教学方案"),
+    ("preset_student", "结合学生D01的答题数据，分析学生的问题，并给出建议。"),
+    ("preset_class", "根据班级DC01的相关学情数据，为班级提建议"),
     ("preset_ebbinghaus", "根据艾宾浩斯遗忘曲线分析今天需要复习哪些内容"),
     ("preset_operations", "根据实数的运算这一章提供教学建议"),
     ("preset_action_layered", "生成分层教学建议"),
