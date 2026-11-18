@@ -48,7 +48,7 @@ _PROVIDERS_API_VERSION = "2026-11-13-ai-access-presets"
 _HOME_UI_API_VERSION = "2026-11-14-dashboard-v4"
 _HOME_DASHBOARD_API_VERSION = "2026-11-14-evidence-overview-v2"
 _TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v6"
-_TEACHING_CHAT_UI_API_VERSION = "2026-11-14-teaching-chat-ui-v16"
+_TEACHING_CHAT_UI_API_VERSION = "2026-11-17-user-bubble-centered-v25"
 _TEACHER_WORKBENCH_API_VERSION = "2026-11-14-without-teaching-recommendations"
 _UI_API_VERSION = "2026-11-14-navigation-without-teaching-page"
 if (

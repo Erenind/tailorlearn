@@ -25,7 +25,7 @@ from tailorlearn.teaching_chat import (
 )
 
 
-TEACHING_CHAT_UI_VERSION = "2026-11-14-teaching-chat-ui-v16"
+TEACHING_CHAT_UI_VERSION = "2026-11-17-user-bubble-centered-v25"
 HISTORY_PAGE_SIZE = 20
 TEMPORARY_FILE_CHAR_LIMIT = 60_000
 PURE_MODE_KEY = "teaching_chat_pure_mode"
@@ -345,9 +345,20 @@ def _render_messages(
         key="teaching_chat_messages",
     ):
         if not messages:
-            st.info(
-                "可以直接提问，也可以从下方选择常用问题。"
-                "AI 会按需读取课本目录、正文和已授权的数据。"
+            st.html(
+                """
+                <div class="teaching-welcome">
+                    <div class="teaching-welcome-badge">✦</div>
+                    <h2>你好，我是教学智能体</h2>
+                    <p>
+                        可以基于当前材料和已授权的学情数据，帮你分析班级、
+                        梳理信息缺口，或设计可执行的教学建议。
+                    </p>
+                    <div class="teaching-welcome-hint">
+                        从下方选择常用问题，或直接输入你的问题
+                    </div>
+                </div>
+                """
             )
         for turn in _message_turns(messages):
             user_message = next(
@@ -505,6 +516,11 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
             height: auto;
             min-height: 0;
             overflow: hidden;
+            max-width: 780px;
+            width: 100%;
+            margin: 0 auto;
+            padding-left: 1.25rem !important;
+            padding-right: 1.25rem !important;
             padding-bottom: 0.75rem !important;
         }
         .stMainBlockContainer:has(.st-key-teaching_page_shell)
@@ -544,37 +560,75 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
             min-height: 0;
             overflow-x: hidden !important;
             overflow-y: auto !important;
+            padding: 0.75rem 0.25rem 1.25rem;
+            scrollbar-width: thin;
+            scrollbar-color: #D7DCE5 transparent;
+        }
+        .st-key-teaching_chat_messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .st-key-teaching_chat_messages::-webkit-scrollbar-thumb {
+            background: #D7DCE5;
+            border-radius: 999px;
+        }
+        .st-key-teaching_chat_messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .st-key-teaching_page_shell,
+        .st-key-teaching_chat_messages,
+        .st-key-teaching_chat_messages [data-testid="stChatMessage"] {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
         }
         [data-testid="stBottom"] {
             background: #FFFFFF !important;
+            border-top: none;
         }
         [data-testid="stBottomBlockContainer"] {
-            padding-top: 0 !important;
-            padding-bottom: 0.75rem !important;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0.2rem 1.25rem 0.55rem !important;
         }
         .st-key-teaching_chat_composer {
             position: relative;
             gap: 0;
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
         }
         .st-key-teaching_chat_draft [data-testid="stChatInput"] > div {
-            border-width: 2px !important;
-            border-radius: 1.8rem !important;
-            min-height: 5.6rem;
-            padding: 0.9rem 1rem 3.1rem !important;
+            border: 1px solid #E8EBF1 !important;
+            border-radius: 1.3rem !important;
+            min-height: 3.5rem;
+            padding: 0.55rem 0.9rem 2.1rem !important;
+            background: #F7F8FA !important;
+            box-shadow: none !important;
+            transition: background-color 120ms ease;
+        }
+        .st-key-teaching_chat_draft [data-testid="stChatInput"] > div:focus-within {
+            border-color: #D8DFEA !important;
+            background: #FFFFFF !important;
+            box-shadow: none !important;
         }
         .st-key-teaching_chat_draft [data-testid="stChatInputTextArea"] {
-            font-size: 16px !important;
-            line-height: 1.6 !important;
+            font-size: 15px !important;
+            line-height: 1.5 !important;
+            color: #1F2329 !important;
+        }
+        .st-key-teaching_chat_draft [data-testid="stChatInputTextArea"]::placeholder {
+            color: #9AA3B2 !important;
         }
         .st-key-teaching_chat_draft [data-testid="stChatInputSubmitButton"] {
             position: absolute !important;
-            right: 0.9rem !important;
-            bottom: 0.65rem !important;
+            right: 0.62rem !important;
+            bottom: 0.42rem !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            width: 2.9rem !important;
-            height: 2.9rem !important;
+            width: 1.95rem !important;
+            height: 1.95rem !important;
             padding: 0 !important;
             border-radius: 999px !important;
             z-index: 5 !important;
@@ -582,8 +636,8 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
         .st-key-teaching_chat_draft
         [data-testid="stChatInputFileUploadButton"] {
             position: absolute !important;
-            right: 4.2rem !important;
-            bottom: 0.65rem !important;
+            right: 2.85rem !important;
+            bottom: 0.42rem !important;
             z-index: 5 !important;
         }
         .st-key-teaching_chat_draft
@@ -591,8 +645,8 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            width: 2.55rem !important;
-            height: 2.55rem !important;
+            width: 1.9rem !important;
+            height: 1.9rem !important;
             padding: 0 !important;
             border: none !important;
             border-radius: 999px !important;
@@ -605,11 +659,11 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
         }
         .st-key-teaching_chat_draft
         [data-testid="stChatInputSubmitButton"]:not([disabled]) {
-            background: #2F5BEA !important;
+            background: #4D6BFE !important;
         }
         .st-key-teaching_chat_draft
         [data-testid="stChatInputSubmitButton"]:not([disabled]):hover {
-            background: #2449C9 !important;
+            background: #3B57E8 !important;
         }
         .st-key-teaching_chat_draft
         [data-testid="stChatInputSubmitButton"] svg {
@@ -630,41 +684,42 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
         }
         .st-key-teaching_chat_toolbar {
             position: absolute;
-            left: 1.05rem;
-            bottom: 0.63rem;
+            left: 0.8rem;
+            bottom: 0.36rem;
             z-index: 4;
             width: auto;
-            max-width: calc(100% - 9.5rem);
+            max-width: calc(100% - 7.2rem);
             padding: 0;
             flex-wrap: nowrap;
             overflow: visible;
         }
         .st-key-teaching_chat_toolbar [data-testid="stPopoverButton"] {
-            min-height: 2rem;
-            padding: 0.3rem 0.58rem;
+            min-height: 1.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
         }
         .st-key-teaching_dataset_popover [data-testid="stPopoverButton"] {
-            min-width: 5.25rem;
+            min-width: 5rem;
         }
         .st-key-teaching_question_popover [data-testid="stPopoverButton"] {
-            min-width: 6.6rem;
+            min-width: 6.3rem;
         }
         .st-key-teaching_chat_pure_mode button {
-            min-height: 2rem;
-            border: 1px solid #D0D5DD !important;
+            min-height: 1.85rem;
+            border: 1px solid #E1E5EC !important;
             border-radius: 999px !important;
-            background: transparent !important;
+            background: #FFFFFF !important;
             color: #667085 !important;
             box-shadow: none !important;
         }
         .st-key-teaching_chat_pure_mode button[data-selected] {
-            border-color: #2F5BEA !important;
-            background: #EDF2FF !important;
-            color: #2F5BEA !important;
+            border-color: #C7D2FE !important;
+            background: #EEF2FF !important;
+            color: #4D6BFE !important;
         }
         .st-key-teaching_chat_pure_mode button[data-selected] * {
-            color: #2F5BEA !important;
-            fill: #2F5BEA !important;
+            color: #4D6BFE !important;
+            fill: #4D6BFE !important;
         }
         .st-key-teaching_dataset_popover
         [data-testid="stPopoverButton"] svg:last-of-type,
@@ -754,6 +809,232 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
         [class*="st-key-teaching_chat_delete_turn_"] button:hover {
             background: #FFF1F2 !important;
             color: #C2415B !important;
+        }
+        [class*="st-key-teaching_chat_turn_"] {
+            gap: 0.35rem !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessage"] {
+            background: transparent !important;
+            border: none !important;
+            padding: 0.1rem 0 !important;
+            gap: 0.62rem !important;
+            align-items: flex-start !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageAvatarUser"] {
+            display: none !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageAvatarAssistant"] {
+            width: 1.8rem !important;
+            height: 1.8rem !important;
+            min-width: 1.8rem !important;
+            border-radius: 999px !important;
+            background: #EEF2FF !important;
+            color: #4D6BFE !important;
+            border: 1px solid #E0E7FF !important;
+            box-shadow: none !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageAvatarAssistant"] svg {
+            width: 1rem !important;
+            height: 1rem !important;
+            fill: #4D6BFE !important;
+            stroke: #4D6BFE !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] {
+            font-size: 0.94rem !important;
+            line-height: 1.72 !important;
+            color: #1F2329 !important;
+            padding: 0.15rem 0 !important;
+            max-width: 100% !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessage"]:has(
+            [data-testid="stChatMessageAvatarUser"]
+        ) {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100% !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 0.55rem !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageAvatarUser"] {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            order: 2 !important;
+            flex: 0 0 1.8rem !important;
+            width: 1.8rem !important;
+            height: 1.8rem !important;
+            min-width: 1.8rem !important;
+            margin-top: 0.1rem !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            border-radius: 999px !important;
+            background: #EEF3FF !important;
+            color: #4D6BFE !important;
+            border: 1px solid #DCE7FF !important;
+            box-shadow: none !important;
+            overflow: hidden !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageAvatarUser"] svg {
+            width: 1rem !important;
+            height: 1rem !important;
+            fill: #4D6BFE !important;
+            stroke: #4D6BFE !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessage"]:has(
+            [data-testid="stChatMessageAvatarUser"]
+        ) [data-testid="stChatMessageContent"] {
+            order: 1 !important;
+            flex: 0 1 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            min-height: 2.25rem !important;
+            background: #EEF3FF !important;
+            border: 1px solid #E1E8FF !important;
+            border-radius: 1.2rem !important;
+            padding: 0.55rem 0.9rem !important;
+            width: fit-content !important;
+            max-width: 82% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            box-shadow: none !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessage"]:has(
+            [data-testid="stChatMessageAvatarUser"]
+        ) [data-testid="stChatMessageContent"] p {
+            margin: 0 !important;
+            line-height: 1.45 !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] p {
+            margin: 0.32rem 0 !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] h1,
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] h2,
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] h3 {
+            margin: 0.85rem 0 0.45rem !important;
+            line-height: 1.4 !important;
+            color: #172033 !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] h1 {
+            font-size: 1.12rem !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] h2 {
+            font-size: 1.03rem !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] h3 {
+            font-size: 0.98rem !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] ul,
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] ol {
+            padding-left: 1.25rem !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] li {
+            margin: 0.18rem 0 !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] pre {
+            background: #F7F8FA !important;
+            border: 1px solid #EBEEF3 !important;
+            border-radius: 0.8rem !important;
+            padding: 0.8rem 0.95rem !important;
+            margin: 0.55rem 0 !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] code {
+            font-size: 0.86em !important;
+            color: #344054 !important;
+            background: #F2F4F7 !important;
+            border-radius: 0.3rem !important;
+            padding: 0.1rem 0.3rem !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] pre code {
+            background: transparent !important;
+            padding: 0 !important;
+            color: #344054 !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] blockquote {
+            border-left: 3px solid #C7D2FE !important;
+            background: #F8FAFF !important;
+            border-radius: 0 0.6rem 0.6rem 0 !important;
+            margin: 0.55rem 0 !important;
+            padding: 0.4rem 0.8rem !important;
+            color: #475467 !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] table {
+            font-size: 0.86em !important;
+            border-radius: 0.6rem !important;
+            overflow: hidden !important;
+        }
+        [class*="st-key-teaching_chat_turn_"]
+        [data-testid="stChatMessageContent"] a {
+            color: #4D6BFE !important;
+        }
+        .teaching-welcome {
+            max-width: 560px;
+            margin: clamp(2rem, 9vh, 5rem) auto 0;
+            padding: 0 1.25rem 2rem;
+            text-align: center;
+        }
+        .teaching-welcome-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+            border-radius: 1rem;
+            background: #EEF2FF;
+            color: #4D6BFE;
+            font-size: 1.45rem;
+            border: 1px solid #E0E7FF;
+        }
+        .teaching-welcome h2 {
+            margin: 0 0 0.55rem;
+            font-size: 1.35rem;
+            line-height: 1.35;
+            color: #172033;
+            letter-spacing: -0.01em;
+        }
+        .teaching-welcome p {
+            margin: 0 auto;
+            max-width: 28rem;
+            color: #667085;
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+        .teaching-welcome-hint {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: #F7F8FA;
+            border: 1px solid #EEF0F4;
+            color: #98A2B3;
+            font-size: 0.78rem;
         }
         </style>
         <script>
@@ -1087,18 +1368,7 @@ def _render_composer(
     if st.session_state.pop(RESET_DRAFT_KEY, False):
         st.session_state[DRAFT_KEY] = ""
     st.session_state.setdefault(DRAFT_KEY, "")
-    placeholder_index = int(st.session_state.get(PLACEHOLDER_INDEX_KEY, 0))
-    if suggestions:
-        showcase = suggestions[placeholder_index % len(suggestions)]["text"]
-        placeholder = (
-            "直接提问，数学公式Latex用 $...$ 或 $$...$$包含，"
-            f"也可以从下方选择常用问题，比如： {showcase}"
-        )
-    else:
-        placeholder = (
-            "直接提问，数学公式Latex用 $...$ 或 $$...$$包含，"
-            "也可以从下方选择常用问题"
-        )
+    placeholder = "给教学智能体发送消息，数学公式用 $...$ 或 $$...$$"
 
     chat_available = profile is not None and bool(profile.api_key)
     with st.bottom:
@@ -1106,6 +1376,8 @@ def _render_composer(
             gap=0,
             key="teaching_chat_composer",
         ):
+            if not chat_available:
+                st.caption("请先在“AI 参数设置”中启用 AI 接入")
             with st.container(
                 horizontal=True,
                 vertical_alignment="center",
@@ -1134,10 +1406,8 @@ def _render_composer(
                 file_type=["pdf", "txt", "md", "csv", "json"],
                 key=DRAFT_KEY,
                 disabled=not chat_available,
-                height=92,
+                height=60,
             )
-            if not chat_available:
-                st.caption("请先在“AI 参数设置”中启用 AI 接入")
 
     if submission is None:
         return None
