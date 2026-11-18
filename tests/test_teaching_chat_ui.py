@@ -71,9 +71,9 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
     ).label.endswith("当前")
     assert at.chat_input(key="teaching_chat_draft").value == ""
     assert at.chat_input(key="teaching_chat_draft").disabled is False
-    assert at.button(
+    assert "学生D01" in at.button(
         key="teaching_question_use_preset_student"
-    ).label == "具体分析学生D01"
+    ).label
     assert at.button(
         key="teaching_question_use_preset_action_layered"
     ).label == "生成分层教学建议"
@@ -140,6 +140,68 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
         for item in learning.list_records(dataset["id"], "student")
     } == {"D01", "D02"}
 
+    current_students = {
+        item["student_code"]: item
+        for item in learning.list_records(dataset["id"], "student")
+    }
+    first_id = current_students["D01"]["row_id"]
+    second_id = current_students["D02"]["row_id"]
+    at.session_state["teaching_chat_pending_action"] = {
+        "id": "pending_batch_test",
+        "tool": "write-data",
+        "arguments": {
+            "dataset_id": dataset["id"],
+            "data_type": "student",
+            "items": [
+                {
+                    "action": "update",
+                    "row_id": first_id,
+                    "fields": {"grade": 8},
+                },
+                {
+                    "action": "update",
+                    "row_id": second_id,
+                    "fields": {"grade": 9},
+                },
+            ],
+        },
+        "summary": "将批量修改 2 条模拟学生记录，共 2 个字段",
+        "items": [
+            {
+                "data_type": "student",
+                "action": "update",
+                "row_id": first_id,
+                "fields": {"grade": 8},
+                "changes": {"grade": {"before": 7, "after": 8}},
+                "summary": f"修改模拟学生 row_id={first_id}，1 个字段",
+            },
+            {
+                "data_type": "student",
+                "action": "update",
+                "row_id": second_id,
+                "fields": {"grade": 9},
+                "changes": {"grade": {"before": 7, "after": 9}},
+                "summary": f"修改模拟学生 row_id={second_id}，1 个字段",
+            },
+        ],
+    }
+    at.run()
+    assert at.button(key="teaching_pending_confirm")
+    assert any(
+        "序号" in frame.value.columns
+        for frame in at.dataframe
+        if frame.value is not None
+    )
+    at.button(key="teaching_pending_confirm").click().run()
+    assert not at.exception
+    updated_students = {
+        item["student_code"]: item
+        for item in learning.list_records(dataset["id"], "student")
+    }
+    assert updated_students["D01"]["grade"] == 8
+    assert updated_students["D02"]["grade"] == 9
+    assert "修改已完成" in service.list_messages(1)[0]["content"]
+
     at.pills(key="teaching_chat_pure_mode").set_value("纯净模式").run()
     assert not at.exception
     assert not any(
@@ -149,10 +211,9 @@ def test_streamlit_teaching_chat_composer_and_pure_mode(
 
     at.button(key="teaching_question_use_preset_student").click().run()
     assert not at.exception
-    assert (
-        at.chat_input(key="teaching_chat_draft").value
-        == "具体分析学生D01"
-    )
+    assert "学生D01" in at.chat_input(
+        key="teaching_chat_draft"
+    ).value
 
     def fake_run_turn_stream(
         self: TeachingAssistantService,

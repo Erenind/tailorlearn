@@ -11,7 +11,7 @@ import pymupdf
 import streamlit as st
 
 from tailorlearn.ai import AIRequestError
-from tailorlearn.learning_data import LearningDataService
+from tailorlearn.learning_data import DATA_TYPE_SPECS, LearningDataService
 from tailorlearn.models import ProviderProfile
 from tailorlearn.teaching_chat import (
     TEACHING_ACTION_PROMPTS,
@@ -25,7 +25,7 @@ from tailorlearn.teaching_chat import (
 )
 
 
-TEACHING_CHAT_UI_VERSION = "2026-11-17-user-bubble-centered-v25"
+TEACHING_CHAT_UI_VERSION = "2026-11-19-live-follow-scroll-v32"
 HISTORY_PAGE_SIZE = 20
 TEMPORARY_FILE_CHAR_LIMIT = 60_000
 PURE_MODE_KEY = "teaching_chat_pure_mode"
@@ -250,23 +250,72 @@ def _render_pending_action(
     with st.container(border=True, key="teaching_pending_action"):
         st.subheader("等待确认", icon=":material/fact_check:")
         st.write(action.get("summary") or "即将执行一项写操作。")
-        changes = action.get("changes")
-        if isinstance(changes, dict) and changes:
-            st.dataframe(
-                pd.DataFrame(
-                    [
+        items = action.get("items")
+        if isinstance(items, list) and items:
+            rows: list[dict[str, Any]] = []
+            for item_index, item in enumerate(items, start=1):
+                if not isinstance(item, dict):
+                    continue
+                data_type = str(item.get("data_type") or "")
+                spec = DATA_TYPE_SPECS.get(data_type)
+                data_label = spec.label if spec is not None else data_type
+                operation = (
+                    "新增" if item.get("action") == "create" else "修改"
+                )
+                row_id = item.get("row_id")
+                record_label = (
+                    "新增记录"
+                    if item.get("action") == "create"
+                    else f"row_id={row_id}"
+                )
+                changes = item.get("changes")
+                changes = changes if isinstance(changes, dict) else {}
+                for key, value in changes.items():
+                    if not isinstance(value, dict):
+                        continue
+                    rows.append(
                         {
-                            "字段": key,
+                            "序号": item_index,
+                            "操作": operation,
+                            "数据类型": data_label,
+                            "记录": record_label,
+                            "字段": (
+                                spec.label_by_key.get(key, key)
+                                if spec is not None
+                                else key
+                            ),
                             "原值": value.get("before"),
                             "新值": value.get("after"),
                         }
-                        for key, value in changes.items()
-                    ]
-                ),
-                hide_index=True,
-                width="stretch",
-                alt="待确认学情数据修改差异",
-            )
+                    )
+            if rows:
+                st.dataframe(
+                    pd.DataFrame(rows),
+                    hide_index=True,
+                    width="stretch",
+                    alt="待确认批量学情数据修改差异",
+                )
+                st.caption(
+                    f"共 {len(items)} 条记录待写入；点击一次确认即可统一执行。"
+                )
+        else:
+            changes = action.get("changes")
+            if isinstance(changes, dict) and changes:
+                st.dataframe(
+                    pd.DataFrame(
+                        [
+                            {
+                                "字段": key,
+                                "原值": value.get("before"),
+                                "新值": value.get("after"),
+                            }
+                            for key, value in changes.items()
+                        ]
+                    ),
+                    hide_index=True,
+                    width="stretch",
+                    alt="待确认学情数据修改差异",
+                )
         confirm, cancel = st.columns(2)
         if confirm.button(
             "确认执行",
@@ -288,10 +337,24 @@ def _render_pending_action(
                         f"{result['relation_count']} 条联系。"
                     )
                 else:
-                    message = (
-                        f"已写入 {result['data_type']} 数据，"
-                        f"记录 row_id={result['row_id']}。"
+                    written_count = int(
+                        result.get("written_count") or 1
                     )
+                    if written_count > 1 or isinstance(
+                        items,
+                        list,
+                    ):
+                        message = (
+                            "修改已完成。"
+                            f"已批量写入 {written_count} 条数据，"
+                            "全部修改已一次性完成。"
+                        )
+                    else:
+                        message = (
+                            "修改已完成。"
+                            f"已写入 {result['data_type']} 数据，"
+                            f"记录 row_id={result['row_id']}。"
+                        )
                 service.append_message("assistant", message)
                 st.session_state.pop(PENDING_ACTION_KEY, None)
                 st.rerun()
@@ -319,6 +382,13 @@ def _message_turns(
     return turns
 
 
+def _load_earlier_history() -> None:
+    current = int(
+        st.session_state.get(HISTORY_LIMIT_KEY, HISTORY_PAGE_SIZE)
+    )
+    st.session_state[HISTORY_LIMIT_KEY] = current + HISTORY_PAGE_SIZE
+
+
 def _render_messages(
     service: TeachingAssistantService,
     profile: ProviderProfile | None,
@@ -330,13 +400,12 @@ def _render_messages(
         int(st.session_state.get(HISTORY_LIMIT_KEY, HISTORY_PAGE_SIZE)),
     )
     if total > history_limit:
-        if st.button(
+        st.button(
             "加载更早对话",
             icon=":material/history:",
             key="teaching_load_earlier",
-        ):
-            st.session_state[HISTORY_LIMIT_KEY] = history_limit + HISTORY_PAGE_SIZE
-            st.rerun()
+            on_click=_load_earlier_history,
+        )
     messages = service.list_messages(history_limit)
     with st.container(
         height="stretch",
@@ -563,6 +632,9 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
             padding: 0.75rem 0.25rem 1.25rem;
             scrollbar-width: thin;
             scrollbar-color: #D7DCE5 transparent;
+        }
+        .st-key-teaching_load_earlier {
+            display: none !important;
         }
         .st-key-teaching_chat_messages::-webkit-scrollbar {
             width: 6px;
@@ -1078,7 +1150,15 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
                 }
                 const autoFollowKey = "teachingChatAutoFollow";
                 const scrollTopKey = "teachingChatScrollTop";
+                const loadAnchorKey = "teachingChatLoadAnchor";
+                const loadLockKey = "teachingChatLoadLockUntil";
                 const bottomThreshold = 24;
+                const savedLoadAnchor = Number(
+                    sessionStorage.getItem(loadAnchorKey)
+                );
+                const loadEarlierButton = document.querySelector(
+                    ".st-key-teaching_load_earlier button"
+                );
                 let autoFollow = (
                     sessionStorage.getItem(autoFollowKey) !== "false"
                 );
@@ -1086,18 +1166,22 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
                     sessionStorage.getItem(scrollTopKey)
                 );
                 let anchoredLiveTurn = false;
+                let anchorRestored = false;
                 let scheduled = false;
                 let suppressScrollEvent = false;
+                let lastScrollTop = messageBox.scrollTop;
                 const setScrollTop = (value) => {
                     const maxTop = Math.max(
                         0,
                         messageBox.scrollHeight - messageBox.clientHeight
                     );
-                    suppressScrollEvent = true;
-                    messageBox.scrollTop = Math.min(
+                    const target = Math.min(
                         Math.max(0, value),
                         maxTop
                     );
+                    suppressScrollEvent = true;
+                    messageBox.scrollTop = target;
+                    lastScrollTop = target;
                     requestAnimationFrame(() => {
                         suppressScrollEvent = false;
                     });
@@ -1122,10 +1206,55 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
                         );
                     }
                 };
+                const maybeLoadEarlier = () => {
+                    if (!loadEarlierButton) return;
+                    if (messageBox.scrollTop > 8) return;
+                    if (
+                        messageBox.dataset.teachingLoadingEarlier
+                        === "true"
+                    ) {
+                        return;
+                    }
+                    const now = Date.now();
+                    const lockUntil = Number(
+                        sessionStorage.getItem(loadLockKey) || 0
+                    );
+                    if (now < lockUntil) return;
+                    messageBox.dataset.teachingLoadingEarlier = "true";
+                    sessionStorage.setItem(
+                        loadLockKey,
+                        String(now + 900)
+                    );
+                    sessionStorage.setItem(
+                        loadAnchorKey,
+                        String(
+                            messageBox.scrollHeight
+                            - messageBox.scrollTop
+                        )
+                    );
+                    loadEarlierButton.click();
+                };
+                const handleScroll = () => {
+                    if (suppressScrollEvent) return;
+                    const currentScrollTop = messageBox.scrollTop;
+                    const scrolledUp = (
+                        currentScrollTop < lastScrollTop - 1
+                    );
+                    lastScrollTop = currentScrollTop;
+                    rememberScrollIntent();
+                    if (scrolledUp) {
+                        maybeLoadEarlier();
+                    }
+                };
                 messageBox.addEventListener(
                     "scroll",
-                    rememberScrollIntent,
+                    handleScroll,
                     { passive: true }
+                );
+                const hasLiveTurn = () => Boolean(
+                    messageBox.querySelector(
+                        ".st-key-teaching_live_turn"
+                    )
                 );
                 const scrollToLatest = () => {
                     if (!autoFollow) return;
@@ -1148,21 +1277,62 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
                     scheduled = true;
                     requestAnimationFrame(() => {
                         scheduled = false;
+                        if (hasLiveTurn()) {
+                            autoFollow = true;
+                            sessionStorage.setItem(
+                                autoFollowKey,
+                                "true"
+                            );
+                        }
                         scrollToLatest();
                     });
                 };
-                const observer = new MutationObserver(scheduleScroll);
-                const liveTurn = messageBox.querySelector(
-                    ".st-key-teaching_live_turn"
-                );
-                if (liveTurn) {
-                    observer.observe(liveTurn, {
+                const observer = new MutationObserver(() => {
+                    ensureLiveObserver();
+                    scheduleScroll();
+                });
+                if (window.__teachingChatLiveObserver) {
+                    window.__teachingChatLiveObserver.disconnect();
+                }
+                if (window.__teachingChatLiveResizeObserver) {
+                    window.__teachingChatLiveResizeObserver.disconnect();
+                }
+                let observedLiveTurn = null;
+                const ensureLiveObserver = () => {
+                    const liveTurn = messageBox.querySelector(
+                        ".st-key-teaching_live_turn"
+                    );
+                    if (!liveTurn || liveTurn === observedLiveTurn) {
+                        return;
+                    }
+                    if (window.__teachingChatLiveObserver) {
+                        window.__teachingChatLiveObserver.disconnect();
+                    }
+                    if (window.__teachingChatLiveResizeObserver) {
+                        window.__teachingChatLiveResizeObserver.disconnect();
+                    }
+                    observedLiveTurn = liveTurn;
+                    const liveObserver = new MutationObserver(scheduleScroll);
+                    liveObserver.observe(liveTurn, {
                         childList: true,
                         subtree: true,
                         characterData: true,
                     });
-                }
+                    if (typeof ResizeObserver !== "undefined") {
+                        const resizeObserver = new ResizeObserver(
+                            scheduleScroll
+                        );
+                        resizeObserver.observe(liveTurn);
+                        window.__teachingChatLiveResizeObserver = (
+                            resizeObserver
+                        );
+                    }
+                    window.__teachingChatLiveObserver = liveObserver;
+                    scheduleScroll();
+                };
+                observer.observe(messageBox, { childList: true });
                 window.__teachingChatScrollObserver = observer;
+                ensureLiveObserver();
                 const resumeFollowing = () => {
                     autoFollow = true;
                     sessionStorage.setItem(autoFollowKey, "true");
@@ -1196,6 +1366,20 @@ def _apply_composer_style(copy_payload: dict[str, str]) -> None:
                     });
                 }
                 const restoreInitialPosition = () => {
+                    if (
+                        Number.isFinite(savedLoadAnchor)
+                        && savedLoadAnchor > 0
+                    ) {
+                        if (anchorRestored) return;
+                        anchorRestored = true;
+                        sessionStorage.removeItem(loadAnchorKey);
+                        autoFollow = false;
+                        sessionStorage.setItem(autoFollowKey, "false");
+                        setScrollTop(
+                            messageBox.scrollHeight - savedLoadAnchor
+                        );
+                        return;
+                    }
                     if (autoFollow) {
                         scrollToLatest();
                     } else if (Number.isFinite(savedScrollTop)) {

@@ -80,13 +80,15 @@ def test_teaching_chat_suggestions_include_editable_presets(tmp_path: Path) -> N
     repository, _learning, service = _service(tmp_path)
 
     suggestions = service.list_suggestions()
-    assert len(suggestions) == 9
-    assert suggestions[0]["text"] == "根据苏格拉底教学方式提教学方案"
+    assert len(suggestions) == 8
+    assert suggestions[0]["text"] == (
+        "根据苏格拉底教学方式，为实数第一节写一份教学方案"
+    )
     preset_texts = {item["text"] for item in suggestions if item["is_preset"]}
     assert {"生成分层教学建议", "梳理信息缺口", "推荐材料与活动"} <= preset_texts
 
     service.update_suggestion("preset_socratic", "用苏格拉底式提问设计教学")
-    service.delete_suggestion("preset_practice")
+    service.delete_suggestion("preset_class")
     added = service.add_suggestion("根据本周错题设计讲评课")
 
     restarted = TeachingAssistantService(
@@ -97,7 +99,7 @@ def test_teaching_chat_suggestions_include_editable_presets(tmp_path: Path) -> N
     )
     texts = {item["text"] for item in restarted.list_suggestions()}
     assert "用苏格拉底式提问设计教学" in texts
-    assert "以实践为重点提个教学建议" not in texts
+    assert "根据班级DC01的相关学情数据，为班级提建议" not in texts
     assert "根据本周错题设计讲评课" in texts
     assert added["text"] == "根据本周错题设计讲评课"
 
@@ -255,6 +257,181 @@ def test_teaching_chat_tools_respect_pure_mode_and_write_confirmation(
     students = learning.list_records(dataset["id"], "student")
     assert len(students) == 1
     assert students[0]["student_code"] == "D01"
+
+
+def test_teaching_chat_merges_multiple_writes_into_one_confirmation(
+    tmp_path: Path,
+) -> None:
+    _repository, learning, service = _service(tmp_path)
+    dataset = learning.create_dataset("批量修改数据")
+    first = learning.create_record(
+        dataset["id"],
+        "student",
+        {"student_code": "D01", "class_code": "DC01", "grade": 7},
+    )
+    second = learning.create_record(
+        dataset["id"],
+        "student",
+        {"student_code": "D02", "class_code": "DC01", "grade": 7},
+    )
+    context = TeachingToolContext(
+        dataset_id=dataset["id"],
+        pure_mode=False,
+        temporary_materials=[],
+    )
+    client = _ScriptedClient([])
+
+    first_preview = service.execute_tool(
+        "write-data",
+        {
+            "data_type": "student",
+            "action": "update",
+            "row_id": first,
+            "fields": {"grade": 8},
+        },
+        context,
+        client=client,
+        profile=_profile(),
+    )
+    assert first_preview["status"] == "pending_confirmation"
+    assert context.pending_action["summary"].startswith("修改 模拟学生")
+    assert "items" not in context.pending_action
+
+    second_preview = service.execute_tool(
+        "write-data",
+        {
+            "data_type": "student",
+            "action": "update",
+            "row_id": second,
+            "fields": {"grade": 9},
+        },
+        context,
+        client=client,
+        profile=_profile(),
+    )
+    assert second_preview["status"] == "pending_confirmation"
+    assert len(context.pending_action["items"]) == 2
+    assert context.pending_action["summary"].startswith("将批量修改 2 条")
+    assert learning.get_record(dataset["id"], "student", first)["grade"] == 7
+    assert learning.get_record(dataset["id"], "student", second)["grade"] == 7
+
+    written = service.execute_pending_action(
+        context.pending_action,
+        _profile(),
+    )
+    assert written["status"] == "written"
+    assert written["written_count"] == 2
+    assert learning.get_record(dataset["id"], "student", first)["grade"] == 8
+    assert learning.get_record(dataset["id"], "student", second)["grade"] == 9
+
+
+def test_teaching_chat_accepts_batch_items_in_one_write_call(
+    tmp_path: Path,
+) -> None:
+    _repository, learning, service = _service(tmp_path)
+    dataset = learning.create_dataset("整批修改数据")
+    first = learning.create_record(
+        dataset["id"],
+        "student",
+        {"student_code": "D11", "class_code": "DC11", "grade": 7},
+    )
+    second = learning.create_record(
+        dataset["id"],
+        "student",
+        {"student_code": "D12", "class_code": "DC11", "grade": 7},
+    )
+    context = TeachingToolContext(
+        dataset_id=dataset["id"],
+        pure_mode=False,
+        temporary_materials=[],
+    )
+    preview = service.execute_tool(
+        "write-data",
+        {
+            "data_type": "student",
+            "items": [
+                {
+                    "action": "update",
+                    "row_id": first,
+                    "fields": {"grade": 8},
+                },
+                {
+                    "action": "update",
+                    "row_id": second,
+                    "fields": {"grade": 9},
+                },
+            ],
+        },
+        context,
+        client=_ScriptedClient([]),
+        profile=_profile(),
+    )
+    assert preview["status"] == "pending_confirmation"
+    assert len(context.pending_action["items"]) == 2
+    assert learning.list_records(dataset["id"], "student")[0]["grade"] == 7
+
+    written = service.execute_pending_action(
+        context.pending_action,
+        _profile(),
+    )
+    assert written["written_count"] == 2
+    assert learning.get_record(dataset["id"], "student", first)["grade"] == 8
+    assert learning.get_record(dataset["id"], "student", second)["grade"] == 9
+
+
+def test_teaching_chat_adds_confirmation_guidance_to_pending_write(
+    tmp_path: Path,
+) -> None:
+    _repository, learning, service = _service(tmp_path)
+    dataset = learning.create_dataset("确认引导数据")
+    client = _ScriptedClient(
+        [
+            AssistantCompletion(
+                content=None,
+                tool_calls=[
+                    ToolCall(
+                        id="call_write",
+                        name="write-data",
+                        arguments={
+                            "data_type": "student",
+                            "action": "create",
+                            "fields": {
+                                "student_code": "D21",
+                                "class_code": "DC21",
+                                "grade": 7,
+                            },
+                        },
+                    )
+                ],
+            ),
+            AssistantCompletion(content="预览已生成，请核对后再执行。"),
+        ]
+    )
+
+    result = service.run_turn(
+        prompt="新增学生 D21",
+        profile=_profile(),
+        client=client,
+        dataset_id=dataset["id"],
+        pure_mode=False,
+        temporary_materials=[],
+    )
+    assert result.pending_action is not None
+    assert "请在确认弹窗显示后点击“确认执行”进行修改。" in (
+        result.message["content"]
+    )
+    persisted = service.list_messages(1)[0]["content"]
+    assert "请在确认弹窗显示后点击“确认执行”进行修改。" in persisted
+
+
+def test_teaching_chat_pending_create_list_guidance(tmp_path: Path) -> None:
+    _repository, _learning, service = _service(tmp_path)
+    text = service._append_pending_action_guidance(
+        "学习内容清单预览已生成。",
+        {"tool": "create-learning-list"},
+    )
+    assert "创建学习内容清单" in text
+    assert "进行修改" not in text
 
 
 def test_teaching_chat_agent_executes_read_tool_then_answers(

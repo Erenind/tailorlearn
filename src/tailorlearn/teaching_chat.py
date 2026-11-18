@@ -15,7 +15,7 @@ from tailorlearn.models import ProviderProfile
 from tailorlearn.outline import OutlineService
 
 
-TEACHING_CHAT_API_VERSION = "2026-11-14-teaching-chat-agent-v6"
+TEACHING_CHAT_API_VERSION = "2026-11-19-pending-guidance-v9"
 TEACHING_SUGGESTION_PRESETS = (
     ("preset_socratic", "根据苏格拉底教学方式，为实数第一节写一份教学方案"),
     ("preset_student", "结合学生D01的答题数据，分析学生的问题，并给出建议。"),
@@ -51,6 +51,7 @@ MEMORY_MESSAGE_LIMIT = 12
 MEMORY_CHAR_LIMIT = 24_000
 MEMORY_KEEP_RECENT = 6
 MAX_TOOL_ROUNDS = 8
+MAX_WRITE_BATCH = 50
 TEACHING_TOOL_LABELS = {
     "get-book-index": "检索课本目录",
     "read-book": "读取课本正文",
@@ -772,7 +773,9 @@ class TeachingAssistantService:
                     "name": "write-data",
                     "description": (
                         "新增或修改具体学情数据。禁止删除。"
-                        "执行前需要用户确认。纯净模式不可用。"
+                        "单条修改用 action/row_id/fields；一次修改多条时，"
+                        "必须把全部记录放进同一次调用的 items 数组，"
+                        "整批只让用户确认一次。纯净模式不可用。"
                     ),
                     "parameters": {
                         "type": "object",
@@ -797,8 +800,33 @@ class TeachingAssistantService:
                                 "type": "object",
                                 "additionalProperties": True,
                             },
+                            "items": {
+                                "type": "array",
+                                "description": (
+                                    "批量写操作；每项是一条新增或修改。"
+                                    "不要为每条记录单独调用一次 write-data。"
+                                ),
+                                "minItems": 1,
+                                "maxItems": 50,
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {
+                                            "type": "string",
+                                            "enum": ["create", "update"],
+                                        },
+                                        "row_id": {"type": "integer"},
+                                        "fields": {
+                                            "type": "object",
+                                            "additionalProperties": True,
+                                        },
+                                    },
+                                    "required": ["action", "fields"],
+                                    "additionalProperties": False,
+                                },
+                            },
                         },
-                        "required": ["data_type", "action", "fields"],
+                        "required": ["data_type"],
                         "additionalProperties": False,
                     },
                 },
@@ -1073,10 +1101,31 @@ class TeachingAssistantService:
                 if data_type in DATA_TYPE_SPECS
                 else data_type or "学情数据"
             )
-            action = "新增" if arguments.get("action") == "create" else "修改"
             dataset_id = str(
                 arguments.get("dataset_id") or context.dataset_id or ""
             )
+            batch_items = arguments.get("items")
+            if isinstance(batch_items, list) and batch_items:
+                creates = sum(
+                    isinstance(item, dict)
+                    and item.get("action") == "create"
+                    for item in batch_items
+                )
+                updates = sum(
+                    isinstance(item, dict)
+                    and item.get("action") == "update"
+                    for item in batch_items
+                )
+                parts = [f"操作：批量写入 {len(batch_items)} 条 {data_label}"]
+                if updates:
+                    parts.append(f"修改 {updates} 条")
+                if creates:
+                    parts.append(f"新增 {creates} 条")
+                dataset_name = self._dataset_display_name(dataset_id)
+                if dataset_name:
+                    parts.append(f"数据集：{dataset_name}")
+                return "；".join(parts)
+            action = "新增" if arguments.get("action") == "create" else "修改"
             parts = [f"操作：{action}{data_label}"]
             dataset_name = self._dataset_display_name(dataset_id)
             if dataset_name:
@@ -1303,61 +1352,256 @@ class TeachingAssistantService:
         data_type = str(arguments.get("data_type") or "")
         if data_type not in DATA_TYPE_SPECS:
             raise ValueError("不支持的学情数据类型")
-        action = str(arguments.get("action") or "")
-        if action not in {"create", "update"}:
-            raise ValueError("write-data 只允许 create 或 update")
         dataset_id = str(arguments.get("dataset_id") or context.dataset_id or "")
         if not dataset_id:
             raise ValueError("修改学情数据前需要选择数据集")
-        values = arguments.get("fields")
-        if not isinstance(values, dict) or not values:
-            raise ValueError("write-data 需要 fields")
+        raw_items = arguments.get("items")
+        if raw_items is not None and not isinstance(raw_items, list):
+            raise ValueError("write-data 的 items 必须是数组")
+        uses_items = isinstance(raw_items, list)
+        if uses_items:
+            if not raw_items:
+                raise ValueError("write-data 的 items 不能为空")
+            if len(raw_items) > MAX_WRITE_BATCH:
+                raise ValueError(f"一次最多提交 {MAX_WRITE_BATCH} 条写操作")
+            operations = raw_items
+        else:
+            action = str(arguments.get("action") or "")
+            if action not in {"create", "update"}:
+                raise ValueError("write-data 只允许 create 或 update")
+            fields = arguments.get("fields")
+            if not isinstance(fields, dict) or not fields:
+                raise ValueError("write-data 需要 fields 或 items")
+            operations = [
+                {
+                    "action": action,
+                    "row_id": arguments.get("row_id"),
+                    "fields": fields,
+                }
+            ]
+
         spec = DATA_TYPE_SPECS[data_type]
         allowed_fields = {field.key for field in spec.fields}
-        unknown = sorted(set(values) - allowed_fields)
-        if unknown:
-            raise ValueError(f"包含不支持的字段：{'、'.join(unknown)}")
-        preview_fields = {
-            key: value for key, value in values.items() if key in allowed_fields
-        }
-        row_id = arguments.get("row_id")
-        if action == "update":
-            if row_id is None:
-                raise ValueError("更新学情数据需要 row_id")
-            current = self.learning.get_record(dataset_id, data_type, int(row_id))
-            if current is None:
-                raise ValueError("找不到要修改的学情记录")
-            changes = {
-                key: {
-                    "before": current.get(key),
-                    "after": value,
+        items: list[dict[str, Any]] = []
+        skipped = 0
+        for index, raw in enumerate(operations, start=1):
+            if not isinstance(raw, dict):
+                raise ValueError(f"第 {index} 条写操作必须是 JSON 对象")
+            action = str(raw.get("action") or "")
+            if action not in {"create", "update"}:
+                raise ValueError(f"第 {index} 条写操作只允许 create 或 update")
+            values = raw.get("fields")
+            if not isinstance(values, dict) or not values:
+                raise ValueError(f"第 {index} 条写操作需要 fields")
+            unknown = sorted(set(values) - allowed_fields)
+            if unknown:
+                raise ValueError(
+                    f"第 {index} 条包含不支持的字段：{'、'.join(unknown)}"
+                )
+            preview_fields = {
+                key: value
+                for key, value in values.items()
+                if key in allowed_fields
+            }
+            row_id = raw.get("row_id")
+            if action == "update":
+                if row_id is None:
+                    raise ValueError(f"第 {index} 条更新操作需要 row_id")
+                try:
+                    row_id = int(row_id)
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(
+                        f"第 {index} 条更新的 row_id 不是整数"
+                    ) from exc
+                current = self.learning.get_record(
+                    dataset_id,
+                    data_type,
+                    row_id,
+                )
+                if current is None:
+                    raise ValueError(f"第 {index} 条找不到要修改的学情记录")
+                changes = {
+                    key: {
+                        "before": current.get(key),
+                        "after": value,
+                    }
+                    for key, value in preview_fields.items()
+                    if current.get(key) != value
                 }
-                for key, value in preview_fields.items()
-                if current.get(key) != value
-            }
-            if not changes:
-                raise ValueError("没有检测到需要修改的字段")
-            summary = (
-                f"将修改 {spec.label} row_id={row_id}，"
-                f"共 {len(changes)} 个字段"
+                if not changes:
+                    skipped += 1
+                    continue
+                item_summary = (
+                    f"修改 {spec.label} row_id={row_id}，"
+                    f"{len(changes)} 个字段"
+                )
+            else:
+                changes = {
+                    key: {"before": None, "after": value}
+                    for key, value in preview_fields.items()
+                }
+                item_summary = f"新增 1 条 {spec.label} 记录"
+            items.append(
+                {
+                    "data_type": data_type,
+                    "action": action,
+                    "row_id": row_id if action == "update" else None,
+                    "fields": preview_fields,
+                    "changes": changes,
+                    "summary": item_summary,
+                    "index": index,
+                }
             )
-        else:
-            changes = {
-                key: {"before": None, "after": value}
-                for key, value in preview_fields.items()
+        if not items:
+            raise ValueError("没有检测到需要修改的字段")
+
+        if not uses_items and len(items) == 1:
+            item = items[0]
+            return {
+                "tool": "write-data",
+                "arguments": {
+                    **arguments,
+                    "dataset_id": dataset_id,
+                    "row_id": item["row_id"],
+                    "fields": item["fields"],
+                },
+                "summary": item["summary"],
+                "changes": item["changes"],
             }
-            summary = f"将新增 1 条 {spec.label} 记录"
-        return {
+        return self._build_write_batch(
+            dataset_id,
+            data_type,
+            items,
+            skipped=skipped,
+        )
+
+    def _build_write_batch(
+        self,
+        dataset_id: str,
+        data_type: str,
+        items: list[dict[str, Any]],
+        *,
+        action_id: str | None = None,
+        skipped: int = 0,
+    ) -> dict[str, Any]:
+        spec = DATA_TYPE_SPECS[data_type]
+        creates = sum(item["action"] == "create" for item in items)
+        updates = sum(item["action"] == "update" for item in items)
+        field_count = sum(
+            len(item.get("changes") or {}) for item in items
+        )
+        parts: list[str] = []
+        if updates:
+            parts.append(f"修改 {updates} 条")
+        if creates:
+            parts.append(f"新增 {creates} 条")
+        summary = (
+            f"将批量{'、'.join(parts)} {spec.label}记录，"
+            f"共 {field_count} 个字段"
+        )
+        if skipped:
+            summary += f"（跳过 {skipped} 条无变化记录）"
+        action = {
             "tool": "write-data",
             "arguments": {
-                **arguments,
                 "dataset_id": dataset_id,
-                "row_id": int(row_id) if row_id is not None else None,
-                "fields": preview_fields,
+                "data_type": data_type,
+                "items": [
+                    {
+                        "action": item["action"],
+                        "row_id": item["row_id"],
+                        "fields": item["fields"],
+                    }
+                    for item in items
+                ],
             },
             "summary": summary,
-            "changes": changes,
+            "items": items,
+            "skipped_count": skipped,
         }
+        if action_id:
+            action["id"] = action_id
+        return action
+
+    def _write_action_items(
+        self,
+        action: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        arguments = action.get("arguments")
+        arguments = arguments if isinstance(arguments, dict) else {}
+        data_type = str(
+            arguments.get("data_type") or action.get("data_type") or ""
+        )
+        raw_items = action.get("items")
+        if isinstance(raw_items, list) and raw_items:
+            return [
+                {
+                    "data_type": str(
+                        item.get("data_type") or data_type
+                    ),
+                    "action": str(item.get("action") or ""),
+                    "row_id": item.get("row_id"),
+                    "fields": item.get("fields") or {},
+                    "changes": item.get("changes") or {},
+                    "summary": str(item.get("summary") or ""),
+                }
+                for item in raw_items
+                if isinstance(item, dict)
+            ]
+        return [
+            {
+                "data_type": data_type,
+                "action": str(arguments.get("action") or ""),
+                "row_id": arguments.get("row_id"),
+                "fields": arguments.get("fields") or {},
+                "changes": action.get("changes") or {},
+                "summary": str(action.get("summary") or ""),
+            }
+        ]
+
+    def _merge_write_actions(
+        self,
+        existing: dict[str, Any],
+        incoming: dict[str, Any],
+    ) -> dict[str, Any]:
+        existing_args = existing.get("arguments")
+        existing_args = (
+            existing_args if isinstance(existing_args, dict) else {}
+        )
+        incoming_args = incoming.get("arguments")
+        incoming_args = (
+            incoming_args if isinstance(incoming_args, dict) else {}
+        )
+        dataset_id = str(
+            existing_args.get("dataset_id")
+            or incoming_args.get("dataset_id")
+            or ""
+        )
+        data_type = str(
+            existing_args.get("data_type")
+            or incoming_args.get("data_type")
+            or ""
+        )
+        if not dataset_id or not data_type:
+            raise ValueError("批量写操作缺少数据集或数据类型")
+        if (
+            str(incoming_args.get("dataset_id") or "") not in {"", dataset_id}
+            or str(incoming_args.get("data_type") or "")
+            not in {"", data_type}
+        ):
+            raise ValueError("一次确认不能合并不同数据集或数据类型")
+        items = [
+            *self._write_action_items(existing),
+            *self._write_action_items(incoming),
+        ]
+        if len(items) > MAX_WRITE_BATCH:
+            raise ValueError(f"一次最多提交 {MAX_WRITE_BATCH} 条写操作")
+        return self._build_write_batch(
+            dataset_id,
+            data_type,
+            items,
+            action_id=str(existing.get("id") or "") or None,
+        )
 
     def execute_tool(
         self,
@@ -1382,20 +1626,37 @@ class TeachingAssistantService:
         if name == "compress-record":
             result = self.maybe_compress(profile, client, force=True)
             return result or {"status": "没有可压缩的较早记录"}
-        if name in {"create-learning-list", "write-data"}:
+        if name == "create-learning-list":
             if context.pending_action is not None:
                 raise ValueError("已有一项操作正在等待确认")
-            action = (
-                self._preview_create_learning_list(arguments, context)
-                if name == "create-learning-list"
-                else self._preview_write_data(arguments, context)
-            )
+            action = self._preview_create_learning_list(arguments, context)
             action["id"] = f"pending_{uuid.uuid4().hex[:12]}"
             context.pending_action = action
             return {
                 "status": "pending_confirmation",
                 "message": "操作预览已生成，必须由用户确认后才能执行。",
                 "preview": action,
+            }
+        if name == "write-data":
+            action = self._preview_write_data(arguments, context)
+            existing = context.pending_action
+            if existing is None:
+                action["id"] = f"pending_{uuid.uuid4().hex[:12]}"
+                context.pending_action = action
+            elif existing.get("tool") == "write-data":
+                context.pending_action = self._merge_write_actions(
+                    existing,
+                    action,
+                )
+            else:
+                raise ValueError("已有一项操作正在等待确认")
+            return {
+                "status": "pending_confirmation",
+                "message": (
+                    "整批写操作预览已生成，用户确认一次后会统一执行；"
+                    "尚未写入。"
+                ),
+                "preview": context.pending_action,
             }
         raise ValueError(f"未知 AI 工具：{name}")
 
@@ -1462,26 +1723,56 @@ class TeachingAssistantService:
         if tool == "create-learning-list":
             return self._execute_create_learning_list(arguments, profile)
         if tool == "write-data":
-            dataset_id = str(arguments.get("dataset_id") or "")
-            data_type = str(arguments.get("data_type") or "")
-            values = arguments.get("fields") or {}
-            if arguments.get("action") == "create":
-                row_id = self.learning.create_record(dataset_id, data_type, values)
-            else:
-                row_id = int(arguments["row_id"])
-                self.learning.update_record(
-                    dataset_id,
-                    data_type,
-                    row_id,
-                    values,
-                    allow_identity_change=True,
+            items = self._write_action_items(action)
+            results: list[dict[str, Any]] = []
+            dataset_id = ""
+            for item in items:
+                dataset_id = str(
+                    action.get("arguments", {}).get("dataset_id")
+                    or item.get("dataset_id")
+                    or ""
                 )
-            return {
+                data_type = str(item.get("data_type") or "")
+                values = item.get("fields") or {}
+                if not dataset_id or not data_type:
+                    raise ValueError("待确认的写操作缺少数据集或数据类型")
+                if item.get("action") == "create":
+                    row_id = self.learning.create_record(
+                        dataset_id,
+                        data_type,
+                        values,
+                    )
+                else:
+                    row_id = int(item["row_id"])
+                    self.learning.update_record(
+                        dataset_id,
+                        data_type,
+                        row_id,
+                        values,
+                        allow_identity_change=True,
+                    )
+                results.append(
+                    {
+                        "data_type": data_type,
+                        "action": item.get("action"),
+                        "row_id": row_id,
+                    }
+                )
+            payload: dict[str, Any] = {
                 "status": "written",
                 "dataset_id": dataset_id,
-                "data_type": data_type,
-                "row_id": row_id,
+                "data_type": (
+                    results[0]["data_type"] if results else ""
+                ),
+                "written_count": len(results),
+                "items": results,
             }
+            if results:
+                payload["row_id"] = results[0]["row_id"]
+                payload["row_ids"] = [
+                    item["row_id"] for item in results
+                ]
+            return payload
         raise ValueError("未知待确认操作")
 
     # ------------------------------------------------------------------
@@ -1516,7 +1807,13 @@ class TeachingAssistantService:
 4. 纯净模式可以读取已有学习内容清单，也可以创建课本模式学习内容清单。
 5. create-learning-list 与 write-data 只是提交确认预览，不会立即写入；
    工具返回 pending_confirmation 时，告知用户等待确认，不得声称已经完成。
-6. write-data 只能新增或修改，不能删除。
+   最终回复末尾要根据待确认操作提醒用户：
+   write-data 提醒“请在确认弹窗显示后点击‘确认执行’进行修改”；
+   create-learning-list 提醒“请在确认弹窗显示后点击‘确认执行’创建学习内容清单”。
+6. write-data 只能新增或修改，不能删除。一次要修改多条记录（例如批量修复异常数据）时，
+   必须把所有记录放进同一次 write-data 调用的 items 数组，整批连同一次确认提交；
+   不要为每条记录单独调用一次 write-data，也不要拆成多次确认。
+   批量修改前先用 read-data 读取数据质量报告或相关明细，确认所有 row_id 和字段。
 7. 班级当前由学生的 class_code 归属派生；学习主题与指标存储在 requirement 数据中。
 8. 教学建议不是审核草稿，直接以清晰的 Markdown 回答。
 9. 不要输出思考过程或工具内部推理；可以用简短步骤说明使用了哪些资料。
@@ -1555,6 +1852,28 @@ class TeachingAssistantService:
         if result is None:
             raise AIRequestError("教学建议没有生成最终结果")
         return result
+
+    def _append_pending_action_guidance(
+        self,
+        content: str,
+        pending_action: dict[str, Any] | None,
+    ) -> str:
+        if not pending_action:
+            return content
+        tool = pending_action.get("tool")
+        if tool == "write-data":
+            hint = (
+                "请在确认弹窗显示后点击“确认执行”进行修改。"
+            )
+        elif tool == "create-learning-list":
+            hint = (
+                "请在确认弹窗显示后点击“确认执行”创建学习内容清单。"
+            )
+        else:
+            return content
+        if hint in content:
+            return content
+        return f"{content.rstrip()}\n\n**下一步**：{hint}"
 
     def _stream_completion(
         self,
@@ -1728,6 +2047,10 @@ class TeachingAssistantService:
                 break
         if not final_content:
             final_content = "本次请求未得到有效回复，请稍后重试。"
+        final_content = self._append_pending_action_guidance(
+            final_content,
+            context.pending_action,
+        )
         message = self.append_message(
             "assistant",
             final_content,
